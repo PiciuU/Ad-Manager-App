@@ -8,23 +8,24 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
      */
     public function up(): void
     {
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
+        Schema::create('user_roles', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('user_id')->unique();
-            $table->string('hash', 32);
-            $table->datetime('valid_until');
-            $table->timestamps();
+            $table->string('name', 255);
+            $table->string('description', 255)->nullable();
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('user_roles');
     }
 };

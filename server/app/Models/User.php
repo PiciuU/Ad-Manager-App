@@ -2,43 +2,65 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+
+    protected $casts = [
+        'is_banned' => 'boolean',
+    ];
+
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'activated_at',
+    ];
+
     protected $fillable = [
         'name',
-        'email',
+        'login',
         'password',
+        'email',
+        'activation_key',
+        'nip',
+        'address',
+        'postal_code',
+        'country',
+        'company_email',
+        'company_phone',
+        'representative',
+        'representative_phone',
+        'notes',
+        'activated_at'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
-        'remember_token',
+        'updated_at',
+        'created_at'
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function userRole()
+    {
+        return $this->belongsTo(UserRole::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function ads()
+    {
+        return $this->hasMany(Ad::class);
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(Log::class);
+    }
 }
