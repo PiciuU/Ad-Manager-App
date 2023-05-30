@@ -14,8 +14,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all();
-        //
+        // return User::all(); - Tradycyjny sposób na zwrócenie wszystkich użytkowników, jednak my będziemy korzystac z kolekcji a więc będzie to wyglądać przykładowo tak:
+        $users = new UserCollection(User::all());
+        return $this->successResponse('Pobrano listę wszystkich użytkowników', $users);
+        // $this->errorResponse('Przykład zwrócenia niepowodzenia funkcji np. błędu 500', 500);
+
     }
 
     /**
