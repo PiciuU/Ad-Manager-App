@@ -25,7 +25,6 @@
 <script>
 import TheHeader from './common/components/TheHeader.vue'
 import ThePosts from './common/components/ThePosts.vue'
-import ChartComponent from './common/components/ChartComponent.vue'
 
 export default {
   name: 'app',
@@ -40,8 +39,7 @@ export default {
   },
   components: {
     'app-theheader': TheHeader,
-    'app-theposts': ThePosts,
-    'app-chartcomponent': ChartComponent
+    'app-theposts': ThePosts
   }
 }
 </script>
