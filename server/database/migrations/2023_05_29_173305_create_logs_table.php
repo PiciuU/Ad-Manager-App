@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('operation_tags', 255);
             $table->string('message', 255);
             $table->text('notes')->nullable();
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
         });
     }
 

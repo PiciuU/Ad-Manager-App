@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ad_stats', function (Blueprint $table) {
+        Schema::create('ads_stats', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('ad_id');
             $table->date('date');
             $table->unsignedBigInteger('views');
             $table->unsignedBigInteger('clicks');
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
         });
     }
 

@@ -15,14 +15,13 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('name', 255);
             $table->unsignedBigInteger('user_id');
-            $table->enum('status', ['unpaid', 'active', 'inactive', 'expired']);
-            $table->timestamp('ad_start_date');
-            $table->timestamp('ad_end_date');
+            $table->enum('status', ['unpaid', 'active', 'inactive', 'expired'])->default('unpaid');
+            $table->timestamp('ad_start_date')->nullable();
+            $table->timestamp('ad_end_date')->nullable();
             $table->string('file_name', 255);
             $table->enum('file_type', ['img', 'video']);
             $table->string('url', 255);
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
         });
     }
 

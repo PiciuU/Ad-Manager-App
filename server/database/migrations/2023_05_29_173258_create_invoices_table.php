@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('ad_id');
             $table->string('number', 255);
             $table->double('price', 8, 2);
             $table->date('date');
-            $table->enum('status', ['paid', 'unpaid']);
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at')->nullable();
+            $table->enum('status', ['paid', 'unpaid'])->default('unpaid');
+            $table->timestamps();
         });
     }
 

@@ -19,13 +19,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::group(['prefix' => 'v1', 'namespace' => 'app\Http\Controllers'], function () {
-    Route::apiResource('Users', UsersController::class);
-    Route::apiResource('Users_roles', UsersRolesController::class);
-    Route::apiResource('Ads', AdsController::class);
-    Route::apiResource('Ads_stats', AdsStatsControllerController::class);
-    Route::apiResource('Notifications', NotificationsController::class);
-    Route::apiResource('Invoices', InvoicesController::class);
-    Route::apiResource('Logs', LogsController::class);
+    Route::apiResource('user', UserController::class);
+    Route::apiResource('ad', AdController::class);
+    Route::apiResource('ad.stats', AdStatsControllerController::class); //ad.stats przesłanie parametru
+    Route::apiResource('notification', NotificationController::class);
+    Route::apiResource('invoice', InvoiceController::class);
+    Route::apiResource('log', LogController::class);
 });
 
 
