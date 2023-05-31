@@ -1,5 +1,5 @@
 <template>
-    <!-- Create Default Layout (login, register etc)-->
+    <!-- Create Authorized Layout (dashboard)-->
 </template>
 
 <script>
