@@ -9,7 +9,7 @@ class User extends Model
 {
     use HasFactory;
 
-
+    protected $table = 'users';
     protected $casts = [
         'is_banned' => 'boolean',
     ];

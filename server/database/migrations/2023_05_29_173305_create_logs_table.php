@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('logs', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('ad_id');
+            $table->unsignedBigInteger('ad_id')->nullable();
             $table->string('operation_tags', 255);
             $table->string('message', 255);
             $table->text('notes')->nullable();

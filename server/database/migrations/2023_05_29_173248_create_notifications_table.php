@@ -17,7 +17,6 @@ return new class extends Migration
             $table->timestamp('date');
             $table->string('title', 255);
             $table->string('description', 255);
-            $table->string('status', 32);
             $table->boolean('is_seen')->default(0);
             $table->timestamps();
         });
