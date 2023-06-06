@@ -3,11 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Model
+
+class User extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, HasApiTokens, Notifiable;
 
     protected $table = 'users';
     protected $casts = [
@@ -35,7 +39,8 @@ class User extends Model
         'representative',
         'representative_phone',
         'notes',
-        'activated_at'
+        'activated_at',
+        'user_role_id'
     ];
 
     protected $hidden = [
@@ -43,6 +48,17 @@ class User extends Model
         'updated_at',
         'created_at'
     ];
+
+    public function isAdmin()
+    {
+        return $this->userRole->name === 'Administrator';
+    }
+
+    public function hasAdminPrivileges()
+    {
+        return $this->tokenCan('admin') && $this->userRole->name === 'Administrator';
+    }
+
 
     public function userRole()
     {

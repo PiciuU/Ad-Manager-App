@@ -14,6 +14,21 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        if ($request->user() && $request->user()->hasAdminPrivileges()) {
+            return [
+                'id' => $this->id,
+                'login' => $this->login,
+                'name' => $this->name,
+                'email' => $this->email,
+                'user_role_id' => $this->user_role_id,
+            ];
+        } else {
+            return [
+                'id' => $this->id,
+                'login' => $this->login,
+                'name' => $this->name,
+                'email' => $this->email,
+            ];
+        }
     }
 }
