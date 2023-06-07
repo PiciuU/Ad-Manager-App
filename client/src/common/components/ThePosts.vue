@@ -1,14 +1,13 @@
 <template>
-  <div class="container" id="posts">
-    <div class="row mb-4">
-      <div class="col-4"></div>
-      <div class="col-8">
-        <h2></h2>
-        <p></p>
-      </div>
+    <div class="container" id="posts">
+        <div class="row mb-4">
+            <div class="col-4"></div>
+            <div class="col-8">
+                <h1>hello Posts</h1>
+                <h2></h2>
+            </div>
+        </div>
     </div>
-  </div>
-  <h1>hello Posts</h1>
 </template>
 
 <script>

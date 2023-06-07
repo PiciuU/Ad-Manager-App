@@ -1,6 +1,5 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <p>hello word</p>
+    <p>register</p>
 </template>
 
 <script>
