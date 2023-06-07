@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <p>hello word</p>
+    <h1>hello settings</h1>
 </template>
 
 <script>

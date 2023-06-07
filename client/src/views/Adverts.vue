@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <p>hello word</p>
+    <p>siema Adverts</p>
 </template>
 
 <script>
