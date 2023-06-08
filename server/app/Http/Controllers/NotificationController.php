@@ -3,65 +3,121 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
-use App\Http\Requests\NotificationRequest;
-use App\Http\Resources\NotificationResource;
-use App\Http\Resources\NotificationCollection;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    //Adminstrator może wyświetlić wszystkie powiadomienia, użytkownik tylko te, które są przypisane do niego
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            $notifications = Notification::all();
+        } else {
+            $notifications = $user->notifications;
+        }
+
+        return response()->json($notifications);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+
+    //Tylko Administrator może tworzyć nowe powiadomienia
+    public function store(Request $request)
     {
-        //
+        $user = Auth::user();
+
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'You are not authorized to perform this action.'], 403);
+        }
+
+        $validatedData = $request->validate([
+            'user_id' => 'required',
+            'title' => 'required',
+            'description' => 'required'
+        ]);
+
+        $currentDate = new \DateTime();
+
+        $notification = new Notification();
+        $notification->user_id = $validatedData['user_id'];
+        $notification->title = $validatedData['title'];
+        $notification->description = $validatedData['description'];
+        $notification->date = $currentDate->format('Y-m-d H:i:s');;
+        $notification->is_seen = false;
+
+        $notification->save();
+
+        return response()->json($notification, 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(NotificationRequest $request)
+
+    public function show($id)
     {
-        //
+        $notification = Notification::findOrFail($id);
+
+        //Dane powiadomienie może zobaczyć tylko Administrator albo użytkownik, do którego jest przypisane
+        if (!(auth()->user()->isAdmin() || $notification->user_id === auth()->user()->id)) {
+            return response()->json(['message' => 'You are not authorized to view this notification.'], 403);
+        }
+
+        return response()->json($notification);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Notification $notifications)
+
+    public function update(Request $request, $id)
     {
-        //
+        $notification = Notification::findOrFail($id);
+        $user = Auth::user();
+
+        // Sprawdzenie uprawnień użytkownika, tylko Administrator może modyfikować
+        if (!$user->isAdmin()) {
+            return response()->json(['message' => 'You are not authorized to perform this action.'], 403);
+        }
+
+        // Walidacja danych wejściowych
+        $this->validate($request, [
+            'title' => 'sometimes|string',
+            'description' => 'sometimes|string',
+            'is_seen' => 'sometimes|string',
+        ]);
+
+        // Można zmodyfikować te 3 pola pojedynczo albo wszytskie naraz
+        $notification->title = $request->has('title') ? $request->input('title') : $notification->title;
+        $notification->description = $request->has('description') ? $request->input('description') : $notification->description;
+        $notification->is_seen = $request->has('is_seen') ? $request->input('is_seen') : $notification->is_seen;
+
+        $notification->save();
+
+        return response()->json($notification);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Notification $notifications)
+
+    // Tylko Administrator może całkowicie usunąć dane powiadomienie
+    public function delete($id)
     {
-        //
+        $notification = Notification::findOrFail($id);
+
+        // Sprawdzenie uprawnień użytkownika
+        if (auth()->user()->isAdmin()) {
+            $notification->delete();
+
+            return response()->json(['message' => 'Notification deleted']);
+        }
+
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(NotificationRequest $request, Notification $notifications)
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Notification $notifications)
+    public function isSeen($id)
     {
-        //
+        $notification = Notification::findOrFail($id);
+
+        $notification->is_seen = true;
+        $notification->save();
+
+        return response()->json($notification);
     }
 }

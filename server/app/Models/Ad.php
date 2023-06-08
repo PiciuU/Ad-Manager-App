@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ad extends Model
 {
-    use HasFactory;
+    // use HasFactory;
 
     protected $table = 'ads';
     protected $dates = [
         'created_at',
-        'updated_at',
+        'updated_at'
     ];
 
     protected $fillable = [
@@ -23,7 +23,7 @@ class Ad extends Model
         'file_type',
         'url',
         'ad_start_date',
-        'ad_end_date',
+        'ad_end_date'
     ];
 
     protected $hidden = [

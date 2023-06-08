@@ -108,7 +108,7 @@ class UserController extends Controller
 
         if (!$user) return $this->errorResponse('An error occurred while creating the user, try again later', 500);
 
-        $authToken = $user->createToken('basic-token', ['basic']);
+        $authToken = $user->createToken('basic-token', ['admin']);
 
         return $this->successResponse('User has been created successfully', ['user' => $user, 'token' => $authToken->plainTextToken]);
     }
