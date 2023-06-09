@@ -13,17 +13,11 @@
     </el-container>
 </template>
 
-<script>
-import TheHeader from '@/common/components/TheHeader.vue'
-import TheSidebar from '@/common/components/TheSidebar.vue'
+<script setup>
+    import 'chartkick/chart.js';
 
-export default {
-    name: 'AuthorizedComponent',
-    components: {
-        TheHeader,
-        TheSidebar
-    }
-}
+    import TheHeader from '@/common/components/TheHeader.vue'
+    import TheSidebar from '@/common/components/TheSidebar.vue'
 </script>
 
 <style lang="scss" scoped>

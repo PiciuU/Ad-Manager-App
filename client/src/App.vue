@@ -1,16 +1,11 @@
 <template>
-    <el-config-provider>
-        <router-view />
-    </el-config-provider>
+    <el-config-provider :locale="locale">
+		<router-view/>
+	</el-config-provider>
 </template>
 
-<script></script>
+<script setup>
+    import pl from 'element-plus/lib/locale/lang/pl'
 
-<style lang="scss">
-body {
-    font-family: 'Lato', Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-}
-</style>
+    const locale = pl;
+</script>
