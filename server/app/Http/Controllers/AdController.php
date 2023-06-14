@@ -22,6 +22,7 @@ class AdController extends Controller
     {
         $user = auth()->user();
         $user_id = $user->id;
+
         if ($user->tokenCan('admin')) $ads = new AdCollection(Ad::all());
         else $ads = new AdCollection(Ad::where('user_id', $user_id));
 
@@ -42,7 +43,7 @@ class AdController extends Controller
         if (!$ad) {
             return $this->errorResponse('An error occurred during creating the Ad, please try again later', 500);
         } else {
-            $invoiceController = new InvoiceController();
+            // $invoiceController = new InvoiceController();
             // $invoiceController->createFromAd()
             return $this->successResponse('Ad has been created successfully', $ad);
         }
@@ -77,22 +78,20 @@ class AdController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(AdRequest $request, $id)
+    public function update($id, AdRequest $request)
     {
         $user = auth()->user();
+        $ad = Ad::find($id);
+        $user_id = $user->id;
 
         if ($user->tokenCan('admin')) $ad = Ad::find($id);
-        else $ad = $ad = Ad::find($id)->where('user_id', $user->id);
+        else $ad = new AdCollection(Ad::where('user_id', $user_id));
 
-        if (!$exercise) return $this->errorResponse('Exercise not found', 404);
+        if (!$ad) return $this->errorResponse('Ad not found', 404);
 
-        if ($exercise->is_public && $request->has('is_public') && !$user->tokenCan('admin')) {
-            return $this->errorResponse('You cannot change the visibility of a public exercise', 403);
-        }
+        if (!$ad->update($request->validated())) return $this->errorResponse('An error occurred while updating the Ad, please try again later', 500);
 
-        if (!$exercise->update($request->validated())) return $this->errorResponse('An error occurred while updating the exercise, please try again later', 500);
-
-        return $this->successResponse('Exercise has been successfully updated', new ExerciseResource($exercise));
+        return $this->successResponse('Ad has been successfully updated', new AdResource($ad));
     }
 
     /**

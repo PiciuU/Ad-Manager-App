@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class AdRequest extends FormRequest
 {
@@ -32,37 +33,38 @@ class AdRequest extends FormRequest
      *
      * @return array
      */
-    public function store()
+    protected function store()
     {
         return [
-            'name' => 'required|string|max:255',
-            'user_id' => 'required|int',
-            'status' => 'required|in:unpaid,active,inactive,expired',
-            'ad_start_date' => 'required|date',
-            'ad_end_date' => 'required|date|after:ad_start_date',
-            'file_name' => 'required|string|max:255',
-            'file_type' => 'required|in:img,video',
-            'url' => 'nullable|string|max:255',
+            'name' => ['required', 'string'],
+            'user_id' => ['required', 'integer'],
+            'status' => ['required', Rule::in(['unpdaid', 'paid', 'expired', 'inactive'])],
+            'ad_start_date' => ['required', 'date'],
+            'ad_end_date' => ['required', 'date'],
+            'file_name' => ['required', 'string'],
+            'file_type' => ['required', Rule::in(['img', 'video'])],
+            'url' => ['required', 'string']
         ];
     }
 
-    public function update()
+    protected function update()
     {
         $rules = [
-            'name' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'name' => ['sometimes', 'required', 'string'],
+            'status' => ['sometimes', 'required'],
         ];
         if ($this->hasAdminPrivileges()) {
             $rules = array_merge($rules, [
-                'name' => 'required|string|max:255',
-                'user_id' => 'required|string|max:255',
-                'status' => 'required|in:unpaid,active,inactive,expired',
-                'ad_start_date' => 'required|date',
-                'ad_end_date' => 'required|date|after:ad_start_date',
-                'file_name' => 'required|string|max:255',
-                'file_type' => 'required|in:img,video',
-                'url' => 'nullable|string|max:255',
+                'name' => ['sometimes', 'required', 'string'],
+                'user_id' => ['sometimes', 'required', 'integer'],
+                'status' => ['sometimes', 'required', Rule::in(['unpdaid', 'paid', 'expired', 'inactive'])],
+                'ad_start_date' => ['sometimes', 'required', 'date'],
+                'ad_end_date' => ['sometimes', 'required', 'date'],
+                'file_name' => ['sometimes', 'required', 'string'],
+                'file_type' => ['sometimes', 'required', Rule::in(['img', 'video'])],
+                'url' => ['sometimes', 'required', 'string']
             ]);
+            print_r($rules);
             return $rules;
         }
     }
@@ -82,7 +84,7 @@ class AdRequest extends FormRequest
             ]);
         } else if ($this->hasAdminPrivileges()) {
             $this->merge([
-                'user_id' => $his->userId,
+                'user_id' => $this->userId,
             ]);
         }
 
