@@ -1,11 +1,19 @@
 <template>
     <el-header class="header">
-        <font-awesome-icon class="header__hamburger" icon="bars" @click="collapseMenu" />
+        <font-awesome-icon
+            class="nav__icon"
+            icon="compass"
+            style="color: aliceblue"
+            font-size="30px"
+        />
         <div class="header__logo"></div>
         <div class="header__group">
             <div class="options">
                 <router-link class="options__link" :to="{ path: '/panel/ustawienia' }">
-                    <font-awesome-icon class="fa-wrench" icon="fa-wrench" title="Ustawienia konta"
+                    <font-awesome-icon
+                        class="options__icon"
+                        icon="fa-wrench"
+                        title="Ustawienia konta"
                 /></router-link>
                 <font-awesome-icon
                     class="options__icon"
@@ -19,7 +27,7 @@
                     <div class="user__name">Zilak</div>
                     <div class="user__company">Mieszalnia farb</div>
                 </div>
-                <div class="icon">
+                <div class="user_icon">
                     <font-awesome-icon
                         class="fa-circle-user"
                         icon="fa-circle-user"
@@ -37,45 +45,16 @@ export default {}
 .header {
     position: fixed;
     width: 100%;
-    height: 10vh;
-    background-color: #060216;
-    margin-top: 0;
-    top: 0;
-    left: 0;
+    height: 60px;
+    background-color: var(--color-overlay);
+    margin: 0px;
     border-bottom: 1px solid white;
+    z-index: 1;
 
     display: flex;
     justify-content: flex-start;
     align-items: center;
     color: rgb(90, 156, 255);
-
-    &__hamburger {
-        order: 1;
-        font-size: 24px;
-        margin: 0px 20px 0px 0px;
-        cursor: pointer;
-        transition: color 0.15s ease-in-out;
-
-        &:hover {
-            transition: color 0.15s ease-in-out;
-            color: rgb(40, 91, 168);
-        }
-    }
-
-    &__logo {
-        order: 2;
-        font-size: 18px;
-
-        a {
-            display: flex;
-        }
-
-        img {
-            width: 70%;
-            height: 70%;
-            user-select: none;
-        }
-    }
 
     &__group {
         order: 3;
@@ -88,7 +67,7 @@ export default {}
 }
 
 .options {
-    margin: 5px;
+    margin-right: 20px;
     display: flex;
     flex-direction: row;
     justify-self: center;
@@ -112,8 +91,8 @@ export default {}
 
         &:hover {
             transition: color 0.15s ease-in-out;
-            color: rgb(40, 91, 168);
             scale: 1.3;
+            color: rgb(40, 91, 168);
         }
     }
 }
@@ -123,6 +102,7 @@ export default {}
     flex-direction: row;
     justify-self: center;
     align-items: center;
+    font-size: 40px;
     margin: 20px;
 
     &__data {
@@ -144,16 +124,5 @@ export default {}
         color: #e2dfdf;
         transform: translateX(-50%);
     }
-
-    &__avatar {
-        margin-left: 20px;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        user-select: none;
-    }
-}
-.icon{
-    font-size: 40px;
 }
 </style>

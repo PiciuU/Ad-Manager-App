@@ -16,7 +16,7 @@
     /* Constants */
 
     --height-header: 60px;
-    --width-sidebar: 250px;
+    --width-sidebar: 64px;
     --width-sidebar-collapsed: 64px;
 
     /* Z-indexes */
@@ -31,7 +31,6 @@
     --breakpoint-medium-devices: 992px;
     --breakpoint-large-devices: 1200px;
 
-
     /* Colors New */
 
     --color-text: #ffffff;
@@ -39,15 +38,20 @@
     --color-text-muted-2: rgba(255, 255, 255, 0.6);
     --color-text-muted-3: rgba(255, 255, 255, 0.38);
 
-    --color-primary: #BB86FC; // Pozmieniać
-    --color-primary-variant: #3700B3; // Pozmieniać
-    --color-secondary: #03DAC6; // Pozmieniać
+    --color-primary: #4f378b;
+    --color-primary-variant: #371e73;
+    --color-secondary: #332d41;
 
     --color-overlay: #202020;
     --color-background: #02010cf2;
-    --color-success: #4CAF50;
-    --color-error: #CF6679;
+    --color-success: #4caf50;
+    --color-error: #cf6679;
 
     --color-on-primary: #000000;
     --color-on-background: #ffffff;
 }
+
+$--breakpoint-mobile: 576px;
+$--breakpoint-small-devices: 768px;
+$--breakpoint-medium-devices: 992px;
+$--breakpoint-large-devices: 1200px;

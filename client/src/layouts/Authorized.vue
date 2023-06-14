@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <!-- eslint-disable vue/no-parsing-error -->
 <template>
     <el-container class="el-container-outer is-vertical">
@@ -14,18 +15,18 @@
 </template>
 
 <script setup>
-    import 'chartkick/chart.js';
+import 'chartkick/chart.js'
 
-    import TheHeader from '@/common/components/TheHeader.vue'
-    import TheSidebar from '@/common/components/TheSidebar.vue'
+import TheHeader from '@/common/components/TheHeader.vue'
+import TheSidebar from '@/common/components/TheSidebar.vue'
 </script>
 
 <style lang="scss" scoped>
 ::v-deep(.cards__container) {
-    padding: 0px 20px;
+    padding: 0px 4vw;
     word-break: break-word;
     &:first-child {
-        margin-top: 120px;
+        margin-top: 10vh;
     }
 
     .el-col {
@@ -33,27 +34,13 @@
     }
 }
 
-.el-container-outer {
-    position: relative;
-    background-image: url('https://cdn.pixabay.com/photo/2018/08/23/07/35/thunderstorm-3625405_1280.jpg');
+.el-container {
+    display: flex;
+    background-color: var(--color-background);
     background-size: cover;
-    width: 100vw;
-    height: 100vh;
-    left: 0;
-    top: 0;
-
-    &::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(2, 1, 12, 0.95);
-    }
 }
 
-@media screen {
+@media screen and (max-width: var(--breakpoint-medium-devices)) {
     ::v-deep(.cards__container--ordered) {
         display: flex;
         .el-col:first-child {
@@ -68,14 +55,13 @@
 ::v-deep(.card) {
     position: relative;
     min-height: 100%;
-    max-height: 40vh;
     border-radius: 10px;
-    background-color: rgba(118, 69, 233, 0.1);
-    box-shadow: 2px 5px #50465a;
-    transition: transform 0.3s;
+    max-height: 40vh;
+    background-color: rgba(0, 0, 0, 0.5);
 
     &:hover {
-        transform: scale(1.05); /* Powiększamy element o 10% */
+        transform: scale(1.02);
+        border: 1px solid #fff;
     }
 
     .card__skeleton {
@@ -84,10 +70,12 @@
 
     .card__title {
         font-size: 16px;
-        color: #ffffff;
+        color: var(--color-text);
         text-align: left;
         font-weight: bold;
-        margin-bottom: 200px;
+        margin-bottom: 20vh;
+        display: flex;
+        justify-content: center;
 
         &--special {
             margin-bottom: 10px;
@@ -123,31 +111,64 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        color: #ffffff;
+        color: var(--color-text);
         top: 20px;
         right: 20px;
         font-size: 10px;
         width: 15px;
         height: 15px;
         border-radius: 50%;
-        border: 1px solid #ffffff;
+        border: 1px solid (var(--color-text));
     }
 
     .card__details {
         margin-left: 15px;
     }
 
-    .card__buttons {
-        &--left {
-            text-align: left;
-        }
-        &--bottom {
-            margin-top: auto;
-        }
+    .card__select {
+        width: 100%;
     }
 
     .card__tabs {
         margin-top: 20px;
+    }
+    .card__data {
+        &-ctr {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: var(--color-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+        }
+
+        &-circle {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        &-amount {
+            font-weight: bold;
+            cursor: default;
+        }
+
+        &-description {
+            margin-top: 2px;
+            font-size: 14px;
+            color: var(--color-text-muted-3);
+            cursor: default;
+        }
+
+        &-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     }
 }
 
@@ -164,6 +185,11 @@
         display: flex;
         flex-direction: column;
         flex: 1;
+    }
+}
+@media screen and (max-width: var(--breakpoint-mobile)) {
+    ::v-deep(.cards__container) {
+        padding: 0px;
     }
 }
 </style>
