@@ -22,9 +22,4 @@ import VueChartkick from 'vue-chartkick'
 
 const app = createApp(App)
 
-app.use(createPinia())
-    .use(router)
-    .use(fontAwesome)
-    .use(elementPlus)
-    .use(VueChartkick)
-    .mount('#app');
+app.use(createPinia()).use(router).use(fontAwesome).use(elementPlus).use(VueChartkick).mount('#app')

@@ -18,8 +18,16 @@ import { faQuestion } from '@fortawesome/free-solid-svg-icons'
 import { faLock } from '@fortawesome/free-solid-svg-icons/faLock'
 import { faKey } from '@fortawesome/free-solid-svg-icons/faKey'
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons/faEnvelope'
+import { faChartLine } from '@fortawesome/free-solid-svg-icons/faChartLine'
+import { faChartArea } from '@fortawesome/free-solid-svg-icons/faChartArea'
+import { faEye } from '@fortawesome/free-solid-svg-icons/faEye'
+import { faMouse } from '@fortawesome/free-solid-svg-icons/faMouse'
 
 library.add(
+    faChartLine,
+    faChartArea,
+    faMouse,
+    faEye,
     faUserSecret,
     faWrench,
     faAddressCard,
@@ -42,6 +50,6 @@ library.add(
 
 export const fontAwesome = {
     install: (app) => {
-        app.component('font-awesome-icon', FontAwesomeIcon);
-    },
-};
+        app.component('font-awesome-icon', FontAwesomeIcon)
+    }
+}

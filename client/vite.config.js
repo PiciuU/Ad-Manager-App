@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig, loadEnv } from 'vite'
@@ -9,6 +10,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
+// eslint-disable-next-line no-unused-vars
 export default defineConfig(({ command, mode }) => {
     const env = loadEnv(mode, process.cwd())
 
@@ -25,6 +27,13 @@ export default defineConfig(({ command, mode }) => {
         resolve: {
             alias: {
                 '@': fileURLToPath(new URL('./src', import.meta.url))
+            }
+        },
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    additionalData: `@import "@/assets/styles/base.scss";`
+                }
             }
         },
         base: env.VITE_APP_PATH
