@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ad;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
+use App\Http\Resources\InvoiceResource;
 
 class InvoiceController extends Controller
 {
@@ -41,33 +42,35 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        // Walidacja danych wejściowych
-        $this->validate($request, [
-            'ad_id' => 'required',
-            'price' => 'required',
-            'date' => 'required|date',
-            'status' => 'required|in:paid,unpaid',
-        ]);
+        // // Walidacja danych wejściowych
+        // $this->validate($request, [
+        //     'ad_id' => 'required',
+        //     'price' => 'required',
+        //     'date' => 'required|date',
+        //     'status' => 'required|in:paid,unpaid',
+        // ]);
 
-        $ad = Ad::findOrFail($request->input('ad_id'));
+        // $ad = Ad::findOrFail($request->input('ad_id'));
 
-        // Sprawdzenie uprawnień użytkownika, tylko admin może dodawać nowe faktury 'ręcznie'
-        $invoiceController = new InvoiceController();
+        // // Sprawdzenie uprawnień użytkownika, tylko admin może dodawać nowe faktury 'ręcznie'
+        // $invoiceController = new InvoiceController();
 
-        $currentDate = new \DateTime();
-        if (auth()->user()->isAdmin()) {
-            $invoice = new Invoice();
-            $invoice->ad_id = $ad->id;
-            $invoice->number = $invoiceController->generateInvoiceNumber();
-            $invoice->price = $request->input('price');
-            $invoice->date = $currentDate->format('Y-m-d H:i:s');;
-            $invoice->status = $request->input('status');
-            $invoice->save();
+        // $currentDate = new \DateTime();
+        // if (auth()->user()->isAdmin()) {
+        //     $invoice = new Invoice();
+        //     $invoice->ad_id = $ad->id;
+        //     $invoice->number = $invoiceController->generateInvoiceNumber();
+        //     $invoice->price = $request->input('price');
+        //     $invoice->date = $currentDate->format('Y-m-d H:i:s');
+        //     $invoice->status = $request->input('status');
+        //     $invoice->save();
 
-            return response()->json($invoice, 201);
-        }
+        //     return response()->json($invoice, 201);
+        // }
 
-        return response()->json(['message' => 'Unauthorized'], 401);
+        // return response()->json(['message' => 'Unauthorized'], 401);
+        // $invoice = new InvoiceResource(Invoice::create($request));
+        // return $this->successResponse('Ad has been created successfully', $invoice);
     }
 
 

@@ -42,8 +42,8 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
         Route::get('ads/{id}', [AdController::class, 'show']);
         Route::get('ads', [AdController::class, 'index']);
         Route::post('ads', [AdController::class, 'store']);
-        Route::post('ads/{id}', [AdController::class, 'update']);
-        Route::get('ads/{id}/delete', [AdController::class, 'delete']);
+        Route::put('ads/{id}', [AdController::class, 'update']);
+        Route::get('ads/{id}/delete', [AdController::class, 'destroy']);
 
         Route::get('stats', [AdStatsController::class, 'index']);
         Route::get('stats/{ad_id}/{stat_id?}', [AdStatsController::class, 'show']);

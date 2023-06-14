@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Ad;
 
 class InvoiceRequest extends FormRequest
 {
@@ -21,8 +22,20 @@ class InvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
-        ];
+        return $this->isMethod('POST') ? $this->store() : $this->update();
     }
+    
+
+    protected function store(): array{
+        return [
+            'ad_id' => ['sometimes', 'string'],
+            'number' => ['sometimes'],
+            'price' => ['required','double'],
+            'date' => ['required', 'date'],
+            'status' => ['sometimes', 'string']
+        ];
+
+    }
+
+    protected
 }

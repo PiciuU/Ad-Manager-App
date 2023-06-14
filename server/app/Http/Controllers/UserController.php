@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\UserRole;
+use App\Models\PasswordResetToken;
+
+use Carbon\Carbon;
+
 use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserCollection;
 use App\Http\Requests\UserRequest;
-use Illuminate\Contracts\Support\ValidatedData;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
@@ -24,11 +28,6 @@ class UserController extends Controller
     {
         return auth()->user()->hasAdminPrivileges();
     }
-
-    // public function hasAccess(UserRequest $request)
-    // {
-    //     return $request->hasAdminPrivileges();
-    // }
 
     /**
      * ADMIN SECTION
@@ -101,14 +100,13 @@ class UserController extends Controller
     public function register(UserRequest $request)
     {
         $validatedData = $request->validated();
-        print_r($validatedData);
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         $user = new UserResource(User::create($validatedData));
 
         if (!$user) return $this->errorResponse('An error occurred while creating the user, try again later', 500);
 
-        $authToken = $user->createToken('basic-token', ['admin']);
+        $authToken = $user->createToken('basic-token', ['basic']);
 
         return $this->successResponse('User has been created successfully', ['user' => $user, 'token' => $authToken->plainTextToken]);
     }
@@ -130,7 +128,7 @@ class UserController extends Controller
             return $this->successResponse('Login successful', ['user' => $user, 'token' => $authToken->plainTextToken]);
         }
 
-        return $this->errorResponse('Invalid login credentials', 401);
+        return $this->errorResponse('Invalid username or password.', 401);
     }
 
     /**
@@ -142,6 +140,86 @@ class UserController extends Controller
     {
         auth()->user()->currentAccessToken()->delete();
         return $this->successResponse('Logout successful');
+    }
+
+    /**
+     * Recover password for the user by generating a reset password hash
+     *
+     * This method generates a reset password hash for the user, which allows them to recover their password.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function recover(UserRequest $request)
+    {
+        $user = User::where('email', $request->validated()['email'])->first();
+
+        if (!$user) return $this->successResponse('If an account is associated with the provided email address, we have sent a message to it.');
+
+        $resetPassword = PasswordResetToken::where('user_id', $user->id)->first();
+        if ($resetPassword) $resetPassword->delete();
+
+        $resetPasswordHash = md5(rand() . time());
+
+        PasswordResetToken::create([
+            'user_id' => $user->id,
+            'hash' => $resetPasswordHash,
+            'valid_until' => Carbon::now()->addDay()->format('Y-m-d H:i:s')
+        ]);
+
+        // Mail::to($user->email)->send(new ResetPasswordRequestMail($resetPasswordHash));
+
+        // if (Mail::failures()) return $this->errorResponse('An error occurred while sending email, try again later', 500);
+
+        return $this->successResponse('If an account is associated with the provided email address, we have sent a message to it.');
+    }
+
+    /**
+     * Verify password recovery.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function recoverToken($hash)
+    {
+        $resetPassword = PasswordResetToken::where('hash', $hash)
+            ->whereDate('valid_until', '>', now())
+            ->first();
+
+        if (!$resetPassword) return $this->errorResponse('Invalid or expired password reset token.');
+
+        return $this->successResponse('Valid password reset token.');
+    }
+
+    /**
+     * Update user password with password recovery.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function resetPassword(UserRequest $request)
+    {
+        $validatedData = $request->validated();
+
+        $resetPassword = PasswordResetToken::where('hash', $validatedData['hash'])
+            ->whereDate('valid_until', '>', now())
+            ->first();
+
+        if (!$resetPassword) return $this->errorResponse('Invalid or expired password reset token.');
+
+        $user = User::where('id', $resetPassword->user_id)->first();
+
+        if (!$user) return $this->errorResponse('Invalid or expired password reset token.');
+
+        $user->update([
+            'password' => Hash::make($validatedData['password'])
+        ]);
+
+        $resetPassword->delete();
+
+        // Mail::to($advertiser['email'])->send(new ResetPasswordConfirmationMail());
+
+        return $this->successResponse('Your password has been successfully reset.');
     }
 
     /**
@@ -199,7 +277,9 @@ class UserController extends Controller
             return $this->errorResponse('New password must be different from the current password', 400);
         }
 
-        if (!$user->update(['password' => Hash::make($request->validated()['password'])])) return $this->errorResponse('An error occurred while updating the password, try again later', 500);
+        if (!$user->update([
+            'password' => Hash::make($request->validated()['password'])
+        ])) return $this->errorResponse('An error occurred while updating the password, try again later', 500);
 
 
         // Implement sending an email about the password change
