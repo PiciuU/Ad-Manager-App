@@ -38,7 +38,7 @@
     --color-text-muted-2: rgba(255, 255, 255, 0.6);
     --color-text-muted-3: rgba(255, 255, 255, 0.38);
 
-    --color-primary: #4f378b;
+    --color-primary: #409EFF;
     --color-primary-variant: #371e73;
     --color-secondary: #332d41;
 
@@ -50,6 +50,38 @@
     --color-on-primary: #000000;
     --color-on-background: #ffffff;
 }
+
+/* Colors */
+
+$--color-text: #ffffff;
+$--color-text-muted-1: rgba(255, 255, 255, 0.87);
+$--color-text-muted-2: rgba(255, 255, 255, 0.6);
+$--color-text-muted-3: rgba(255, 255, 255, 0.38);
+
+$--color-primary: #409EFF;
+$--color-primary-variant: #BB86FC;
+$--color-secondary: #66b1ff;
+
+$--color-overlay: #202020;
+$--color-background: #02010cf2;
+$--color-success: #4caf50;
+$--color-error: #cf6679;
+
+$--color-on-primary: #000000;
+$--color-on-background: #ffffff;
+
+/* Constants */
+
+$--height-header: 60px;
+$--width-sidebar: 250px;
+$--width-sidebar-collapsed: 64px;
+
+/* Z-indexes */
+
+$--z-index-header: 2000;
+$--z-index-loader: 1000;
+
+/* Breakpoints */
 
 $--breakpoint-mobile: 576px;
 $--breakpoint-small-devices: 768px;
