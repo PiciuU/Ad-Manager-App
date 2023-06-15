@@ -9,14 +9,14 @@
 *::after {
     box-sizing: border-box;
     margin: 0;
-    // position: relative;
+    position: relative;
     font-weight: normal;
 }
 
 html,
 body {
-    color: var(--color-text);
-    background: var(--color-background);
+    color: $--color-text;
+    background: $--color-background;
     min-height: 100vh;
     font-family: 'Lato', Avenir, Helvetica, Arial, sans-serif;
     text-rendering: optimizeLegibility;
@@ -33,7 +33,7 @@ body {
     min-height: 100vh;
 }
 
-@media screen and (max-width: var(--breakpoint-small-devices)) {
+@media screen and (max-width: $--breakpoint-small-devices) {
     .disable-scroll {
         overflow: hidden;
     }
@@ -50,34 +50,34 @@ body {
 
 .el-container-inner {
     background-color: #333;
-    margin-top: var(--height-header);
+    margin-top: $--height-header;
 
-    @media (min-width: calc(var(--breakpoint-small-devices) + 1px)) {
+    @media (min-width: calc($--breakpoint-small-devices + 1px)) {
         .el-aside ~ .el-main {
-            margin-left: var(--width-sidebar);
+            margin-left: $--width-sidebar;
         }
 
         .el-aside.nav--collapse ~ .el-main {
-            margin-left: var(--width-sidebar-collapsed);
+            margin-left: $--width-sidebar-collapsed;
         }
     }
 }
 
 /* Utility classes for hiding elements */
 
-@media (max-width: var(--breakpoint-small-devices)) {
+@media (max-width: $--breakpoint-small-devices) {
     .el-hidden-xs-and-down {
         display: none !important;
     }
 }
 
-@media (max-width: var(--breakpoint-medium-devices)) {
+@media (max-width: $--breakpoint-medium-devices) {
     .el-hidden-sm-and-down {
         display: none !important;
     }
 }
 
-@media (max-width: calc(var(--breakpoint-large-devices) - 1px)) {
+@media (max-width: calc($--breakpoint-large-devices - 1px)) {
     .el-hidden-md-and-down {
         display: none !important;
     }
@@ -127,7 +127,7 @@ body {
     transform: translateX(-50%);
 }
 
-@media screen and (max-width: var(--breakpoint-small-devices)) {
+@media screen and (max-width: $--breakpoint-small-devices) {
     .el-date-range-picker.has-sidebar {
         width: 100% !important;
 
@@ -149,7 +149,7 @@ body {
     }
 }
 
-@media screen and (max-width: var(--breakpoint-mobile)) {
+@media screen and (max-width: $--breakpoint-mobile) {
     .el-picker-panel__body {
         display: flex;
         flex-direction: column;
@@ -218,11 +218,11 @@ body {
 .el-dialog {
     border-radius: 10px;
 
-    @media screen and (max-width: var(--breakpoint-small-devices)) {
+    @media screen and (max-width: $--breakpoint-small-devices) {
         width: 400px !important;
     }
 
-    @media screen and (max-width: var(--breakpoint-mobile)) {
+    @media screen and (max-width: $--breakpoint-mobile) {
         display: flex;
         flex-direction: column;
         width: 100% !important;

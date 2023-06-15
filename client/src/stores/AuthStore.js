@@ -137,5 +137,8 @@ export const useAuthStore = defineStore('authStore', {
             deleteCookie('token');
             router.push({ name: 'Login' });
         },
+        logout() {
+            router.push({ name: 'Login' });
+        }
     }
 });

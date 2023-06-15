@@ -15,10 +15,18 @@
 </template>
 
 <script setup>
-import 'chartkick/chart.js'
+    import { watchEffect } from 'vue';
+    import 'chartkick/chart.js'
+    import TheHeader from '@/common/components/TheHeader.vue'
+    import TheSidebar from '@/common/components/TheSidebar.vue'
+    import { useDataStore } from '@/stores/DataStore';
 
-import TheHeader from '@/common/components/TheHeader.vue'
-import TheSidebar from '@/common/components/TheSidebar.vue'
+    const dataStore = useDataStore();
+
+    watchEffect(() => {
+        if (dataStore.isScrollDisabled) document.querySelector('body').classList.add('disable-scroll');
+		else document.querySelector('body').classList.remove('disable-scroll');
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -26,7 +34,7 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
     padding: 0px 4vw;
     word-break: break-word;
     &:first-child {
-        margin-top: 10vh;
+        margin-top: 10px;
     }
 
     .el-col {
@@ -36,11 +44,11 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
 
 .el-container {
     display: flex;
-    background-color: var(--color-background);
+    background-color: $--color-background;
     background-size: cover;
 }
 
-@media screen and (max-width: var(--breakpoint-medium-devices)) {
+@media screen and (max-width: $--breakpoint-medium-devices) {
     ::v-deep(.cards__container--ordered) {
         display: flex;
         .el-col:first-child {
@@ -70,7 +78,7 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
 
     .card__title {
         font-size: 16px;
-        color: var(--color-text);
+        color: $--color-text;
         text-align: left;
         font-weight: bold;
         margin-bottom: 20vh;
@@ -111,14 +119,14 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
         display: flex;
         justify-content: center;
         align-items: center;
-        color: var(--color-text);
+        color: $--color-text;
         top: 20px;
         right: 20px;
         font-size: 10px;
         width: 15px;
         height: 15px;
         border-radius: 50%;
-        border: 1px solid (var(--color-text));
+        border: 1px solid ($--color-text);
     }
 
     .card__details {
@@ -137,7 +145,7 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
             font-size: 22px;
             font-weight: bold;
             letter-spacing: 1px;
-            color: var(--color-blue);
+            color: $--color-primary;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -159,7 +167,7 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
         &-description {
             margin-top: 2px;
             font-size: 14px;
-            color: var(--color-text-muted-3);
+            color: $--color-text-muted-3;
             cursor: default;
         }
 
@@ -187,7 +195,7 @@ import TheSidebar from '@/common/components/TheSidebar.vue'
         flex: 1;
     }
 }
-@media screen and (max-width: var(--breakpoint-mobile)) {
+@media screen and (max-width: $--breakpoint-mobile) {
     ::v-deep(.cards__container) {
         padding: 0px;
     }

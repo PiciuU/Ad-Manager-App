@@ -1,10 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <h1>hello company-details</h1>
+    <el-main>Company</el-main>
 </template>
 
-<script>
-export default {}
+<script setup>
+
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+</style>

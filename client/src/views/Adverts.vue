@@ -1,10 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <p>siema Adverts</p>
+    <el-main>Adverts</el-main>
 </template>
 
-<script>
-export default {}
+<script setup>
+
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+</style>
