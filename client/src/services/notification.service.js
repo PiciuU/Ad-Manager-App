@@ -1,6 +1,5 @@
-import { h } from 'vue';
 import 'element-plus/es/components/notification/style/css';
-import { ElNotification, ElMessageBox } from 'element-plus';
+import { ElNotification } from 'element-plus';
 
 const NotificationService = {
 	displayError(title = 'Ups... Coś poszło nie tak.', message = 'Wystąpił nieoczekiwany błąd. Prosimy odswieżyć stronę lub spróbować ponownie później.') {

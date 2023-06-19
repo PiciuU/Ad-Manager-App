@@ -6,7 +6,7 @@ export const router = createRouter({
     routes: [
         {
             path: '/panel',
-            meta: { requiresAuth: false },
+            meta: { requiresAuth: true },
             component: () => import(/* webpackChunkName: "group-authorized" */ '@/layouts/Authorized.vue'),
             children: [
                 {
@@ -20,7 +20,7 @@ export const router = createRouter({
                     component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Adverts.vue')
                 },
                 {
-                    name: 'CompanyDetails',
+                    name: 'Company',
                     path: 'dane',
                     component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Company.vue')
                 },
@@ -56,10 +56,10 @@ export const router = createRouter({
                     path: 'przypomnienie-hasla/:hash',
                     component: () => import(/* webpackChunkName: "group-default" */ '@/views/auth/ResetPassword.vue'),
                     beforeEnter: (to, from, next) => {
-                        // const authStore = useAuthStore();
-                        // authStore.validatePasswordResetHash(to.params.hash)
-                        //     .then(() => next())
-                        //     .catch(() => next('/'))
+                        const authStore = useAuthStore();
+                        authStore.validatePasswordResetHash(to.params.hash)
+                            .then(() => next())
+                            .catch(() => next('/'))
                     },
                 },
             ]
@@ -70,8 +70,8 @@ export const router = createRouter({
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
 
-    if (to.meta.requiresAuth && !authStore.isLogged) next('/login'); // User not logged in, redirect to the login page
-    // else if (!to.meta.requiresAuth && authStore.isLogged) next('/'); // User logged in, redirect to the Home view
+    if (to.meta.requiresAuth && !authStore.isLogged) next('/'); // User not logged in, redirect to the login page
+    else if (!to.meta.requiresAuth && authStore.isLogged) next('/panel'); // User logged in, redirect to the Home view
     else next(); // Redirect to the intended view
 });
 

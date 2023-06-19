@@ -49,7 +49,7 @@ body {
 }
 
 .el-container-inner {
-    background-color: #333;
+    background-color: $--color-background;
     margin-top: $--height-header;
 
     @media (min-width: calc($--breakpoint-small-devices + 1px)) {
@@ -86,7 +86,7 @@ body {
 /* Custom styling */
 
 .el-empty {
-    padding: 0;
+    padding: 0px !important;
 
     &__description {
         margin-top: 10px;
@@ -202,6 +202,13 @@ body {
 .el-notification {
     max-width: 90%;
 }
+
+/* Fix position of closeButton due to position relative on *, *::after, *::before */
+i.el-icon.el-notification__closeBtn {
+    top: 0px;
+    right: -30px;
+}
+
 /* MessageBox RWD support for mobile devices */
 .el-message-box {
     width: 500px;
@@ -216,7 +223,8 @@ body {
 
 /* Dialog Modal RWD support for mobile devices & Correct styles */
 .el-dialog {
-    border-radius: 10px;
+    border: 1px solid $--color-text-muted-3;
+    border-radius: 10px !important;
 
     @media screen and (max-width: $--breakpoint-small-devices) {
         width: 400px !important;
@@ -233,6 +241,11 @@ body {
         &__footer {
             margin-top: auto;
         }
+    }
+
+    &__header {
+        margin-right: 0px !important;
+        text-align: center;
     }
 
     &__header > &__title {

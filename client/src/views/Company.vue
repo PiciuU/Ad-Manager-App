@@ -12,28 +12,28 @@
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.person) }} -->
+                            {{ stringToLocale(user.representative) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="Adres email: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.email) }} -->
+                            {{ stringToLocale(user.email) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="Telefon: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.phone) }} -->
+                            {{ stringToLocale(user.representativePhone) }}
                         </el-descriptions-item>
                     </el-descriptions>
                     <div class="card__buttons--left card__buttons--bottom">
                         <el-button
                             class="card__button"
                             type="primary"
-                            @click="enableCompanyDetails('person')"
+                            @click="toggleCompanyDetails('person')"
                             plain
                             >Edytuj dane kontaktowe</el-button
                         >
@@ -49,56 +49,56 @@
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.name) }} -->
+                            {{ stringToLocale(user.name) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="Adres: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.address1) }} -->
+                            {{ stringToLocale(user.address) }}
                         </el-descriptions-item>
                         <el-descriptions-item
-                            label="Kod pocztowy i miasto: "
+                            label="Kod pocztowy: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.address2) }} -->
+                            {{ stringToLocale(user.postalCode) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="Kraj: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.country) }} -->
+                            {{ stringToLocale(user.country) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="NIP: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.nip) }} -->
+                            {{ stringToLocale(user.nip) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="Firmowy adres email: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.company_email) }} -->
+                            {{ stringToLocale(user.companyEmail) }}
                         </el-descriptions-item>
                         <el-descriptions-item
                             label="Firmowy telefon: "
                             label-class-name="card__data-label"
                             class-name="card__data-line"
                         >
-                            <!-- {{ stringToLocale(user.company_phone) }} -->
+                            {{ stringToLocale(user.companyPhone) }}
                         </el-descriptions-item>
                     </el-descriptions>
                     <div class="card__buttons--left">
                         <el-button
                             class="card__button card__buttons--bottom"
                             type="primary"
-                            @click="enableCompanyDetails('company')"
+                            @click="toggleCompanyDetails('company')"
                             plain
                             >Edytuj dane reklamodawcy</el-button
                         >
@@ -107,56 +107,31 @@
             </el-col>
         </el-row>
 
-        <company-details></company-details>
+        <ModalCompanyDetails v-if="modal.isVisible" :mode="modal.mode" @close="toggleCompanyDetails"/>
     </el-main>
 </template>
 
-<script>
-import { reactive, computed, defineAsyncComponent } from 'vue'
-import { useStore } from 'vuex'
+<script setup>
+    import { reactive, computed } from 'vue'
 
-import { stringToLocale } from '@/common/helpers/utility.helper'
+    import { stringToLocale } from '@/common/helpers/utility.helper'
+    import ModalCompanyDetails from '@/modules/components/ModalCompanyDetails.vue'
 
-import NotificationService from '@/services/notification.service'
+    import { useAuthStore } from '@/stores/AuthStore';
 
-export default {
-    // eslint-disable-next-line vue/multi-word-component-names
-    name: 'Company',
-    components: {
-        'company-details': defineAsyncComponent(() =>
-            import('@/modules/components/CompanyDetails.vue')
-        )
-    },
-    setup() {
-        const modal = reactive({
-            isOpen: false,
-            currentValue: ''
-        })
+    const authStore = useAuthStore();
 
-        const store = useStore()
+    const user = computed(() => authStore.user);
 
-        const user = computed(() => store.getters.currentUser)
+    const modal = reactive({
+        isVisible: false,
+        mode: ''
+    })
 
-        function enableCompanyDetails(type) {
-            modal.isOpen = true
-            modal.currentValue = type
-        }
-
-        function disableCompanyDetails() {
-            modal.isOpen = false
-            modal.currentValue = ''
-        }
-
-        return {
-            stringToLocale,
-            modal,
-            user,
-            NotificationService,
-            enableCompanyDetails,
-            disableCompanyDetails
-        }
-    }
-}
+    const toggleCompanyDetails = (type = '') => {
+        modal.isVisible = !modal.isVisible
+        modal.mode = type
+    };
 </script>
 
 <style lang="scss" scoped></style>

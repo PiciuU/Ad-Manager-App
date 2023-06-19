@@ -68,7 +68,7 @@
 				trigger: "blur"
 			},
 		],
-		password_confirmation: [
+		passwordConfirmation: [
 			{
 				validator: (rule, value, callback) => {
 					if (value === '') callback(new Error('Wprowadź ponownie hasło'))
@@ -85,7 +85,7 @@
 	const credentials = reactive({
 		hash: route.params.hash,
 		password: '',
-		password_confirmation: ''
+		passwordConfirmation: ''
 	});
 
 	const validateCredentials = () => {
@@ -96,7 +96,7 @@
 	};
 
     const submitForm = () => {
-        authStore.passwordRecover(credentials)
+        authStore.passwordReset(credentials)
             .then(() => {
                 formState.isFormDone = true;
             })

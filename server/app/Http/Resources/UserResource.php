@@ -17,17 +17,38 @@ class UserResource extends JsonResource
         if ($request->user() && $request->user()->hasAdminPrivileges()) {
             return [
                 'id' => $this->id,
-                'login' => $this->login,
+                'userRoleId' => $this->user_role_id,
                 'name' => $this->name,
+                'login' => $this->login,
                 'email' => $this->email,
-                'user_role_id' => $this->user_role_id,
+                'activationKey' => $this->activation_key,
+                'nip' => $this->nip,
+                'address' => $this->address,
+                'postalCode' => $this->postal_code,
+                'country' => $this->country,
+                'companyEmail' => $this->company_email,
+                'companyPhone' => $this->company_phone,
+                'representative' => $this->representative,
+                'representativePhone' => $this->representative_phone,
+                'notes' => $this->notes,
+                'isBanned' => $this->is_banned,
+                'banReason' => $this->ban_reason,
+                'activatedAt' => $this->activated_at
             ];
         } else {
             return [
                 'id' => $this->id,
-                'login' => $this->login,
                 'name' => $this->name,
+                'login' => $this->login,
                 'email' => $this->email,
+                'nip' => $this->nip,
+                'address' => $this->address,
+                'postalCode' => $this->postal_code,
+                'country' => $this->country,
+                'companyEmail' => $this->company_email,
+                'companyPhone' => $this->company_phone,
+                'representative' => $this->representative,
+                'representativePhone' => $this->representative_phone,
             ];
         }
     }
