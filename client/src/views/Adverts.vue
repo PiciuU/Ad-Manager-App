@@ -6,25 +6,31 @@
             <el-col :span="24" :md="12">
                 <el-card class="card">
                     <div class="card__title">Informacje o reklamie</div>
-                    <el-empty v-if="(isObjectEmpty = 0)" description="Brak reklamy"></el-empty>
-                    <div>
+                    <el-empty v-if="isObjectEmpty(data.advert)" description="Brak reklamy"></el-empty>
+                    <div v-else>
                         <!-- <div v-else> -->
                         <el-descriptions class="el-descriptions-two-column" :column="2">
                             <el-descriptions-item
                                 label="Nazwa reklamy: "
                                 label-class-name="card__data-label"
                                 class-name="card__data-line"
-                            ></el-descriptions-item>
+                            >
+                            Placeholder dla nazwy
+                            </el-descriptions-item>
                             <el-descriptions-item
                                 label="Typ reklamy: "
                                 label-class-name="card__data-label"
                                 class-name="card__data-line"
-                            ></el-descriptions-item>
+                            >
+                            Placeholder dla typu
+                            </el-descriptions-item>
                             <el-descriptions-item
                                 label="Status reklamy: "
                                 label-class-name="card__data-label"
                                 class-name="card__data-line"
-                            ></el-descriptions-item>
+                            >
+                            Placeholder dla statusu
+                            </el-descriptions-item>
                             <el-descriptions-item
                                 label="Kolaudacja: "
                                 label-class-name="card__data-label"
@@ -35,12 +41,16 @@
                                 label="Wyświetlana od: "
                                 label-class-name="card__data-label"
                                 class-name="card__data-line"
-                            ></el-descriptions-item>
+                            >
+                            Placeholder dla daty początek
+                            </el-descriptions-item>
                             <el-descriptions-item
                                 label="Wyświetlana do: "
                                 label-class-name="card__data-label"
                                 class-name="card__data-line"
-                            ></el-descriptions-item>
+                            >
+                            Placeholder dla daty koniec
+                            </el-descriptions-item>
                         </el-descriptions>
                     </div>
                 </el-card>
@@ -51,84 +61,74 @@
                     <el-select
                         class="card__select"
                         @change="handleAdvertChange"
-                        v-model="searchFilteradvertId"
-                        :loading="componentStateisLoading"
+                        v-model="searchFilter.advertId"
                         loading-text="Wyszukiwanie reklam..."
                         placeholder="Wybierz reklamę..."
                         no-data-text="Nie znaleziono żadnych reklam."
                         clearable
                     >
+                        <el-option v-for="ad in data.ads" :key="ad.id" :label="ad.name" :value="ad.id"></el-option>
                     </el-select>
 
-                    <el-tabs class="card__tabs">
+                    <el-tabs class="card__tabs" v-model="searchFilter.type">
                         <el-tab-pane label="Tydzień" name="week">
                             <div class="date-picker">
                                 <el-date-picker
+                                    v-model="searchFilter.week"
                                     type="week"
                                     placeholder="Wybierz tydzień"
                                     format="[Tydzień] ww"
                                     value-format="YYYY-MM-DD"
+                                    :disabled="!searchFilter.advertId"
                                     :clearable="false"
                                     @change="handleAdvertChange"
                                 >
-                                    <!-- dodac w el-date-picker'ach i el-button'ach '-------------- >
-                                    :disabled="!searchFilter.advertId"                 oraz
-                                w date pickerze
-                                    v-model="searchFilter.week/month/year"
-                                -->
                                 </el-date-picker>
-                                <el-button class="btn-spacing" @click="handleAdvertChange"
-                                    ><font-awesome-icon icon="search"
-                                /></el-button>
+                                <el-button class="btn-spacing" @click="handleAdvertChange" :disabled="!searchFilter.advertId">
+                                    <font-awesome-icon icon="search"/>
+                                </el-button>
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="Miesiąc" name="month">
                             <div class="date-picker">
                                 <el-date-picker
+                                    v-model="searchFilter.month"
                                     type="month"
                                     placeholder="Wybierz miesiąc"
                                     format="YYYY/MM"
                                     value-format="YYYY-MM"
+                                    :disabled="!searchFilter.advertId"
                                     :clearable="false"
                                     @change="handleAdvertChange"
                                 >
                                 </el-date-picker>
-                                <el-button class="btn-spacing" @click="handleAdvertChange"
-                                    ><font-awesome-icon icon="search"
-                                /></el-button>
+                                <el-button class="btn-spacing" @click="handleAdvertChange" :disabled="!searchFilter.advertId">
+                                    <font-awesome-icon icon="search"/>
+                                </el-button>
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="Rok" name="year">
                             <div class="date-picker">
                                 <el-date-picker
+                                    v-model="searchFilter.year"
                                     type="year"
                                     placeholder="Wybierz rok"
                                     format="YYYY"
                                     value-format="YYYY"
+                                    :disabled="!searchFilter.advertId"
                                     :clearable="false"
                                     @change="handleAdvertChange"
                                 >
                                 </el-date-picker>
-                                <el-button class="btn-spacing" @click="handleAdvertChange"
-                                    ><font-awesome-icon icon="search"
-                                /></el-button>
+                                <el-button class="btn-spacing" @click="handleAdvertChange" :disabled="!searchFilter.advertId">
+                                    <font-awesome-icon icon="search"/>
+                                </el-button>
                             </div>
                         </el-tab-pane>
                         <el-tab-pane label="Zakres dat" name="monthrange">
                             <div class="date-picker">
-                                <!-- w date picker dodac:
-                                    
-                                    v-model="searchFilter.monthrange" 
-                                    :shortcuts="searchFilter.shortcuts"
-                                    :disabled="!searchFilter.advertId"
-
-                                    w buttonie:
-                                    :disabled="!searchFilter.advertId"
-
-
-                                
-                                -->
                                 <el-date-picker
+                                    v-model="searchFilter.monthrange"
                                     type="monthrange"
                                     unlink-panels
                                     range-separator="-"
@@ -136,13 +136,15 @@
                                     end-placeholder="Data końcowa"
                                     format="YYYY/MM"
                                     value-format="YYYY-MM"
+                                    :shortcuts="searchFilter.shortcuts"
+									:disabled="!searchFilter.advertId"
                                     :clearable="false"
                                     @change="handleAdvertChange"
                                 >
                                 </el-date-picker>
-                                <el-button class="btn-spacing" @click="handleAdvertChange"
-                                    ><font-awesome-icon icon="search"
-                                /></el-button>
+                                <el-button class="btn-spacing" @click="handleAdvertChange" :disabled="!searchFilter.advertId">
+                                    <font-awesome-icon icon="search"/>
+                                </el-button>
                             </div>
                         </el-tab-pane>
                     </el-tabs>
@@ -150,22 +152,12 @@
             </el-col>
         </el-row>
 
-        <el-row class="cards__container" :gutter="32">
+        <el-row class="cards__container" :gutter="32" v-if="!isObjectEmpty(data.advert)">
             <el-col :span="24">
                 <el-card class="card">
                     <div class="card__title">Wyświetlenia</div>
-                    <!-- 
-                        poniżej w el tabs dodac:
-                        
-                        v-model="searchFilter.graphs.currentViewsTab"
-                        
-                    -->
-                    <el-tabs>
+                    <el-tabs v-model="searchFilter.graphs.currentClicksTab">
                         <el-tab-pane label="Wykres liniowy" name="line">
-                            <!-- line chart:
-                :data="data.views"
-                v-if="componentState.isRendered"
-                -->
                             <line-chart
                                 download="Wyswietlenia_liniowy"
                                 :data="{
@@ -187,10 +179,6 @@
                             ></line-chart>
                         </el-tab-pane>
                         <el-tab-pane label="Wykres kolumnowy" name="column">
-                            <!-- column chart:
-                :data="data.views"
-                v-if="componentState.isRendered"
-                -->
                             <column-chart
                                 download="Wyswietlenia_kolumnowy"
                                 :data="{
@@ -213,10 +201,6 @@
                         </el-tab-pane>
 
                         <el-tab-pane label="Wykres słupkowy" name="bar">
-                            <!-- bar chart:
-                :data="data.views"
-                v-if="componentState.isRendered"
-                -->
                             <bar-chart
                                 download="Wyswietlenia_slupkowy"
                                 :data="{
@@ -243,9 +227,6 @@
                                     label="Wszystkie wyświetlenia: "
                                     label-class-name="card__data-label"
                                     class-name="card__data-line"
-                                    :data="{
-                                        '2017-01-01': 82
-                                    }"
                                 >
                                     19157
                                     <!-- {{ data.summary.all_views }} -->
@@ -272,24 +253,16 @@
                 </el-card>
             </el-col>
         </el-row>
-        <!-- dodac w elrow ponizej -->
-        <!-- v-if="!isObjectEmpty(data.advert)" -->
-        <el-row class="cards__container" :gutter="32">
+
+        <el-row class="cards__container" :gutter="32" v-if="!isObjectEmpty(data.advert)">
             <el-col :span="24">
                 <el-card class="card">
                     <div class="card__title">Kliknięcia</div>
-                    <!-- dodac ponizej w el-tabs -->
-                    <!-- v-model="searchFilter.graphs.currentClicksTab" -->
-                    <el-tabs>
+                    <el-tabs v-model="searchFilter.graphs.currentClicksTab">
                         <el-tab-pane label="Wykres liniowy" name="line">
-                            <!-- dodac w linechartach:
-                            :data="data.clicks"
-                            v-if="componentState.isRendered" -->
-
                             <line-chart
                                 download="Klikniecia_liniowy"
                                 :discrete="true"
-                                :colors="--el - color - primar"
                                 empty="Brak danych"
                                 :data="{
                                     '2017-01-01': 82,
@@ -311,7 +284,6 @@
                             <column-chart
                                 download="Klikniecia_kolumnowy"
                                 :discrete="true"
-                                :colors="--el - color - primar"
                                 empty="Brak danych"
                                 :data="{
                                     '2017-01-01': 82,
@@ -333,7 +305,6 @@
                             <bar-chart
                                 download="Klikniecia_slupkowy"
                                 :discrete="true"
-                                :colors="--el - color - primar"
                                 empty="Brak danych"
                                 :data="{
                                     '2017-01-01': 82,
@@ -386,7 +357,77 @@
     </el-main>
 </template>
 
-<script setup></script>
+<script setup>
+    import { reactive, onMounted } from 'vue';
+
+    import DateHelper from '@/common/helpers/date.helper';
+    import { advertStatusToLocaleString, advertTypeToLocaleString, stringToLocale, isObjectEmpty } from '@/common/helpers/utility.helper';
+
+		// onMounted(() => {
+        //     adStore.getAdverts()
+        //         .then((response) => {
+        //             data.ads = response.data
+        //         })
+		// });
+
+		const data = reactive({
+			ads: {},
+			advert: {},
+			views: {},
+			clicks: {},
+			summary: {
+				most_views: {},
+				least_views: {},
+				most_clicks: {},
+				least_clicks: {}
+			}
+		});
+
+		const searchFilter = reactive({
+			advertId: null,
+			type: 'month',
+			week: DateHelper.getCurrentWeek(),
+			month: DateHelper.getCurrentMonth(),
+			year: DateHelper.getCurrentYear(),
+			monthrange: DateHelper.getCurrentMonthRange(),
+			graphs:{
+				currentViewsTab: 'line',
+				currentClicksTab: 'line',
+			},
+			shortcuts: [
+				{
+					text: 'Ostatnie 3 miesiące',
+					value: () => DateHelper.getCurrentMonthRange(2),
+				},
+				{
+					text: 'Ostatnie 6 miesięcy',
+					value: () => DateHelper.getCurrentMonthRange(5),
+				},
+				{
+					text: 'Ostatni rok',
+					value: () => DateHelper.getCurrentMonthRange(11),
+				},
+			]
+		});
+
+		function handleAdvertChange() {
+			if (!searchFilter.advertId || searchFilter.advertId === null || searchFilter[searchFilter.type] === null) {
+				data.advert = {};
+				return;
+			}
+
+			const body = {
+				format: searchFilter.type,
+				date: searchFilter[searchFilter.type]
+			};
+
+            // adStore.getAdvert(searchFilter.advertId, body)
+            //     .then((response) => {
+            //         Object.assign(data, response.data);
+            //     })
+		}
+
+</script>
 
 <style lang="scss" scoped>
 .date-picker {
@@ -398,8 +439,5 @@
 
 .btn-spacing {
     margin-left: 10px;
-}
-.card-title {
-    margin: 10px;
 }
 </style>

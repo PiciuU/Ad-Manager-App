@@ -12,6 +12,7 @@ export const useAuthStore = defineStore('authStore', {
         loading: false,
     }),
     getters: {
+        getUser: (state) => state.user,
         isLoading: (state) => state.loading,
         isLogged: (state) => !!state.token,
         isAuthenticated: (state) => !!state.token && Object.keys(state.user).length != 0 && state.user.constructor === Object,
@@ -77,6 +78,19 @@ export const useAuthStore = defineStore('authStore', {
                 this.loading = false;
             }
         },
+        async logout() {
+            try {
+                this.loading = true;
+                await ApiService.get('/auth/logout');
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+                this.clearAuthorization();
+            }
+        },
         async passwordRecover(credentials) {
             try {
                 this.loading = true;
@@ -113,6 +127,44 @@ export const useAuthStore = defineStore('authStore', {
                 this.loading = false;
             }
         },
+        async changeMail(payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put('/auth/user/mail', payload);
+                this.user.email = response.data.email;
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async changePassword(payload) {
+            try {
+                this.loading = true;
+                await ApiService.put('/auth/user/password', payload);
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async updateData(payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put('/auth/user', payload);
+                this.user = response.data
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
         async fetchUser() {
             try {
                 this.loading = true;
@@ -123,7 +175,6 @@ export const useAuthStore = defineStore('authStore', {
             } finally {
                 this.loading = false;
             }
-
         },
         setAuthorization(token, user, redirect = true) {
             this.user = user;
@@ -137,8 +188,5 @@ export const useAuthStore = defineStore('authStore', {
             deleteCookie('token');
             router.push({ name: 'Login' });
         },
-        logout() {
-            router.push({ name: 'Login' });
-        }
     }
 });

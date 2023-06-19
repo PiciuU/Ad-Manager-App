@@ -13,8 +13,8 @@
             </div>
             <div class="user">
                 <div class="user__data">
-                    <div class="user__name">{{ user.login }}</div>
-                    <div class="user__company">{{ user.name }}</div>
+                    <div class="user__name">{{ authStore.getUser.login }}</div>
+                    <div class="user__company">{{ authStore.getUser.name }}</div>
                 </div>
                 <img class="user__avatar" src="@/assets/icons/avatar.jpg" alt="Avatar użytkownika">
             </div>
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-    import { reactive } from 'vue';
+    import { watchEffect } from 'vue';
     import { useDataStore } from '@/stores/DataStore';
     import { useAuthStore } from '@/stores/AuthStore';
 
@@ -35,9 +35,9 @@
         else dataStore.hideSidebar();
     }
 
-    const user = reactive({
-        login: 'Zilak',
-        name: 'Mieszalnia farb'
+    watchEffect(() => {
+        if (dataStore.isScrollDisabled) document.querySelector('body').classList.add('disable-scroll')
+        else document.querySelector('body').classList.remove('disable-scroll')
     });
 </script>
 
@@ -46,7 +46,7 @@
 .header {
         position: fixed;
         width: 100%;
-        z-index: 9999;
+        z-index: $--z-index-header;
 
         display: flex;
         justify-content: flex-start;

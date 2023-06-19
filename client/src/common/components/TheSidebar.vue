@@ -44,8 +44,8 @@
                         alt="Avatar użytkownika"
                     />
                     <div class="nav__details">
-                        <div class="nav__name">{{ user.login }}</div>
-                        <div class="nav__company">{{ user.name }}</div>
+                        <div class="nav__name">{{ authStore.getUser.login }}</div>
+                        <div class="nav__company">{{ authStore.getUser.name }}</div>
                     </div>
                     <div class="nav__options">
                         <router-link
@@ -68,23 +68,17 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useRoute } from 'vue-router'
-import { useDataStore } from '@/stores/DataStore'
-import { useAuthStore } from '@/stores/AuthStore'
+    import { useRoute } from 'vue-router'
+    import { useDataStore } from '@/stores/DataStore'
+    import { useAuthStore } from '@/stores/AuthStore'
 
-const dataStore = useDataStore()
-const authStore = useAuthStore()
-const route = useRoute()
+    const dataStore = useDataStore();
+    const authStore = useAuthStore();
+    const route = useRoute();
 
-function handleAction() {
-    if (!dataStore.isSidebarHidden) dataStore.hideSidebar()
-}
-
-const user = reactive({
-    login: 'Zilak',
-    name: 'Mieszalnia farb'
-})
+    const handleAction = () => {
+        if (!dataStore.isSidebarHidden) dataStore.hideSidebar();
+    };
 </script>
 
 <style lang="scss" scoped>

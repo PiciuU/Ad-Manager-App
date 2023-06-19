@@ -50,8 +50,14 @@ class UserRequest extends FormRequest
             return $this->login();
         } elseif ($methodName === 'register') {
             return $this->register();
-        } elseif ($methodName === 'updateName') {
-            return $this->updateName();
+        } elseif ($methodName === 'recover') {
+            return $this->recover();
+        } elseif ($methodName === 'resetPassword') {
+            return $this->reset();
+        } elseif ($methodName === 'updateData') {
+            return $this->updateData();
+        } elseif ($methodName === 'updateMail') {
+            return $this->updateMail();
         } elseif ($methodName === 'updatePassword') {
             return $this->updatePassword();
         }
@@ -91,6 +97,29 @@ class UserRequest extends FormRequest
     }
 
     /**
+     * Get the validation rules for recover.
+     *
+     * @return array
+     */
+    protected function recover() : array {
+        return [
+            'email'=> ['required', 'email']
+        ];
+    }
+
+    /**
+     * Get the validation rules for reset.
+     *
+     * @return array
+     */
+    protected function reset() : array {
+        return [
+            'hash'=> ['required'],
+            'password' => ['required', 'confirmed'],
+        ];
+    }
+
+    /**
      * Get the validation rules for updating user information.
      *
      * @return array
@@ -107,14 +136,32 @@ class UserRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules for updating the user's name.
+     * Get the validation rules for updating the user's data.
      *
      * @return array
      */
-    protected function updateName(): array
+    protected function updateData(): array
     {
         return [
-            'name' => ['sometimes', 'required'],
+            'representative' => ['sometimes', 'string', 'max:255'],
+            'representative_phone' => ['sometimes', 'string', 'max:32', 'not_regex:/[a-z]/i'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'address' => ['sometimes', 'string', 'max:255'],
+            'postal_code' => ['sometimes', 'string', 'max:255'],
+            'nip' => ['sometimes', 'string', 'max:10', 'not_regex:/[a-z]/i'],
+            'company_email' => ['sometimes', 'nullable', 'string', 'email', 'max:255'],
+            'company_phone' => ['sometimes', 'nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
+        ];
+    }
+
+    /**
+     * Get the validation rules for updating the user's mail.
+     *
+     * @return array
+     */
+    protected function updateMail() : array {
+        return [
+            'email' => ['sometimes', 'required', 'email', 'unique:users'],
         ];
     }
 
@@ -143,6 +190,30 @@ class UserRequest extends FormRequest
         } else if ($this->filled('userRoleId')) {
             $this->merge([
                 'user_role_id' => $this->userRoleId
+            ]);
+        }
+
+        if ($this->filled('representativePhone')) {
+            $this->merge([
+                'representative_phone' => $this->representativePhone
+            ]);
+        }
+
+        if ($this->filled('postalCode')) {
+            $this->merge([
+                'postal_code' => $this->postalCode
+            ]);
+        }
+
+        if ($this->filled('companyEmail')) {
+            $this->merge([
+                'company_email' => $this->companyEmail
+            ]);
+        }
+
+        if ($this->filled('companyPhone')) {
+            $this->merge([
+                'company_phone' => $this->companyPhone
             ]);
         }
 
