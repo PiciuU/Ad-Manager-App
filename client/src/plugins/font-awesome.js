@@ -22,9 +22,11 @@ import { faChartLine } from '@fortawesome/free-solid-svg-icons/faChartLine'
 import { faChartArea } from '@fortawesome/free-solid-svg-icons/faChartArea'
 import { faEye } from '@fortawesome/free-solid-svg-icons/faEye'
 import { faMouse } from '@fortawesome/free-solid-svg-icons/faMouse'
+import { faCog } from '@fortawesome/free-solid-svg-icons/faCog'
 
 library.add(
     faChartLine,
+    faCog,
     faChartArea,
     faMouse,
     faEye,

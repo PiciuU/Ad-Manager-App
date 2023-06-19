@@ -1,4 +1,5 @@
 <!-- eslint-disable vue/multi-word-component-names -->
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <el-main>
         <el-row class="cards__container" :gutter="32">
@@ -105,6 +106,7 @@ import { inject, reactive, onMounted, onActivated, onDeactivated } from 'vue'
 import ApiService from '@/services/api.service'
 
 export default {
+    // eslint-disable-next-line vue/multi-word-component-names
     name: 'Dashboard',
     setup() {
         const logger = inject('logger')
@@ -194,7 +196,7 @@ export default {
     }
 }
 
-@media screen and (max-width: var(--breakpoint-small-devices)) {
+@media screen and (max-width: $--breakpoint-small-devices) {
     .card {
         &__body {
             grid-template-columns: auto;
@@ -206,7 +208,7 @@ export default {
     }
 }
 
-@media screen and (max-width: var(--breakpoint-mobile)) {
+@media screen and (max-width: $--breakpoint-mobile) {
     .cards__container {
         padding: 0px;
     }
@@ -219,6 +221,5 @@ export default {
 // }
 .thecharts {
     position: relative;
-    top: -200px;
 }
 </style>
