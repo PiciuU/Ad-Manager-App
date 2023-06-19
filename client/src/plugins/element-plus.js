@@ -1,6 +1,6 @@
-import { ElButton, ElColorPicker, ElSkeleton } from 'element-plus'
+import { ElButton, ElColorPicker, ElSkeleton, ElDatePicker } from 'element-plus'
 
-const components = [ElButton, ElColorPicker, ElSkeleton]
+const components = [ElButton, ElColorPicker, ElSkeleton, ElDatePicker]
 
 export const elementPlus = {
     install: (app) => {

@@ -15,18 +15,18 @@
 </template>
 
 <script setup>
-    import { watchEffect } from 'vue';
-    import 'chartkick/chart.js'
-    import TheHeader from '@/common/components/TheHeader.vue'
-    import TheSidebar from '@/common/components/TheSidebar.vue'
-    import { useDataStore } from '@/stores/DataStore';
+import { watchEffect } from 'vue'
+import 'chartkick/chart.js'
+import TheHeader from '@/common/components/TheHeader.vue'
+import TheSidebar from '@/common/components/TheSidebar.vue'
+import { useDataStore } from '@/stores/DataStore'
 
-    const dataStore = useDataStore();
+const dataStore = useDataStore()
 
-    watchEffect(() => {
-        if (dataStore.isScrollDisabled) document.querySelector('body').classList.add('disable-scroll');
-		else document.querySelector('body').classList.remove('disable-scroll');
-    });
+watchEffect(() => {
+    if (dataStore.isScrollDisabled) document.querySelector('body').classList.add('disable-scroll')
+    else document.querySelector('body').classList.remove('disable-scroll')
+})
 </script>
 
 <style lang="scss" scoped>
@@ -64,7 +64,7 @@
     position: relative;
     min-height: 100%;
     border-radius: 10px;
-    max-height: 40vh;
+    max-height: 50vh;
     background-color: rgba(0, 0, 0, 0.5);
 
     &:hover {
@@ -77,11 +77,11 @@
     }
 
     .card__title {
-        font-size: 16px;
+        font-size: 1.6rem;
         color: $--color-text;
         text-align: left;
         font-weight: bold;
-        margin-bottom: 20vh;
+        margin-bottom: 20px;
         display: flex;
         justify-content: center;
 
@@ -122,7 +122,7 @@
         color: $--color-text;
         top: 20px;
         right: 20px;
-        font-size: 10px;
+        font-size: 1rem;
         width: 15px;
         height: 15px;
         border-radius: 50%;
@@ -142,7 +142,7 @@
     }
     .card__data {
         &-ctr {
-            font-size: 22px;
+            font-size: 2.2rem;
             font-weight: bold;
             letter-spacing: 1px;
             color: $--color-primary;
@@ -166,7 +166,7 @@
 
         &-description {
             margin-top: 2px;
-            font-size: 14px;
+            font-size: 1.4rem;
             color: $--color-text-muted-3;
             cursor: default;
         }
