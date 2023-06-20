@@ -42,8 +42,8 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
         Route::get('ads/{id}', [AdController::class, 'show']);
         Route::get('ads', [AdController::class, 'index']);
         Route::post('ads', [AdController::class, 'store']);
-        Route::put('ads/{id}', [AdController::class, 'update']);
-        Route::get('ads/{id}/delete', [AdController::class, 'destroy']);
+        Route::put('ads/{id}', [AdController::class, 'update']); //lkjlkjlkjlkjlkjlkj
+        Route::delete('ads/{id}', [AdController::class, 'destroy']);
 
         Route::get('stats', [AdStatsController::class, 'index']);
         Route::get('stats/{ad_id}/{stat_id?}', [AdStatsController::class, 'show']);
@@ -51,9 +51,10 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
         Route::get('stats/{stat_id}/delete', [AdStatsController::class, 'delete']); //admin only
 
         Route::get('invoice', [InvoiceController::class, 'index']);
+        Route::post('invoice', [InvoiceController::class, 'store']);
         Route::get('invoice/{id}', [InvoiceController::class, 'show']);
-        Route::post('invoice/{id}', [InvoiceController::class, 'update']); //admin only
-        Route::post('invoice/{id}/delete', [InvoiceController::class, 'delete']); //admin only
+        Route::put('invoice/{id}', [InvoiceController::class, 'update']); //admin only
+        Route::delete('invoice/{id}', [InvoiceController::class, 'destroy']); //admin only
 
         Route::get('notification', [NotificationController::class, 'index']);
         Route::post('notification', [NotificationController::class, 'store']);

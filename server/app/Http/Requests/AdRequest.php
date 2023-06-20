@@ -38,7 +38,7 @@ class AdRequest extends FormRequest
         return [
             'name' => ['required', 'string'],
             'user_id' => ['required', 'integer'],
-            'status' => ['required', Rule::in(['unpdaid', 'paid', 'expired', 'inactive'])],
+            'status' => ['sometimes', 'required', Rule::in(['unpdaid', 'paid', 'expired', 'inactive'])],
             'ad_start_date' => ['required', 'date'],
             'ad_end_date' => ['required', 'date'],
             'file_name' => ['required', 'string'],
@@ -64,9 +64,8 @@ class AdRequest extends FormRequest
                 'file_type' => ['sometimes', 'required', Rule::in(['img', 'video'])],
                 'url' => ['sometimes', 'required', 'string']
             ]);
-            print_r($rules);
-            return $rules;
         }
+        return $rules;
     }
 
     /**
@@ -82,7 +81,7 @@ class AdRequest extends FormRequest
             $this->merge([
                 'user_id' => $this->userId,
             ]);
-        } else if ($this->hasAdminPrivileges()) {
+        } else if (($this->hasAdminPrivileges()) && ($this->filled('userId'))) {
             $this->merge([
                 'user_id' => $this->userId,
             ]);

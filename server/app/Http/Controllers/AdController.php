@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\AdModel;
 use App\Models\Ad;
 use App\Http\Resources\AdCollection;
 use App\Http\Resources\AdResource;
 use App\Http\Requests\AdRequest;
 use App\Http\Controllers\InvoiceController;
-use Illuminate\Support\Facades\Auth;
+
 
 class AdController extends Controller
 {
@@ -33,19 +31,31 @@ class AdController extends Controller
     /**
      * Store a newly created ad in storage.
      *
-     * @param  \App\Http\Requests\ExerciseRequest  $request
+     * @param  \App\Http\Requests\AdRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
     public function store(AdRequest $request)
     {
+
         $ad = new AdResource(Ad::create($request->validated()));
+        $invoiceController = new InvoiceController();
+
+        $invoice = [
+            'ad_id' => $ad->id,
+            'adEndDate' => $ad->ad_end_date,
+            'adStartDate' => $ad->ad_start_date,
+            'date' => date('Y-m-d H:i:s'),
+            'status' => 'unpaid'
+
+        ];
+        $newInvoice = $invoiceController->storeFromAd($invoice);
+
 
         if (!$ad) {
             return $this->errorResponse('An error occurred during creating the Ad, please try again later', 500);
         } else {
-            // $invoiceController = new InvoiceController();
-            // $invoiceController->createFromAd()
-            return $this->successResponse('Ad has been created successfully', $ad);
+            print_r($ad->toArray);
+            return $this->successResponse('Ad has been created successfully', [$ad, $newInvoice]);
         }
     }
 
@@ -81,15 +91,13 @@ class AdController extends Controller
     public function update($id, AdRequest $request)
     {
         $user = auth()->user();
-        $ad = Ad::find($id);
-        $user_id = $user->id;
 
         if ($user->tokenCan('admin')) $ad = Ad::find($id);
-        else $ad = new AdCollection(Ad::where('user_id', $user_id));
+        else $ad = $user->ads()->find($id);
 
         if (!$ad) return $this->errorResponse('Ad not found', 404);
 
-        if (!$ad->update($request->validated())) return $this->errorResponse('An error occurred while updating the Ad, please try again later', 500);
+        if (!$ad->update($request->validate())) return $this->errorResponse('An error occurred while updating the Ad, please try again later', 500);
 
         return $this->successResponse('Ad has been successfully updated', new AdResource($ad));
     }
@@ -98,19 +106,17 @@ class AdController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Traits\ResponseTrait
      */
     public function destroy($id)
     {
         $user = auth()->user();
         $ad = Ad::find($id);
-
-        if ($ad->user_id === $user->id && !$user->tokenCan('admin')) {
+        if ($ad->user_id == $user->id || $user->tokenCan('admin')) {
+            if (!$ad) return $this->errorResponse('Ad not found!', 404);
             if (!$ad->delete()) return $this->errorResponse('An error occurred while deleting the Ad, please try again later', 500);
             return $this->successResponse('Ad has been successfully deleted');
         }
         return $this->errorResponse('Ad not available', 403);
-
-        if (!$ad) return $this->errorResponse('Ad not found!', 404);
     }
 }

@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ad;
 use App\Models\Invoice;
-use Illuminate\Http\Request;
+
 use App\Http\Resources\InvoiceResource;
+use App\Http\Resources\InvoiceCollection;
+use App\Http\Requests\InvoiceRequest;
 
 class InvoiceController extends Controller
 {
 
-    function generateInvoiceNumber()
+    protected function generateInvoiceNumber()
     {
         $lastInvoice = Invoice::orderBy('id', 'desc')->first();
 
         if ($lastInvoice) {
-            $lastNumber = substr($lastInvoice->number, 4); // Pobierz ostatnią część numeru faktury
+            $lastNumber = substr($lastInvoice->number, 8); // Pobierz ostatnią część numeru faktury
             $nextNumber = str_pad((int)$lastNumber + 1, 8, '0', STR_PAD_LEFT); // Inkrementuj liczbę i dodaj wiodące zera
         } else {
             $nextNumber = '00000001'; // Jeśli nie ma poprzednich faktur, zacznij od 00000001
@@ -24,15 +25,25 @@ class InvoiceController extends Controller
         $invoiceNumber = 'INV-' . $nextNumber;
         return $invoiceNumber;
     }
+    protected function generatePrice($adStartDate, $adEndDate)
+    {
+        $activeDays = strtotime($adEndDate) - strtotime($adStartDate);
+        return round(($activeDays / (60 * 60 * 24)) * 5.99, 2);
+    }
+
     /**
      * Zwraca wszystkie faktury użytkownika.
      */
     public function index()
     {
-        $userId = auth()->user()->id;
-        $invoices = Invoice::whereHas('ad', function ($query) use ($userId) {
+        $user = auth()->user();
+        $userId = $user->id;
+        $userId = strval($userId);
+
+        if ($user->tokenCan('admin')) $invoices = new InvoiceCollection(Invoice::paginate());
+        else  $invoices = Invoice::whereHas('ad', function ($query) use ($userId) {
             $query->where('user_id', $userId);
-        })->get();
+        })->paginate();
 
         return response()->json($invoices);
     }
@@ -40,39 +51,32 @@ class InvoiceController extends Controller
     /**
      * Tworzy nową fakturę dla użytkownika.
      */
-    public function store(Request $request)
+    public function store(InvoiceRequest $request)
     {
-        // // Walidacja danych wejściowych
-        // $this->validate($request, [
-        //     'ad_id' => 'required',
-        //     'price' => 'required',
-        //     'date' => 'required|date',
-        //     'status' => 'required|in:paid,unpaid',
-        // ]);
-
-        // $ad = Ad::findOrFail($request->input('ad_id'));
-
-        // // Sprawdzenie uprawnień użytkownika, tylko admin może dodawać nowe faktury 'ręcznie'
-        // $invoiceController = new InvoiceController();
-
-        // $currentDate = new \DateTime();
-        // if (auth()->user()->isAdmin()) {
-        //     $invoice = new Invoice();
-        //     $invoice->ad_id = $ad->id;
-        //     $invoice->number = $invoiceController->generateInvoiceNumber();
-        //     $invoice->price = $request->input('price');
-        //     $invoice->date = $currentDate->format('Y-m-d H:i:s');
-        //     $invoice->status = $request->input('status');
-        //     $invoice->save();
-
-        //     return response()->json($invoice, 201);
-        // }
-
-        // return response()->json(['message' => 'Unauthorized'], 401);
-        // $invoice = new InvoiceResource(Invoice::create($request));
-        // return $this->successResponse('Ad has been created successfully', $invoice);
+        $invoice = new InvoiceResource(Invoice::create($request->validated()));
+        if (!$invoice) {
+            return $this->errorResponse('An error occurred during creating the Ad, please try again later', 500);
+        } else {
+            // $invoiceController = new InvoiceController();
+            // $invoiceController->createFromAd()
+            return $this->successResponse('Invoice has been created successfully', $invoice);
+        }
     }
 
+    public function storeFromAd($invoice)
+    {
+
+        print_r($invoice['adStartDate']);
+        $newInvoice = new Invoice();
+        $newInvoice = [
+            'ad_id' => $invoice['ad_id'],
+            'number' => InvoiceController::generateInvoiceNumber(),
+            'price' => InvoiceController::generatePrice($invoice['adStartDate'], $invoice['adEndDate']),
+            'date' => $invoice['date'],
+            'status' => $invoice['status']
+        ];
+        return new InvoiceResource(Invoice::create($newInvoice));
+    }
 
     /**
      * Zwraca fakturę o podanym ID, ale tylko, jeśli użytkownik jest administratorem.
@@ -91,46 +95,43 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Edytuje fakturę o podanym ID, ale tylko, jeśli użytkownik jest administratorem.
-     * Jeśli nie jest administratorem, może edytować fakturę o danym ID, tylko jeśli jest do niego przypisana.
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update($id, InvoiceRequest $request)
     {
-        $invoice = Invoice::findOrFail($id);
+        $user = auth()->user();
+        if ($user->tokenCan('admin')) $invoice = Invoice::find($id);
+        // else return $this->errorResponse('Unauthorized', 500);
 
-        // Sprawdzenie uprawnień użytkownika
-        if (auth()->user()->isAdmin()) {
-            $invoice->ad_id = $request->has('ad_id') ? $request->input('ad_id') : $invoice->ad_id;
-            $invoice->number = $request->has('number') ? $request->input('number') : $invoice->number;
-            $invoice->price = $request->has('price') ? $request->input('price') : $invoice->price;
-            $invoice->date = $request->has('date') ? $request->input('date') : $invoice->date;
-            $invoice->status = $request->has('status') ? $request->input('status') : $invoice->status;
+        if (!$invoice) return $this->errorResponse('Invoice not found', 404);
 
-            $invoice->save();
+        if (!($invoice->update($request->validate([])))) return $this->errorResponse('An error occurred while updating the Invoice, please try again later', 500);
 
-            return response()->json($invoice);
-        } elseif ($invoice->ad->user_id === auth()->user()->id) {
-            return response()->json(['message' => 'Unauthorized']);
-        }
 
-        return response()->json(['message' => 'Unauthorized'], 401);
+
+        return $this->successResponse('Invoice has been successfully updated', new InvoiceResource($invoice));
     }
 
 
     /**
-     * Usuwa fakturę o podanym ID, ale tylko, jeśli użytkownik jest administratorem.
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \App\Http\Traits\ResponseTrait
      */
-    public function delete($id)
+    public function destroy($id)
     {
-        $invoice = Invoice::findOrFail($id);
-
-        // Sprawdzenie uprawnień użytkownika
-        if (auth()->user()->isAdmin()) {
-            $invoice->delete();
-
-            return response()->json(['message' => 'Invoice deleted']);
+        $user = auth()->user();
+        $invoice = Invoice::find($id);
+        if ($user->tokenCan('admin')) {
+            if (!$invoice) return $this->errorResponse('Invoice not found!', 404);
+            if (!$invoice->delete()) return $this->errorResponse('An error occurred while deleting the Invoice, please try again later', 500);
+            return $this->successResponse('Invoice has been successfully deleted');
         }
-
-        return response()->json(['message' => 'Unauthorized'], 401);
+        return $this->errorResponse('Invoice not available', 403);
     }
 }

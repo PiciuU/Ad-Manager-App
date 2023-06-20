@@ -17,9 +17,9 @@ class AdResource extends JsonResource
     public function toArray($request)
     {
         // Include additional fields if the user is an administrator
-        $additionalFields = [];
+        // $additionalFields = [];
         if ($request->user()->tokenCan('admin')) {
-            return array_merge([
+            return [
                 'name' => $this->name,
                 'id' => $this->id,
                 'adStartDate' => $this->ad_start_date,
@@ -28,9 +28,9 @@ class AdResource extends JsonResource
                 'fileType' => $this->file_type,
                 'url' => $this->url,
                 'status' => 'unpaid',
-            ], $additionalFields);
-        } elseif (($this->user_id == Auth::user()->id)) {
-            return array_merge([
+            ];
+        } else {
+            return [
                 'name' => $this->name,
                 'adStartDate' => $this->ad_start_date,
                 'adEndDate' => $this->ad_end_date,
@@ -38,7 +38,7 @@ class AdResource extends JsonResource
                 'fileType' => $this->file_type,
                 'url' => $this->url,
                 'status' => 'unpaid',
-            ], $additionalFields);
+            ];
         }
         response()->json(['message' => 'Unauthorized'], 401);
     }

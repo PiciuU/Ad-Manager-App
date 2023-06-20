@@ -3,17 +3,28 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Ad;
+
 
 class InvoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    protected function hasAdminPrivileges(): bool
+    {
+        return $this->user()->tokenCan('admin');
+    }
+    /**
+     * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
+
+
 
     /**
      * Get the validation rules that apply to the request.
@@ -24,18 +35,59 @@ class InvoiceRequest extends FormRequest
     {
         return $this->isMethod('POST') ? $this->store() : $this->update();
     }
-    
 
-    protected function store(): array{
-        return [
-            'ad_id' => ['sometimes', 'string'],
-            'number' => ['sometimes'],
-            'price' => ['required','double'],
-            'date' => ['required', 'date'],
-            'status' => ['sometimes', 'string']
-        ];
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    protected function store(): array
+    {
 
+        $rules = [];
+        if ($this->hasAdminPrivileges()) {
+            $rules = array_merge($rules, [
+                'ad_id' => ['required', 'string'],
+                'number' => ['required'],
+                'price' => ['required', 'numeric', 'regex:/^\d{0,6}\.\d{2}$/'],
+                'date' => ['required', 'date'],
+                'status' => ['required', 'string']
+            ]);
+
+            return $rules;
+        }
+
+        return $rules;
     }
 
-    protected
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    protected function update(): array
+    {
+        return [
+            'ad_id' => ['sometimes', 'string'],
+            'number' => ['sometimes', 'required'],
+            'price' => ['sometimes', 'required', 'numeric', 'regex:/^\d{0,6}\.\d{2}$/'],
+            'date' => ['sometimes', 'required', 'date'],
+            'status' => ['sometimes', 'required', 'string']
+        ];
+    }
+
+    protected function prepareForValidation()
+    {
+        if (($this->hasAdminPrivileges()) && ($this->filled('userId'))) {
+            $this->merge([
+                'user_id' => $this->userId,
+            ]);
+        }
+
+        if (($this->hasAdminPrivileges()) && ($this->filled('adId'))) {
+            $this->merge([
+                'ad_id' => $this->adId
+            ]);
+        }
+    }
 }
