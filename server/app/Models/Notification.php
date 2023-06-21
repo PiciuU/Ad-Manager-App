@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    use HasFactory;
+    // use HasFactory;
 
     protected $table = 'notifications';
     protected $dates = ['created_at', 'updated_at'];

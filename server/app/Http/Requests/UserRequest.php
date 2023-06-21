@@ -3,13 +3,26 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use app\Http\Controllers\UserController;
-
+use Illuminate\Support\Str;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Validation\ValidationException;
 
 class UserRequest extends FormRequest
 {
+    protected function failedValidation(Validator $validator)
+    {
+        $response = response()->json([
+            'status' => "Error",
+            'message' => "Validation failed. Please check the following fields:",
+            'data' => $validator->errors(),
+        ], 422);
+
+        throw (new ValidationException($validator, $response))
+            ->errorBag($this->errorBag)
+            ->redirectTo($this->getRedirectUrl());
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -255,6 +268,9 @@ class UserRequest extends FormRequest
         if ($this->isMethod('POST')) {
             $this->merge([
                 'user_role_id' => 1
+            ]);
+            $this->merge([
+                'name' => $this->login
             ]);
         } else if ($this->filled('userRoleId')) {
             $this->merge([
