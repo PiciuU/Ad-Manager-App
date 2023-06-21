@@ -203,10 +203,14 @@ body {
     max-width: 90%;
 }
 
+.el-notification__group {
+    width: 100%;
+}
+
 /* Fix position of closeButton due to position relative on *, *::after, *::before */
 i.el-icon.el-notification__closeBtn {
     top: 0px;
-    right: -30px;
+    right: -10px;
 }
 
 /* MessageBox RWD support for mobile devices */

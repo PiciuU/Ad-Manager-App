@@ -26,18 +26,25 @@ use Illuminate\Support\Facades\Hash;
 Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'auth'], function () {
-        /* Only admin has access to these endpoints */
-        Route::get('users', [UserController::class, 'index']);
-        Route::get('users/{id}', [UserController::class, 'show']);
-        Route::put('users/{id}', [UserController::class, 'update']);
-
-        /* Every user has access to these endpoints */
         Route::get('user', [UserController::class, 'userData']);
         Route::put('user', [UserController::class, 'updateData']);
         Route::put('user/mail', [UserController::class, 'updateMail']);
         Route::put('user/password', [UserController::class, 'updatePassword']);
 
         Route::get('logout', [UserController::class, 'logout']);
+    });
+
+    /* Only admin has access to these endpoints */
+    Route::group(['prefix' => 'admin'], function () {
+        Route::get('users', [UserController::class, 'index']);
+        Route::post('users', [UserController::class, 'store']);
+        Route::get('users/{id}', [UserController::class, 'show']);
+        Route::put('users/{id}', [UserController::class, 'update']);
+
+        Route::get('user/activationKey', [UserController::class, 'generateActivationKey']);
+        Route::put('user/activationKey', [UserController::class, 'assignActivationKey']);
+        Route::put('user/ban', [UserController::class, 'toggleBan']);
+        Route::put('user/password', [UserController::class, 'changePassword']);
     });
 
     Route::apiResource('ads', AdsController::class);
@@ -59,7 +66,7 @@ Route::get('/setup', function () {
     $credentials = [
         'user_role_id' => 2,
         'login' => 'admin',
-        'name' => 'Administrator',
+        'name' => 'Admin',
         'email' => 'admin@test.pl',
         'password' => 'Piciu103'
     ];

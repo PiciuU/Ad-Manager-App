@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Laravel\Sanctum\PersonalAccessToken;
 
 class User extends Authenticatable
 {
@@ -40,7 +41,9 @@ class User extends Authenticatable
         'representative_phone',
         'notes',
         'activated_at',
-        'user_role_id'
+        'user_role_id',
+        'is_banned',
+        'ban_reason',
     ];
 
     protected $hidden = [
@@ -51,14 +54,20 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->userRole->name === 'Administrator';
+        return $this->userRole->name === 'Admin';
     }
 
     public function hasAdminPrivileges()
     {
-        return $this->tokenCan('admin') && $this->userRole->name === 'Administrator';
+        return $this->tokenCan('admin') && $this->userRole->name === 'Admin';
     }
 
+    public function lastUsedToken()
+    {
+        return $this->hasMany(PersonalAccessToken::class, 'tokenable_id')
+            ->orderByDesc('last_used_at')
+            ->limit(1);
+    }
 
     public function userRole()
     {

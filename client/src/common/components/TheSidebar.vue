@@ -15,6 +15,7 @@
                 </div>
 
                 <el-menu
+                    :class="{'el-menu--disable-margin': authStore.isAdmin }"
                     :default-active="route.path"
                     router
                     :collapse="dataStore.isSidebarCollapsed"
@@ -36,6 +37,38 @@
                         <span>Dane firmowe</span>
                     </el-menu-item>
                 </el-menu>
+
+                <div class="nav__special" v-if="authStore.isAdmin">
+                    <div class="nav__namespace">
+                        <transition name="el-fade-in" mode="out-in">
+                            <span v-if="!dataStore.isSidebarCollapsed">Administracja</span>
+                            <font-awesome-icon v-else icon="user-shield" />
+                        </transition>
+                    </div>
+
+                    <el-menu
+                        :default-active="route.path"
+                        router
+                        :collapse="dataStore.isSidebarCollapsed"
+                        :collapse-transition="false"
+                        @select="handleAction"
+                    >
+                        <el-menu-item index="/panel/admin/uzytkownicy">
+                            <font-awesome-icon class="nav__icon" icon="users" />
+                            <span>Użykownicy</span>
+                        </el-menu-item>
+
+                        <el-menu-item index="/panel/admin/reklamy">
+                            <font-awesome-icon class="nav__icon" icon="rectangle-ad" />
+                            <span>Reklamy</span>
+                        </el-menu-item>
+
+                        <el-menu-item index="/panel/admin/dziennik">
+                            <font-awesome-icon class="nav__icon" icon="book" />
+                            <span>Dziennik zdarzeń</span>
+                        </el-menu-item>
+                    </el-menu>
+                </div>
 
                 <div class="nav__user">
                     <img
@@ -118,6 +151,10 @@
     border-right: none;
     margin-bottom: 20px;
 
+    &--disable-margin {
+        margin-bottom: 0px;
+    }
+
     &--collapse &-item:after {
         width: 100%;
     }
@@ -161,6 +198,12 @@
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
+        }
+    }
+
+    &__special {
+        .nav__namespace, .nav__namespace svg {
+            color: $--color-primary;
         }
     }
 
