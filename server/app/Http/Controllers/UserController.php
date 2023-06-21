@@ -29,11 +29,6 @@ class UserController extends Controller
         return auth()->user()->hasAdminPrivileges();
     }
 
-    // public function hasAccess(UserRequest $request)
-    // {
-    //     return $request->hasAdminPrivileges();
-    // }
-
     /**
      * ADMIN SECTION
      * Methods accessible only to administrators.
@@ -105,7 +100,6 @@ class UserController extends Controller
     public function register(UserRequest $request)
     {
         $validatedData = $request->validated();
-        print_r($validatedData);
         $validatedData['password'] = Hash::make($validatedData['password']);
 
         $user = new UserResource(User::create($validatedData));
@@ -134,7 +128,7 @@ class UserController extends Controller
             return $this->successResponse('Login successful', ['user' => $user, 'token' => $authToken->plainTextToken]);
         }
 
-        return $this->errorResponse('Invalid login credentials', 401);
+        return $this->errorResponse('Invalid username or password.', 401);
     }
 
     /**
@@ -156,6 +150,7 @@ class UserController extends Controller
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
+  
     public function recover(UserRequest $request) {
         $user = User::where('email', $request->validated()['email'])->first();
 
@@ -194,8 +189,8 @@ class UserController extends Controller
 
         return $this->successResponse('Valid password reset token.');
     }
-
-     /**
+  
+    /**
      * Update user password with password recovery.
      *
      * @param  \App\Http\Requests\UserRequest  $request
@@ -284,7 +279,9 @@ class UserController extends Controller
             return $this->errorResponse('New password must be different from the current password', 400);
         }
 
-        if (!$user->update(['password' => Hash::make($request->validated()['password'])])) return $this->errorResponse('An error occurred while updating the password, try again later', 500);
+        if (!$user->update([
+            'password' => Hash::make($request->validated()['password'])
+        ])) return $this->errorResponse('An error occurred while updating the password, try again later', 500);
 
 
         // Implement sending an email about the password change

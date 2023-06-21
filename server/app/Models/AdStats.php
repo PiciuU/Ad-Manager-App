@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AdStats extends Model
 {
-    use HasFactory;
+    // use HasFactory;
 
     protected $table = 'ads_stats';
     protected $dates = [
