@@ -111,8 +111,6 @@ class InvoiceController extends Controller
 
         if (!($invoice->update($request->validate([])))) return $this->errorResponse('An error occurred while updating the Invoice, please try again later', 500);
 
-
-
         return $this->successResponse('Invoice has been successfully updated', new InvoiceResource($invoice));
     }
 

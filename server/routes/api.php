@@ -38,13 +38,13 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
         Route::get('ads/{id}', [AdController::class, 'show']);
         Route::get('ads', [AdController::class, 'index']);
         Route::post('ads', [AdController::class, 'store']);
-        Route::put('ads/{id}', [AdController::class, 'update']); //lkjlkjlkjlkjlkjlkj
+        Route::put('ads/{id}', [AdController::class, 'update']);
         Route::delete('ads/{id}', [AdController::class, 'destroy']);
 
         Route::get('stats', [AdStatsController::class, 'index']);
         Route::get('stats/{ad_id}/{stat_id?}', [AdStatsController::class, 'show']);
-        Route::post('stats/{stat_id}', [AdStatsController::class, 'update']); //admin only
-        Route::get('stats/{stat_id}/delete', [AdStatsController::class, 'delete']); //admin only
+        Route::put('stats/{stat_id}', [AdStatsController::class, 'update']); //admin only
+        Route::delete('stats/{stat_id}', [AdStatsController::class, 'destroy']); //admin only
 
         Route::get('invoice', [InvoiceController::class, 'index']);
         Route::post('invoice', [InvoiceController::class, 'store']);
@@ -56,14 +56,14 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
         Route::post('notification', [NotificationController::class, 'store']);
         Route::get('notification/{id}', [NotificationController::class, 'show']);
         Route::get('notification/{id}/seen', [NotificationController::class, 'isSeen']);
-        Route::post('notification/{id}', [NotificationController::class, 'update']);
-        Route::get('notification/{id}/delete', [NotificationController::class, 'delete']);
+        Route::put('notification/{id}', [NotificationController::class, 'update']);
+        Route::delete('notification/{id}', [NotificationController::class, 'destroy']);
 
 
 
         Route::get('logout', [UserController::class, 'logout']);
     });
-  
+
     /* Only admin has access to these endpoints */
     Route::group(['prefix' => 'admin'], function () {
         Route::get('users', [UserController::class, 'index']);

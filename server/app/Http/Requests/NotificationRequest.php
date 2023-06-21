@@ -8,10 +8,12 @@ class NotificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
-    public function authorize(): bool
+    protected function hasAdminPrivileges(): bool
     {
-        return false;
+        return $this->user()->tokenCan('admin');
     }
 
     /**
@@ -21,8 +23,47 @@ class NotificationRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
-        ];
+        return $this->isMethod('POST') ? $this->store() : $this->update();
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    protected function store()
+    {
+        if ($this->hasAdminPrivileges()) {
+            return [
+                'user_id' => ['required', 'integer'],
+                'title' => ['required', 'string'],
+                'description' => ['required', 'string'],
+                'date' => ['required', 'date'],
+            ];
+        }
+    }
+
+    protected function update()
+    {
+        if ($this->hasAdminPrivileges()) {
+            return [
+                'user_id' => ['sometimes', 'required', 'integer'],
+                'title' => ['sometimes', 'required', 'string'],
+                'description' => ['sometimes', 'required', 'string'],
+                'date' => ['sometimes', 'required', 'date'],
+            ];
+        }
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        if (($this->hasAdminPrivileges()) && ($this->filled('userId'))) {
+            $this->merge([
+                'user_id' => $this->userId,
+            ]);
+        }
     }
 }
