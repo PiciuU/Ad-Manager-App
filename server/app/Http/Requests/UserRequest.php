@@ -75,8 +75,12 @@ class UserRequest extends FormRequest
             return $this->updatePassword();
         }
 
-        if ($this->hasAdminPrivileges() && $methodName === 'update') {
-            return $this->update();
+        if ($this->hasAdminPrivileges()) {
+            if ($methodName === 'update') return $this->update();
+            elseif ($methodName === 'store') return $this->store();
+            elseif ($methodName === 'assignActivationKey') return $this->assignActivationKey();
+            elseif ($methodName === 'toggleBan') return $this->toggleBan();
+            elseif ($methodName === 'changePassword') return $this->changePassword();
         }
     }
 
@@ -133,22 +137,6 @@ class UserRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules for updating user information.
-     *
-     * @return array
-     */
-    protected function update(): array
-    {
-        return [
-            'name' => ['sometimes', 'required'],
-            'email' => ['sometimes', 'required', 'email', 'unique:users'],
-            'login' => ['sometimes', 'required', 'unique:users'],
-            'user_role_id' => ['sometimes', 'required', 'integer'],
-            'password' => ['sometimes', 'required']
-        ];
-    }
-
-    /**
      * Get the validation rules for updating the user's data.
      *
      * @return array
@@ -158,7 +146,7 @@ class UserRequest extends FormRequest
         return [
             'representative' => ['sometimes', 'string', 'max:255'],
             'representative_phone' => ['sometimes', 'string', 'max:32', 'not_regex:/[a-z]/i'],
-            'name' => ['sometimes', 'string', 'max:255'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'address' => ['sometimes', 'string', 'max:255'],
             'postal_code' => ['sometimes', 'string', 'max:255'],
             'nip' => ['sometimes', 'string', 'max:10', 'not_regex:/[a-z]/i'],
@@ -190,6 +178,87 @@ class UserRequest extends FormRequest
             'password' => ['required', 'confirmed'],
         ];
     }
+
+
+    /* ADMIN ONLY */
+
+    /**
+     * Get the validation rules for creating user account.
+     *
+     * @return array
+     */
+    protected function store(): array
+    {
+        return [
+            'login' => ['required', 'unique:users'],
+            'name' => ['required'],
+            'email' => ['required', 'email', 'unique:users'],
+            'password' => ['required', 'string', 'min:6', 'max:255'],
+            'user_role_id' => ['required', Rule::in([1])],
+        ];
+    }
+
+    /**
+     * Get the validation rules for updating user information.
+     *
+     * @return array
+     */
+    protected function update(): array
+    {
+        return [
+            'login' => ['sometimes', 'required', 'string', 'max:32', Rule::unique('users')->ignore($this->id, 'id')],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($this->id, 'id')],
+            'representative' => ['sometimes','nullable', 'string', 'max:255'],
+            'representative_phone' => ['sometimes','nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
+            'address' => ['sometimes','nullable', 'string', 'max:255'],
+            'postal_code' => ['sometimes','nullable', 'string', 'max:255'],
+            'country' => ['sometimes','nullable', 'string', 'max:255'],
+            'nip' => ['sometimes','nullable', 'string', 'max:10', 'not_regex:/[a-z]/i'],
+            'company_email' => ['sometimes', 'nullable', 'string', 'email', 'max:255'],
+            'company_phone' => ['sometimes', 'nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
+        ];
+    }
+
+    /**
+     * Get the validation rules for assigning activation key to user.
+     *
+     * @return array
+     */
+    protected function assignActivationKey(): array
+    {
+        return [
+            'id' => ['required', 'integer'],
+            'activation_key' => ['required', 'string', 'max:32', 'min:32']
+        ];
+    }
+
+    /**
+     * Get the validation rules for banning or unbanning user.
+     *
+     * @return array
+     */
+    protected function toggleBan(): array
+    {
+        return [
+            'id' => ['required', 'integer'],
+            'ban_reason' => ['sometimes', 'required', 'string', 'max:255']
+        ];
+    }
+
+    /**
+     * Get the validation rules for updating the user's password.
+     *
+     * @return array
+     */
+    protected function changePassword(): array
+    {
+        return [
+            'id' => ['required', 'integer'],
+            'password' => ['required', 'string', 'min:6', 'max:255'],
+        ];
+    }
+
 
     /**
      * Prepare the data for validation.
@@ -242,6 +311,18 @@ class UserRequest extends FormRequest
         if ($this->filled('passwordCurrent')) {
             $this->merge([
                 'password_current' => $this->passwordCurrent
+            ]);
+        }
+
+        if ($this->filled('activationKey')) {
+            $this->merge([
+                'activation_key' => $this->activationKey
+            ]);
+        }
+
+        if ($this->filled('banReason')) {
+            $this->merge([
+                'ban_reason' => $this->banReason
             ]);
         }
     }

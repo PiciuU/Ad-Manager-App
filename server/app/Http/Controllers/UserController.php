@@ -57,8 +57,32 @@ class UserController extends Controller
     {
         if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
 
-        $user = new UserResource(User::find($id));
-        return $this->successResponse('User data found', $user);
+        $user = User::find($id);
+
+        if (!$user) return $this->errorResponse('User not found', 404);
+
+        return $this->successResponse('User data found', new UserResource($user));
+    }
+
+    /**
+     * Store a newly created user account in storage.
+     *
+     * @param int $id
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function store(UserRequest $request)
+    {
+        if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
+
+        $validatedData = $request->validated();
+        $validatedData['password'] = Hash::make($validatedData['password']);
+
+        $user = User::create($validatedData);
+
+        if (!$user) return $this->errorResponse('An error occurred while creating the user, try again later', 500);
+
+        return $this->successResponse('User has been successfully created', new UserResource($user));
     }
 
     /**
@@ -74,17 +98,94 @@ class UserController extends Controller
 
         $user = new UserResource(User::find($id));
 
-        $validatedData = $request->validated();
-
-        if (Arr::has($validatedData, 'password')) {
-            $validatedData['password'] = Hash::make($validatedData['password']);
-        }
-
         if (!$user->update($request->validated())) return $this->errorResponse('An error occurred while updating the user data, try again later', 500);
 
         return $this->successResponse('User data has been successfully updated', new UserResource($user));
     }
 
+    /**
+     * Generates a 32-character activation key using the MD5 cryptographic function.
+     *
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function generateActivationKey() {
+        if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
+
+        return $this->successResponse('Activation key has been successfully generated', md5(time().rand()));
+    }
+
+    /**
+     * Assign to user account a 32-character activation key.
+     *
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function assignActivationKey(UserRequest $request) {
+        if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
+
+        $user = User::find($request->validated()['id']);
+
+        if (!$user) return $this->errorResponse('User not found', 404);
+
+        $updateData = [
+            'activation_key' => $request->validated()['activation_key'],
+        ];
+
+        if (!$user->update($updateData)) return $this->errorResponse('An error occurred while updating the user data, try again later', 500);
+
+        return $this->successResponse('Activation key has been successfully assigned', new UserResource($user));
+    }
+
+    /**
+     * Ban or unban user account
+     *
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function toggleBan(UserRequest $request) {
+        if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
+
+        $user = User::find($request->validated()['id']);
+
+        if (!$user) return $this->errorResponse('User not found', 404);
+
+        if ($user->is_banned) {
+            $updateData = [
+                'is_banned' => false,
+                'ban_reason' => '',
+            ];
+        } else {
+            $updateData = [
+                'is_banned' => true,
+                'ban_reason' => $request->validated()['ban_reason'] ?? 'Nie podano powodu',
+            ];
+        }
+
+        if (!$user->update($updateData)) return $this->errorResponse('An error occurred while banning the user, try again later', 500);
+
+        return $this->successResponse('User has been successfully banned', new UserResource($user));
+    }
+
+    /**
+     * Update the password of the user.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function changePassword(UserRequest $request)
+    {
+        if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
+
+        $user = User::find($request->validated()['id']);
+
+        if (!$user) return $this->errorResponse('User not found', 404);
+
+        $updateData = [
+            'password' => Hash::make($request->validated()['password'])
+        ];
+
+        if (!$user->update($updateData)) return $this->errorResponse('An error occurred while changing the user password, try again later', 500);
+
+        return $this->successResponse('User password has been successfully changed');
+    }
 
     /**
      * USER SECTION
@@ -123,7 +224,7 @@ class UserController extends Controller
             $user = new UserResource(Auth::user());
 
             if ($user->isAdmin()) $authToken = $user->createToken('admin-token', ['admin']);
-            else  $authToken = $user->createToken('basic-token', ['basic']);
+            else $authToken = $user->createToken('basic-token', ['basic']);
 
             return $this->successResponse('Login successful', ['user' => $user, 'token' => $authToken->plainTextToken]);
         }
@@ -140,6 +241,17 @@ class UserController extends Controller
     {
         auth()->user()->currentAccessToken()->delete();
         return $this->successResponse('Logout successful');
+    }
+
+    /**
+     * Get the data of the authenticated user.
+     *
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function userData()
+    {
+        $user = new UserResource(auth()->user());
+        return $this->successResponse('User data found', $user);
     }
 
     /**
@@ -218,17 +330,6 @@ class UserController extends Controller
         // Mail::to($advertiser['email'])->send(new ResetPasswordConfirmationMail());
 
         return $this->successResponse('Your password has been successfully reset.');
-    }
-
-    /**
-     * Get the data of the authenticated user.
-     *
-     * @return \App\Http\Traits\ResponseTrait
-     */
-    public function userData()
-    {
-        $user = new UserResource(auth()->user());
-        return $this->successResponse('User data found', $user);
     }
 
     /**

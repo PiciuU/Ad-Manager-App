@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('authStore', {
         getUser: (state) => state.user,
         isLoading: (state) => state.loading,
         isLogged: (state) => !!state.token,
+        isAdmin: (state) => Object.keys(state.user).length != 0 && state.user?.userRole === 'Admin',
         isAuthenticated: (state) => !!state.token && Object.keys(state.user).length != 0 && state.user.constructor === Object,
     },
     actions: {

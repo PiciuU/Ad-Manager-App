@@ -29,6 +29,17 @@ export const router = createRouter({
                     path: 'ustawienia',
                     component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Settings.vue')
                 },
+                {
+                    path: 'admin',
+                    component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/layouts/Admin.vue'),
+                    children: [
+                        {
+                            name: 'AdminUsers',
+                            path: 'uzytkownicy',
+                            component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/views/admin/Users.vue')
+                        }
+                    ]
+                }
             ],
         },
         {

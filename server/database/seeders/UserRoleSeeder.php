@@ -16,7 +16,7 @@ class UserRoleSeeder extends Seeder
         UserRole::factory()->create();
 
         UserRole::factory()->create([
-            'name' => 'Administrator',
+            'name' => 'Admin',
             'description' => 'Admin systemu',
         ]);
     }

@@ -14,10 +14,14 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $token = $this->lastUsedToken()->first();
+        if ($token && $token->last_used_at) $recentlyActiveAt = $token->last_used_at->format('Y-m-d H:i:s');
+        else $recentlyActiveAt = null;
+
         if ($request->user() && $request->user()->hasAdminPrivileges()) {
             return [
                 'id' => $this->id,
-                'userRoleId' => $this->user_role_id,
+                'userRole' => $this->userRole->name,
                 'name' => $this->name,
                 'login' => $this->login,
                 'email' => $this->email,
@@ -33,11 +37,15 @@ class UserResource extends JsonResource
                 'notes' => $this->notes,
                 'isBanned' => $this->is_banned,
                 'banReason' => $this->ban_reason,
-                'activatedAt' => $this->activated_at
+                'recentlyActiveAt' =>$recentlyActiveAt,
+                'activatedAt' => $this->activated_at,
+                'updatedAt' => $this->updated_at->format('Y-m-d H:i:s'),
+                'createdAt' => $this->created_at->format('Y-m-d H:i:s'),
             ];
         } else {
             return [
                 'id' => $this->id,
+                'userRole' => $this->userRole->name,
                 'name' => $this->name,
                 'login' => $this->login,
                 'email' => $this->email,

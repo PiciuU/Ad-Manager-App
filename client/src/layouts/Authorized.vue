@@ -25,9 +25,11 @@
     const authStore = useAuthStore();
 
     onBeforeMount(async () => {
-        LoaderService.create();
-        await authStore.fetchUser();
-        LoaderService.destroy();
+        if (!authStore.isAuthenticated) {
+            LoaderService.create();
+            await authStore.fetchUser();
+            LoaderService.destroy();
+        }
     });
 </script>
 
