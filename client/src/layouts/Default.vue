@@ -1,11 +1,31 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
-    <!-- Create Default Layout (login, register etc)-->
+	<main>
+		<div class="container">
+			<router-view v-slot="{ Component }">
+				<keep-alive>
+					<component :is="Component"></component>
+				</keep-alive>
+			</router-view>
+		</div>
+	</main>
 </template>
 
-<script>
+<style scoped>
+	main {
+		display: flex;
+		flex: 1;
+		padding: 0px 20px;
+	}
 
-</script>
-
-<style lang="scss" scoped>
-
+	.container {
+		display: flex;
+        justify-content: center;
+        align-items: center;
+		max-width: 1280px;
+		margin-left: auto;
+		margin-right: auto;
+		width: 100%;
+		flex: 1;
+	}
 </style>

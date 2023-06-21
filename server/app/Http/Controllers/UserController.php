@@ -150,8 +150,8 @@ class UserController extends Controller
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function recover(UserRequest $request)
-    {
+  
+    public function recover(UserRequest $request) {
         $user = User::where('email', $request->validated()['email'])->first();
 
         if (!$user) return $this->successResponse('If an account is associated with the provided email address, we have sent a message to it.');
@@ -159,7 +159,7 @@ class UserController extends Controller
         $resetPassword = PasswordResetToken::where('user_id', $user->id)->first();
         if ($resetPassword) $resetPassword->delete();
 
-        $resetPasswordHash = md5(rand() . time());
+        $resetPasswordHash = md5(rand().time());
 
         PasswordResetToken::create([
             'user_id' => $user->id,
@@ -180,30 +180,28 @@ class UserController extends Controller
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function recoverToken($hash)
-    {
+    public function recoverToken($hash) {
         $resetPassword = PasswordResetToken::where('hash', $hash)
-            ->whereDate('valid_until', '>', now())
-            ->first();
+                        ->whereDate('valid_until', '>', now())
+                        ->first();
 
         if (!$resetPassword) return $this->errorResponse('Invalid or expired password reset token.');
 
         return $this->successResponse('Valid password reset token.');
     }
-
+  
     /**
      * Update user password with password recovery.
      *
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function resetPassword(UserRequest $request)
-    {
+    public function resetPassword(UserRequest $request) {
         $validatedData = $request->validated();
 
         $resetPassword = PasswordResetToken::where('hash', $validatedData['hash'])
-            ->whereDate('valid_until', '>', now())
-            ->first();
+                        ->whereDate('valid_until', '>', now())
+                        ->first();
 
         if (!$resetPassword) return $this->errorResponse('Invalid or expired password reset token.');
 
@@ -234,13 +232,12 @@ class UserController extends Controller
     }
 
     /**
-     * Update the name of the authenticated user.
+     * Update the data of the authenticated user.
      *
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function updateName(UserRequest $request)
-    {
+    public function updateData(UserRequest $request) {
         $user = auth()->user();
 
         if (!$user->update($request->validated())) return $this->errorResponse('An error occurred while updating the user data, try again later', 500);
@@ -257,6 +254,11 @@ class UserController extends Controller
     public function updateMail(UserRequest $request)
     {
         // Implement a similar function to updateName, but also send an email to the old email address notifying about the change.
+        $user = auth()->user();
+
+        if(!$user->update($request->validated())) return $this->errorResponse('An error occurred while updating the user data, try again later', 500);
+
+        return $this->successResponse('User data has been successfully updated', new UserResource($user));
     }
 
     /**

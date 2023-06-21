@@ -30,12 +30,14 @@ use Illuminate\Support\Facades\Hash;
 Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'auth'], function () {
+        /* Only admin has access to these endpoints */
         Route::get('users', [UserController::class, 'index']);
         Route::get('users/{id}', [UserController::class, 'show']);
         Route::put('users/{id}', [UserController::class, 'update']);
 
+        /* Every user has access to these endpoints */
         Route::get('user', [UserController::class, 'userData']);
-        Route::put('user/name', [UserController::class, 'updateName']);
+        Route::put('user', [UserController::class, 'updateData']);
         Route::put('user/mail', [UserController::class, 'updateMail']);
         Route::put('user/password', [UserController::class, 'updatePassword']);
 
@@ -65,7 +67,7 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
 
 
 
-        Route::post('logout', [UserController::class, 'logout']);
+        Route::get('logout', [UserController::class, 'logout']);
     });
 });
 
@@ -73,6 +75,9 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => 'auth:sanct
 Route::group(['prefix' => 'auth'], function () {
     Route::post('register', [UserController::class, 'register']);
     Route::post('login', [UserController::class, 'login']);
+    Route::get('recover/{hash}', [UserController::class, 'recoverToken']);
+    Route::post('recover', [UserController::class, 'recover']);
+    Route::post('reset', [UserController::class, 'resetPassword']);
 });
 
 Route::get('/setup', function () {

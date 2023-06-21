@@ -1,30 +1,25 @@
-import './assets/styles/main.css'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-const app = createApp(App)
+/* Styles */
+import '@/assets/styles/main.scss'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 
 /* Font Awesome */
-import FontAwesome from '@/plugins/font-awesome'
-FontAwesome(app)
+import { fontAwesome } from '@/plugins/font-awesome'
 
 /* Element Plus */
-import ElementPlus from '@/plugins/element-plus'
-ElementPlus(app)
+import { elementPlus } from '@/plugins/element-plus'
 
-/* axios */
+/* Axios */
 import ApiService from '@/services/api.service'
 ApiService.init()
 
 /* Chartkick */
-import 'chartkick/chart.js'
 import VueChartkick from 'vue-chartkick'
-app.use(VueChartkick)
 
-app.use(createPinia())
-app.use(router)
+const app = createApp(App)
 
-app.use(router).mount('#app')
+app.use(createPinia()).use(router).use(fontAwesome).use(elementPlus).use(VueChartkick).mount('#app')
