@@ -13,8 +13,8 @@
         <div v-if="!formState.isFormDone">
             <!-- Check integrity of access key -->
             <el-form v-if="formState.step === 1" ref="credentialsForm" :model="credentials" :rules="validationRules" @submit.prevent="validateCredentials()">
-                <el-form-item prop="activation_key" class="auth__input-group">
-                    <el-input v-model="credentials.activation_key" maxlength="32" placeholder="Wprowadź klucz aktywacyjny...">
+                <el-form-item prop="activationKey" class="auth__input-group">
+                    <el-input v-model="credentials.activationKey" maxlength="32" placeholder="Wprowadź klucz aktywacyjny...">
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="key" />
                         </template>
@@ -27,14 +27,14 @@
             <!-- Check login and email -->
             <el-form v-else-if="formState.step === 2" ref="credentialsForm" :model="credentials" :rules="validationRules" @submit.prevent="validateCredentials()">
                 <el-form-item prop="login" class="auth__input-group">
-                    <el-input v-model="credentials.login" maxlength="30" placeholder="Wprowadź login...">
+                    <el-input v-model="credentials.login" maxlength="32" placeholder="Wprowadź login...">
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="user" />
                         </template>
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="email" class="auth__input-group">
-                    <el-input v-model="credentials.email" maxlength="254" placeholder="Wprowadź adres email...">
+                    <el-input v-model="credentials.email" maxlength="255" placeholder="Wprowadź adres email...">
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="envelope" />
                         </template>
@@ -46,14 +46,14 @@
             <!-- Check passwords -->
             <el-form v-else-if="formState.step === 3" ref="credentialsForm" :model="credentials" :rules="validationRules" @submit.prevent="validateCredentials()">
                 <el-form-item prop="password" class="auth__input-group">
-                    <el-input v-model="credentials.password" maxlength="128" placeholder="Wprowadź hasło..." show-password>
+                    <el-input v-model="credentials.password" maxlength="255" placeholder="Wprowadź hasło..." show-password>
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="lock" />
                         </template>
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="passwordConfirmation" class="auth__input-group">
-                    <el-input v-model="credentials.passwordConfirmation" maxlength="128" placeholder="Wprowadź ponownie hasło..." show-password>
+                    <el-input v-model="credentials.passwordConfirmation" maxlength="255" placeholder="Wprowadź ponownie hasło..." show-password>
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="lock" />
                         </template>
@@ -90,7 +90,7 @@
 	});
 
     const validationRules = {
-		activation_key: [
+		activationKey: [
 			{
 				required: true,
 				message: "Klucz aktywacyjny jest wymagany aby przejść dalej.",
@@ -130,8 +130,8 @@
 				trigger: "blur"
 			},
 			{
-				max: 30,
-				message: "Nazwa użytkownika może posiadać maksymalnie 30 znaków",
+				max: 32,
+				message: "Nazwa użytkownika może posiadać maksymalnie 32 znaki",
 				trigger: "blur"
 			},
 			{
@@ -145,7 +145,7 @@
 				asyncValidator: (rule, value) => {
 					if (!formState.isFormValidating) return;
                     return new Promise((resolve, reject) => {
-                        authStore.validateActivationLogin(credentials.activation_key, value)
+                        authStore.validateActivationLogin(credentials.activationKey, value)
 							.then(() => {
 								resolve();
 							})
@@ -174,15 +174,15 @@
 				trigger: "blur"
 			},
 			{
-				max: 254,
-				message: "Adres email może posiadać maksymalnie 254 znaki",
+				max: 255,
+				message: "Adres email może posiadać maksymalnie 255 znaków",
 				trigger: "blur"
 			},
 			{
 				asyncValidator: (rule, value) => {
 					if (!formState.isFormValidating) return;
                     return new Promise((resolve, reject) => {
-                        authStore.validateActivationEmail(credentials.activation_key, value)
+                        authStore.validateActivationEmail(credentials.activationKey, value)
 							.then(() => {
 								resolve();
 							})
@@ -206,8 +206,8 @@
 				trigger: "blur"
 			},
 			{
-				max: 128,
-				message: "Hasło może posiadać maksymalnie 128 znaków",
+				max: 255,
+				message: "Hasło może posiadać maksymalnie 255 znaków",
 				trigger: "blur"
 			},
 		],
@@ -226,7 +226,7 @@
     const credentialsForm = ref();
 
 	const credentials = reactive({
-		activation_key: '',
+		activationKey: '',
 		login: '',
 		email: '',
 		password: '',

@@ -37,6 +37,5 @@ class InvoiceResource extends JsonResource
                 'number' => $this->number,
             ];
         }
-        return response()->json(['message' => 'Unauthorized'], 401);
     }
 }

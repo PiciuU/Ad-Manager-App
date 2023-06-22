@@ -10,14 +10,20 @@ class Log extends Model
     use HasFactory;
 
     protected $table = 'logs';
-    protected $dates = ['created_at', 'updated_at'];
+
+    protected $dates = [
+        'created_at',
+        'updated_at'
+    ];
+
     protected $fillable = [
         'user_id',
-        'operation_tags',
         'ad_id',
+        'operation_tags',
         'message',
         'notes'
     ];
+
     protected $hidden = [
         'created_at',
         'updated_at'

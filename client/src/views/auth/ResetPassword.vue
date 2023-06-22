@@ -7,14 +7,14 @@
         <div v-if="!formState.isFormDone">
             <el-form ref="credentialsForm" :model="credentials" :rules="validationRules" @submit.prevent="validateCredentials()">
                 <el-form-item prop="password" class="auth__input-group">
-                    <el-input v-model="credentials.password" maxlength="128" placeholder="Wprowadź nowe hasło..." show-password>
+                    <el-input v-model="credentials.password" maxlength="255" placeholder="Wprowadź nowe hasło..." show-password>
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="lock" />
                         </template>
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="passwordConfirmation" class="auth__input-group">
-                    <el-input v-model="credentials.passwordConfirmation" maxlength="128" placeholder="Wprowadź ponownie nowe hasło..." show-password>
+                    <el-input v-model="credentials.passwordConfirmation" maxlength="255" placeholder="Wprowadź ponownie nowe hasło..." show-password>
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="lock" />
                         </template>
@@ -63,8 +63,8 @@
 				trigger: "blur"
 			},
 			{
-				max: 128,
-				message: "Hasło może posiadać maksymalnie 128 znaków",
+				max: 255,
+				message: "Hasło może posiadać maksymalnie 255 znaków",
 				trigger: "blur"
 			},
 		],
