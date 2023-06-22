@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
+
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
@@ -10,18 +12,18 @@ use Illuminate\Validation\ValidationException;
 
 class UserRequest extends FormRequest
 {
-    protected function failedValidation(Validator $validator)
-    {
-        $response = response()->json([
-            'status' => "Error",
-            'message' => "Validation failed. Please check the following fields:",
-            'data' => $validator->errors(),
-        ], 422);
+    // protected function failedValidation(Validator $validator)
+    // {
+    //     $response = response()->json([
+    //         'status' => "Error",
+    //         'message' => "Validation failed. Please check the following fields:",
+    //         'data' => $validator->errors(),
+    //     ], 422);
 
-        throw (new ValidationException($validator, $response))
-            ->errorBag($this->errorBag)
-            ->redirectTo($this->getRedirectUrl());
-    }
+    //     throw (new ValidationException($validator, $response))
+    //         ->errorBag($this->errorBag)
+    //         ->redirectTo($this->getRedirectUrl());
+    // }
 
     /**
      * Determine if the user is authorized to make this request.
@@ -59,21 +61,18 @@ class UserRequest extends FormRequest
     {
         $methodName = $this->getMethodName();
 
-        if ($methodName === 'login') {
-            return $this->login();
-        } elseif ($methodName === 'register') {
-            return $this->register();
-        } elseif ($methodName === 'recover') {
-            return $this->recover();
-        } elseif ($methodName === 'resetPassword') {
-            return $this->reset();
-        } elseif ($methodName === 'updateData') {
-            return $this->updateData();
-        } elseif ($methodName === 'updateMail') {
-            return $this->updateMail();
-        } elseif ($methodName === 'updatePassword') {
-            return $this->updatePassword();
-        }
+        if ($methodName === 'validateAuthenticationKey') return $this->validateAuthenticationKey();
+        elseif ($methodName === 'validateLogin') return $this->validateLogin();
+        elseif ($methodName === 'validateEmail') return $this->validateEmail();
+        elseif ($methodName === 'activateAccount') return $this->activateAccount();
+
+        elseif ($methodName === 'login') return $this->login();
+        elseif ($methodName === 'recover') return $this->recover();
+        elseif ($methodName === 'resetPassword') return $this->resetPassword();
+        elseif ($methodName === 'updateData') return $this->updateData();
+        elseif ($methodName === 'updateMail') return $this->updateMail();
+        elseif ($methodName === 'updatePassword') return $this->updatePassword();
+
 
         if ($this->hasAdminPrivileges()) {
             if ($methodName === 'update') return $this->update();
@@ -82,6 +81,61 @@ class UserRequest extends FormRequest
             elseif ($methodName === 'toggleBan') return $this->toggleBan();
             elseif ($methodName === 'changePassword') return $this->changePassword();
         }
+
+        return [];
+    }
+
+    /**
+     * Get the validation rules for authentication key while activating account.
+     *
+     * @return array
+     */
+    protected function validateAuthenticationKey(): array
+    {
+        return [
+            'activation_key' => ['required', 'string', 'size:32']
+        ];
+    }
+
+    /**
+     * Get the validation rules for login while activating account.
+     *
+     * @return array
+     */
+    protected function validateLogin(): array
+    {
+        return [
+            'activation_key' => ['required', 'string', 'size:32', Rule::exists('users', 'activation_key')],
+            'login' => ['required', 'string', 'min:2', 'max:32', 'regex:/^[a-z0-9_]*$/i', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')],
+        ];
+    }
+
+    /**
+     * Get the validation rules for email while activating account.
+     *
+     * @return array
+     */
+    protected function validateEmail(): array
+    {
+        return [
+            'activation_key' => ['required', 'string', 'size:32', Rule::exists('users', 'activation_key')],
+            'email' => ['required', 'string', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')]
+        ];
+    }
+
+    /**
+     * Get the validation rules for activating account.
+     *
+     * @return array
+     */
+    protected function activateAccount(): array
+    {
+        return [
+            'activation_key' => ['required', 'string', 'size:32', Rule::exists('users', 'activation_key')],
+            'login' => ['required', 'string', 'min:2', 'max:32', 'regex:/^[a-z0-9_]*$/i', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')],
+            'email' => ['required', 'string', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')],
+            'password' => ['required', 'string', 'confirmed', 'min:6', 'max:255'],
+        ];
     }
 
     /**
@@ -98,41 +152,27 @@ class UserRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules for user registration.
+     * Get the validation rules for attemp to recovering password.
      *
      * @return array
      */
-    protected function register(): array
+    protected function recover() : array
     {
-        return [
-            'login' => ['required', 'unique:users'],
-            'name' => ['required'],
-            'email' => ['required', 'email', 'unique:users'],
-            'password' => ['required'],
-            'user_role_id' => ['required', Rule::in([1])],
-        ];
-    }
-
-    /**
-     * Get the validation rules for recover.
-     *
-     * @return array
-     */
-    protected function recover() : array {
         return [
             'email'=> ['required', 'email']
         ];
     }
 
     /**
-     * Get the validation rules for reset.
+     * Get the validation rules for resetting password.
      *
      * @return array
      */
-    protected function reset() : array {
+    protected function resetPassword() : array
+    {
         return [
             'hash'=> ['required'],
-            'password' => ['required', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', 'min:6', 'max:255'],
         ];
     }
 
@@ -144,9 +184,9 @@ class UserRequest extends FormRequest
     protected function updateData(): array
     {
         return [
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'representative' => ['sometimes', 'string', 'max:255'],
             'representative_phone' => ['sometimes', 'string', 'max:32', 'not_regex:/[a-z]/i'],
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'address' => ['sometimes', 'string', 'max:255'],
             'postal_code' => ['sometimes', 'string', 'max:255'],
             'nip' => ['sometimes', 'string', 'max:10', 'not_regex:/[a-z]/i'],
@@ -162,7 +202,7 @@ class UserRequest extends FormRequest
      */
     protected function updateMail() : array {
         return [
-            'email' => ['sometimes', 'required', 'email', 'unique:users'],
+            'email' => ['sometimes', 'required', 'string', 'email', 'min:3', 'max:255', 'unique:users'],
         ];
     }
 
@@ -175,7 +215,7 @@ class UserRequest extends FormRequest
     {
         return [
             'password_current' => ['required'],
-            'password' => ['required', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', 'min:6', 'max:255'],
         ];
     }
 
@@ -190,9 +230,9 @@ class UserRequest extends FormRequest
     protected function store(): array
     {
         return [
-            'login' => ['required', 'unique:users'],
-            'name' => ['required'],
-            'email' => ['required', 'email', 'unique:users'],
+            'login' => ['required', 'string', 'min:2', 'max:32', 'regex:/^[a-z0-9_]*$/i', 'unique:users'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'min:3', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'max:255'],
             'user_role_id' => ['required', Rule::in([1])],
         ];
@@ -206,9 +246,9 @@ class UserRequest extends FormRequest
     protected function update(): array
     {
         return [
-            'login' => ['sometimes', 'required', 'string', 'max:32', Rule::unique('users')->ignore($this->id, 'id')],
+            'login' => ['sometimes', 'required', 'string', 'min:2', 'max:32', 'regex:/^[a-z0-9_]*$/i', Rule::unique('users')->ignore($this->id, 'id')],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($this->id, 'id')],
+            'email' => ['sometimes', 'required', 'string', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore($this->id, 'id')],
             'representative' => ['sometimes','nullable', 'string', 'max:255'],
             'representative_phone' => ['sometimes','nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
             'address' => ['sometimes','nullable', 'string', 'max:255'],
@@ -229,7 +269,7 @@ class UserRequest extends FormRequest
     {
         return [
             'id' => ['required', 'integer'],
-            'activation_key' => ['required', 'string', 'max:32', 'min:32']
+            'activation_key' => ['required', 'string', 'size:32']
         ];
     }
 

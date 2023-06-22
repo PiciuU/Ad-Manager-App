@@ -40,12 +40,16 @@ class InvoiceController extends Controller
         $userId = $user->id;
         $userId = strval($userId);
 
-        if ($user->tokenCan('admin')) $invoices = new InvoiceCollection(Invoice::paginate());
-        else  $invoices = Invoice::whereHas('ad', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })->paginate();
+        if ($user->tokenCan('admin')) {
+            return new InvoiceCollection(Invoice::paginate());
+        } else {
+            $invoices = Invoice::whereHas('ad', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })->paginate();
+            return new InvoiceCollection($invoices);
+        }
 
-        return response()->json($invoices);
+        return $this->errorResponse('Ann error occured', 403);
     }
 
     /**
@@ -55,7 +59,7 @@ class InvoiceController extends Controller
     {
         $invoice = new InvoiceResource(Invoice::create($request->validated()));
         if (!$invoice) {
-            return $this->errorResponse('An error occurred during creating the Ad, please try again later', 500);
+            return $this->errorResponse('An error occurred during creating the invoice, please try again later', 500);
         } else {
             // $invoiceController = new InvoiceController();
             // $invoiceController->createFromAd()
@@ -84,14 +88,13 @@ class InvoiceController extends Controller
      */
     public function show($id)
     {
-        $invoice = Invoice::findOrFail($id);
-
+        $invoice = Invoice::find($id);
+        if (!$invoice) return $this->errorResponse("Invoice doesn\'t exists", 404);
         // Sprawdzenie uprawnień użytkownika
         if (auth()->user()->isAdmin() || $invoice->ad->user_id === auth()->user()->id) {
-            return response()->json($invoice);
+            return new InvoiceResource($invoice);
         }
-
-        return response()->json(['message' => 'Unauthorized'], 401);
+        return $this->errorResponse('An error occured', 403);
     }
 
     /**

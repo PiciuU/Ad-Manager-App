@@ -37,6 +37,11 @@ export const router = createRouter({
                             name: 'AdminUsers',
                             path: 'uzytkownicy',
                             component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/views/admin/Users.vue')
+                        },
+                        {
+                            name: 'AdminLogs',
+                            path: 'dziennik',
+                            component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/views/admin/Logs.vue')
                         }
                     ]
                 }

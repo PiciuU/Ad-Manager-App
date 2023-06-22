@@ -85,7 +85,43 @@ export const useAdminStore = defineStore('adminStore', {
         async createUser(payload) {
             try {
                 this.loading = true;
-                const response = await ApiService.post(`/admin/users`, payload);
+                const response = await ApiService.post('/admin/users', payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async getLogs(page = 1) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/logs?page=${page}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async getUserLogs(id, page = 1) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/logs/${id}?page=${page}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async updateLogs(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put(`/admin/logs/${id}`, payload);
                 return Promise.resolve(response);
             }
             catch (error) {

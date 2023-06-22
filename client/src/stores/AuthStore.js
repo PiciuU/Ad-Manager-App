@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('authStore', {
         async register(credentials) {
             try {
                 this.loading = true;
-                const response = await ApiService.post('/auth/register', credentials);
+                const response = await ApiService.put('/auth/activate', credentials);
                 this.setAuthorization(response.data.token, response.data.user, false);
             }
             catch (error) {
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('authStore', {
         async validateActivationKey(activationKey) {
             try {
                 this.loading = true;
-                const response = await ApiService.post('/auth/validation/key', { activationKey });
+                const response = await ApiService.put('/auth/validate/key', { activationKey });
                 return Promise.resolve(response);
             }
             catch (error) {
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('authStore', {
         async validateActivationLogin(activationKey, login) {
             try {
                 this.loading = true;
-                const response = await ApiService.post('/auth/validation/login', { activationKey, login });
+                const response = await ApiService.put('/auth/validate/login', { activationKey, login });
                 return Promise.resolve(response);
             }
             catch (error) {
@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('authStore', {
         async validateActivationEmail(activationKey, email) {
             try {
                 this.loading = true;
-                const response = await ApiService.post('/auth/validation/email', { activationKey, email });
+                const response = await ApiService.put('/auth/validate/email', { activationKey, email });
                 return Promise.resolve(response);
             }
             catch (error) {
@@ -74,7 +74,8 @@ export const useAuthStore = defineStore('authStore', {
                 this.setAuthorization(response.data.token, response.data.user);
             }
             catch (error) {
-                NotificationService.displayError('Nie udało się zalogować', 'Wprowadzono błędny login lub hasło.');
+                if (error.status === 403) NotificationService.displayError('Twoje konto zostało zablokowane', `Powód blokady: ${error.data.data}`, 10000);
+                else NotificationService.displayError('Nie udało się zalogować', 'Wprowadzono błędny login lub hasło.');
             } finally {
                 this.loading = false;
             }

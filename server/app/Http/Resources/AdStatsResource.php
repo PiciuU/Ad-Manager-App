@@ -33,6 +33,5 @@ class AdStatsResource extends JsonResource
                 'clicks' => $this->clicks
             ];
         }
-        response()->json(['message' => 'Unauthorized'], 401);
     }
 }

@@ -1,8 +1,9 @@
-<!-- eslint-disable vue/multi-word-component-names -->
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <el-main>
         <el-row class="cards__container" :gutter="32">
+
+            <!-- Spis użytkowników -->
+
             <el-col :span="24" :md="16">
                 <el-card class="card">
                     <div class="card__title">Lista użytkowników</div>
@@ -28,6 +29,8 @@
                 </el-card>
             </el-col>
         </el-row>
+
+         <!-- Szczegóły użytkownika -->
 
         <div v-if="Object.keys(data.user).length > 0">
             <el-row class="cards__container" :gutter="32">
@@ -120,6 +123,8 @@
                 </el-col>
             </el-row>
 
+             <!-- Reklamy -->
+
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24">
                     <el-card class="card">
@@ -162,17 +167,20 @@
                 </el-col>
             </el-row>
 
+            <!-- Dziennik Zdarzeń -->
+
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24">
                     <el-card class="card">
                         <div class="card__title">Dziennik zdarzeń użytkownika</div>
-                        <el-table :data="data.logs.entries" stripe style="width: 100%">
-                            <el-table-column prop="date" label="Data" width="150"/>
-                            <el-table-column label="Typ" width="150">
+                        <el-table @row-click="editLog" :data="data.logs.entries" stripe style="width: 100%" v-loading="loaders.isLogsLoading">
+                            <el-table-column prop="id" label="ID" width="50"/>
+                            <el-table-column prop="createdAt" label="Data" width="200"/>
+                            <el-table-column label="Typ" min-width="200">
                                 <template #default="scope">
                                     <el-popover effect="light" trigger="hover" placement="top" width="auto">
                                         <template #default>
-                                            <div>Notatki: {{ scope.row.notes }}</div>
+                                            <div>Notatki administratora: {{ stringToLocale(scope.row.notes) }}</div>
                                         </template>
                                         <template #reference>
                                             <el-tag>{{ scope.row.operationTags }}</el-tag>
@@ -180,42 +188,41 @@
                                     </el-popover>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="message" label="Opis" min-width="250"/>
-                            <el-table-column label="Operacje" min-width="150">
-                                <template #default="scope">
-                                    <el-button size="small" @click="handleEdit(scope.$index, scope.row)">Edytuj</el-button>
-                                    <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">Usuń</el-button>
-                                </template>
-                            </el-table-column>
+                            <el-table-column prop="message" label="Opis" min-width="300" width="auto"/>
                         </el-table>
                         <el-pagination
-                            v-model:current-page="data.logs.currentPage"
-                            v-model:page-size="data.logs.pageSize"
+                            v-if="!isObjectEmpty(data.logs)"
                             class="card__pagination"
+                            :current-page="data.logs.current_page"
+                            :page-size="data.logs.per_page"
+                            :total="data.logs.total"
                             :small="true"
                             :disabled="false"
                             :background="true"
                             layout="prev, pager, next, jumper"
-                            :total="data.logs.entries.length"
-                            @current-change="true"
+                            @current-change="handlePageChange"
                         />
                     </el-card>
                 </el-col>
             </el-row>
         </div>
 
+        <!-- Modale -->
+
         <ModalUserCreate v-if="modals.currentModal === 'create'" :user="data.user" @add="addUser" @close="toggleModal"/>
         <ModalUserEdit v-if="modals.currentModal === 'edit'" :user="data.user" @update="updateUser" @close="toggleModal"/>
         <ModalUserPassword v-if="modals.currentModal === 'password'" :user="data.user" @close="toggleModal"/>
         <ModalUserActivationKey v-if="modals.currentModal === 'activation'" :user="data.user" @update="updateUser" @close="toggleModal"/>
         <ModalUserBan v-if="modals.currentModal === 'ban'" :user="data.user" @update="updateUser" @close="toggleModal"/>
+
+        <ModalLogEdit v-if="modals.currentModal === 'log'" :log="data.log" @update="updateLog" @close="toggleModal"/>
     </el-main>
 </template>
 
 <script setup>
     import { reactive, onMounted } from 'vue'
 
-    import { stringToLocale } from '@/common/helpers/utility.helper'
+    import { isObjectEmpty, stringToLocale } from '@/common/helpers/utility.helper'
 
     import { useAdminStore } from '@/stores/AdminStore';
 
@@ -224,29 +231,33 @@
     import ModalUserPassword from '@/modules/components/admin/ModalUserPassword.vue';
     import ModalUserEdit from '@/modules/components/admin/ModalUserEdit.vue';
     import ModalUserCreate from '@/modules/components/admin/ModalUserCreate.vue';
+    import ModalLogEdit from '@/modules/components/admin/ModalLogEdit.vue';
 
     const adminStore = useAdminStore();
 
     const loaders = reactive({
-        isUsersLoading: false
-    })
+        isUsersLoading: false,
+        isLogsLoading: false,
+    });
+
+    /* Modals */
 
     const modals = reactive({
         currentModal: ''
-    })
+    });
 
     const toggleModal = (modal = '') => {
         modals.currentModal = modal;
-    }
+    };
 
-    const updateUser = (newData) => {
-        Object.assign(data.user, newData);
-    }
+    /* Main Data */
 
-    const addUser = (newData) => {
-        data.users.push(newData);
-        data.user = newData;
-    }
+    const data = reactive({
+		users: {},
+        user: {},
+        logs: {},
+        log: {}
+	});
 
     onMounted(() => {
         loaders.isUsersLoading = true;
@@ -259,54 +270,62 @@
             })
 	});
 
+    /* Users List */
+
     const searchFilter = reactive({
 		userId: null,
         adId: null,
 	});
 
-    const data = reactive({
-		users: {},
-        user: {},
-        logs: {
-            currentPage: 1,
-            pageSize: 10,
-            entries: [
-                {
-                    date: '2016-05-03',
-                    operationTags: 'LOGOUT',
-                    message: 'Użytkownik wylogował się.',
-                    notes: 'No. 189, Grove St, Los Angeles',
-                },
-                {
-                    date: '2016-05-02',
-                    operationTags: 'LOGIN',
-                    message: 'Użytkownik zalogował się.',
-                    notes: 'No. 189, Grove St, Los Angeles',
-                },
-                {
-                    date: '2016-05-04',
-                    operationTags: 'LOGOUT',
-                    message: 'Użytkownik wylogował się.',
-                    notes: 'No. 189, Grove St, Los Angeles',
-                },
-                {
-                    date: '2016-05-01',
-                    operationTags: 'LOGIN',
-                    message: 'Użytkownik zalogował się.',
-                    notes: 'No. 189, Grove St, Los Angeles',
-                },
-            ]
-        }
-	});
-
-    function handleUserChange() {
+    const handleUserChange = () => {
 		if (!searchFilter.userId) data.user = {};
-		else data.user = data.users.find((user) => user.id === searchFilter.userId);
-        // adStore.getAdvert(searchFilter.advertId, body)
-        //     .then((response) => {
-        //         Object.assign(data, response.data);
-        //     })
-	}
+		else {
+            data.user = data.users.find((user) => user.id === searchFilter.userId);
+            data.logs = {};
+            loaders.isLogsLoading = true;
+            adminStore.getUserLogs(data.user.id)
+                .then((response) => {
+                    data.logs = response.data;
+                })
+                .finally(() => {
+                    loaders.isLogsLoading = false;
+                })
+        }
+	};
+
+    /* User Details */
+
+    const updateUser = (newData) => {
+        Object.assign(data.user, newData);
+    };
+
+    const addUser = (newData) => {
+        data.users.push(newData);
+        data.user = newData;
+    };
+
+    /* Logs */
+
+    const handlePageChange = (newPage) => {
+        loaders.isLogsLoading = true;
+        adminStore.getUserLogs(data.user.id, newPage)
+                .then((response) => {
+                    data.logs = response.data;
+                })
+                .finally(() => {
+                    loaders.isLogsLoading = false;
+                })
+    };
+
+    const editLog = (log) => {
+        data.log = log;
+        toggleModal('log');
+    };
+
+    const updateLog = (newData) => {
+        let log = data.logs.entries.find((log) => log.id === newData.id);
+        Object.assign(log, newData);
+    };
 </script>
 
 <style lang="scss" scoped>

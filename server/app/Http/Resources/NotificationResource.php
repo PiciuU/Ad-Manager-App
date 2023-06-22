@@ -30,6 +30,5 @@ class NotificationResource extends JsonResource
                 'date' => date('Y-m-d H:i:s'),
             ];
         }
-        response()->json(['message' => 'Unauthorized'], 401);
     }
 }
