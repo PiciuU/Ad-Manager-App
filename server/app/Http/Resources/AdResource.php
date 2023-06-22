@@ -20,26 +20,26 @@ class AdResource extends JsonResource
         // $additionalFields = [];
         if ($request->user()->tokenCan('admin')) {
             return [
-                'name' => $this->name,
                 'id' => $this->id,
+                'name' => $this->name,
+                'userId' => $this->user_id,
+                'status' => 'unpaid',
                 'adStartDate' => $this->ad_start_date,
                 'adEndDate' => $this->ad_end_date,
                 'fileName' => $this->file_name,
                 'fileType' => $this->file_type,
                 'url' => $this->url,
-                'status' => 'unpaid',
             ];
         } else {
             return [
                 'name' => $this->name,
+                'status' => 'unpaid',
                 'adStartDate' => $this->ad_start_date,
                 'adEndDate' => $this->ad_end_date,
                 'fileName' => $this->file_name,
                 'fileType' => $this->file_type,
                 'url' => $this->url,
-                'status' => 'unpaid',
             ];
         }
-        response()->json(['message' => 'Unauthorized'], 401);
     }
 }

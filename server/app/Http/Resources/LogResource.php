@@ -14,6 +14,18 @@ class LogResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        if ($request->user() && $request->user()->hasAdminPrivileges()) {
+            return [
+                'id' => $this->id,
+                'userId' => $this->user_id,
+                'adId' => $this->ad_id,
+                'operationTags' => $this->operation_tags,
+                'message' => $this->message,
+                'notes' => $this->notes,
+                'createdAt' => $this->created_at->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        return [];
     }
 }

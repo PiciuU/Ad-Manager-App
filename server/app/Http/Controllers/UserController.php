@@ -9,6 +9,9 @@ use App\Models\PasswordResetToken;
 use Carbon\Carbon;
 
 use Illuminate\Http\Request;
+
+use App\Http\Controllers\LogController;
+
 use App\Http\Resources\UserResource;
 use App\Http\Resources\UserCollection;
 use App\Http\Requests\UserRequest;
@@ -19,6 +22,13 @@ use Illuminate\Support\Arr;
 
 class UserController extends Controller
 {
+    private $logController;
+
+    public function __construct(LogController $logController)
+    {
+        $this->logController = $logController;
+    }
+
     /**
      * Checks if the user has administrator privileges.
      *
@@ -108,7 +118,8 @@ class UserController extends Controller
      *
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function generateActivationKey() {
+    public function generateActivationKey()
+    {
         if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
 
         return $this->successResponse('Activation key has been successfully generated', md5(time().rand()));
@@ -119,7 +130,8 @@ class UserController extends Controller
      *
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function assignActivationKey(UserRequest $request) {
+    public function assignActivationKey(UserRequest $request)
+    {
         if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
 
         $user = User::find($request->validated()['id']);
@@ -140,7 +152,8 @@ class UserController extends Controller
      *
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function toggleBan(UserRequest $request) {
+    public function toggleBan(UserRequest $request)
+    {
         if (!$this->hasAccess()) return $this->errorResponse('You do not have access to this resource!', 403);
 
         $user = User::find($request->validated()['id']);
@@ -193,23 +206,66 @@ class UserController extends Controller
      */
 
     /**
-     * Store a newly created user resource in storage.
+     * Validate the authentication key of an account.
      *
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function register(UserRequest $request)
+    public function validateAuthenticationKey(UserRequest $request)
+    {
+        $user = User::where('activation_key', $request->validated()['activation_key'])->first();
+
+        if (!$user) return $this->errorResponse('Invalid activation key', 401);
+
+        return $this->successResponse('Activation key has been successfully verified', ['login' => $user->login, 'email' => $user->email]);
+    }
+
+    /**
+     * Validate the login of an account.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function validateLogin(UserRequest $request)
+    {
+        return $this->successResponse('Login has been successfully verified');
+    }
+
+    /**
+     * Validate the email of an account.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function validateEmail(UserRequest $request)
+    {
+        return $this->successResponse('Email has been successfully verified');
+    }
+
+     /**
+     * Activate user account and log user into system if successful.
+     *
+     * @param  \App\Http\Requests\UserRequest  $request
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function activateAccount(UserRequest $request)
     {
         $validatedData = $request->validated();
+        $user = User::where('activation_key', $validatedData['activation_key'])->first();
+
+        if (!$user) return $this->errorResponse('Invalid activation key', 401);
+
+        $validatedData['activated_at'] = date("Y-m-d H:i:s");
+        $validatedData['activation_key'] = null;
         $validatedData['password'] = Hash::make($validatedData['password']);
 
-        $user = new UserResource(User::create($validatedData));
-
-        if (!$user) return $this->errorResponse('An error occurred while creating the user, try again later', 500);
+        if(!$user->update($validatedData)) return $this->errorResponse('An error occurred while activating the user account, try again later', 500);
 
         $authToken = $user->createToken('basic-token', ['basic']);
 
-        return $this->successResponse('User has been created successfully', ['user' => $user, 'token' => $authToken->plainTextToken]);
+        $this->logController->createLogEntry('AUTH/ACTIVATE', ['user_id' => $user->id]);
+
+        return $this->successResponse('User has been created successfully', ['user' => new UserResource($user), 'token' => $authToken->plainTextToken]);
     }
 
     /**
@@ -226,6 +282,8 @@ class UserController extends Controller
             if ($user->isAdmin()) $authToken = $user->createToken('admin-token', ['admin']);
             else $authToken = $user->createToken('basic-token', ['basic']);
 
+            $this->logController->createLogEntry('AUTH/LOGIN', ['user_id' => $user->id]);
+
             return $this->successResponse('Login successful', ['user' => $user, 'token' => $authToken->plainTextToken]);
         }
 
@@ -240,6 +298,9 @@ class UserController extends Controller
     public function logout()
     {
         auth()->user()->currentAccessToken()->delete();
+
+        $this->logController->createLogEntry('AUTH/LOGOUT', ['user_id' =>auth()->user()->id]);
+
         return $this->successResponse('Logout successful');
     }
 
@@ -262,8 +323,9 @@ class UserController extends Controller
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-  
-    public function recover(UserRequest $request) {
+
+    public function recover(UserRequest $request)
+    {
         $user = User::where('email', $request->validated()['email'])->first();
 
         if (!$user) return $this->successResponse('If an account is associated with the provided email address, we have sent a message to it.');
@@ -292,7 +354,8 @@ class UserController extends Controller
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function recoverToken($hash) {
+    public function recoverToken($hash)
+    {
         $resetPassword = PasswordResetToken::where('hash', $hash)
                         ->whereDate('valid_until', '>', now())
                         ->first();
@@ -301,14 +364,15 @@ class UserController extends Controller
 
         return $this->successResponse('Valid password reset token.');
     }
-  
+
     /**
      * Update user password with password recovery.
      *
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function resetPassword(UserRequest $request) {
+    public function resetPassword(UserRequest $request)
+    {
         $validatedData = $request->validated();
 
         $resetPassword = PasswordResetToken::where('hash', $validatedData['hash'])
@@ -329,6 +393,8 @@ class UserController extends Controller
 
         // Mail::to($advertiser['email'])->send(new ResetPasswordConfirmationMail());
 
+        $this->logController->createLogEntry('AUTH/PASSWORD/RESET', ['user_id' => $user->id]);
+
         return $this->successResponse('Your password has been successfully reset.');
     }
 
@@ -338,10 +404,13 @@ class UserController extends Controller
      * @param  \App\Http\Requests\UserRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function updateData(UserRequest $request) {
+    public function updateData(UserRequest $request)
+    {
         $user = auth()->user();
 
         if (!$user->update($request->validated())) return $this->errorResponse('An error occurred while updating the user data, try again later', 500);
+
+        $this->logController->createLogEntry('AUTH/UPDATE', ['user_id' => $user->id]);
 
         return $this->successResponse('User data has been successfully updated', new UserResource($user));
     }
@@ -358,6 +427,8 @@ class UserController extends Controller
         $user = auth()->user();
 
         if(!$user->update($request->validated())) return $this->errorResponse('An error occurred while updating the user data, try again later', 500);
+
+        $this->logController->createLogEntry('AUTH/MAIL', ['user_id' => $user->id]);
 
         return $this->successResponse('User data has been successfully updated', new UserResource($user));
     }
@@ -386,6 +457,8 @@ class UserController extends Controller
 
 
         // Implement sending an email about the password change
+
+        $this->logController->createLogEntry('AUTH/PASSWORD/CHANGE', ['user_id' => $user->id]);
 
         return $this->successResponse('Password updated successfully');
     }
