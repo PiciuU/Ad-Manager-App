@@ -107,7 +107,7 @@
             </el-col>
         </el-row>
 
-        <ModalCompanyDetails v-if="modal.isVisible" :mode="modal.mode" @close="toggleComp,anyDetails"/>
+        <ModalCompanyDetails v-if="modal.isVisible" :mode="modal.mode" @close="toggleCompanyDetails"/>
     </el-main>
 </template>
 
