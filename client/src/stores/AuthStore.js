@@ -93,6 +93,19 @@ export const useAuthStore = defineStore('authStore', {
                 this.clearAuthorization();
             }
         },
+        async forceLogout() {
+            try {
+                this.loading = true;
+                await ApiService.get('/auth/logout/all');
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+                this.clearAuthorization();
+            }
+        },
         async passwordRecover(credentials) {
             try {
                 this.loading = true;
@@ -174,6 +187,39 @@ export const useAuthStore = defineStore('authStore', {
                 this.user = response.data;
             } catch (error) {
                this.clearAuthorization();
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchLastNotifications() {
+            try {
+                this.loading = true;
+                const response = await ApiService.get('notification/latest');
+                return Promise.resolve(response);
+            } catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchNotifications(page = 1) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`notification?page=${page}`);
+                return Promise.resolve(response);
+            } catch (error) {
+               return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async changeNotificationStatus(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put(`notification/${id}/seen`, payload);
+                return Promise.resolve(response);
+            } catch (error) {
+               return Promise.reject(error.data);
             } finally {
                 this.loading = false;
             }

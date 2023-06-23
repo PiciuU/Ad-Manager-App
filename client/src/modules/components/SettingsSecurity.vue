@@ -3,6 +3,7 @@
         <div class="container__item">
             <div class="container__title">Zmiana hasła</div>
             <el-form
+                v-if="!formState.isFormDone"
                 class="form"
                 ref="credentialsForm"
                 :model="credentials"
@@ -12,12 +13,12 @@
                 label-position="left"
                 :hide-required-asterisk="true"
             >
-                <el-form-item prop="password_current" label="Obecne hasło">
+                <el-form-item prop="passwordCurrent" label="Obecne hasło">
                     <el-input
                         maxlength="128"
                         placeholder="Wprowadź aktualne hasło..."
                         show-password
-                        v-model="credentials.password_current"
+                        v-model="credentials.passwordCurrent"
                     >
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="lock" />
@@ -38,12 +39,12 @@
                     </el-input>
                 </el-form-item>
 
-                <el-form-item prop="password_confirmation" label="Potwierdź hasło">
+                <el-form-item prop="passwordConfirmation" label="Potwierdź hasło">
                     <el-input
                         maxlength="128"
                         placeholder="Wprowadź ponownie nowe hasło..."
                         show-password
-                        v-model="credentials.password_confirmation"
+                        v-model="credentials.passwordConfirmation"
                     >
                         <template #prefix>
                             <font-awesome-icon class="form__input_icon" icon="lock" />
@@ -56,7 +57,7 @@
                 </el-button>
             </el-form>
 
-            <div class="container__result" v-if="formState.isFormDone">
+            <div class="container__result" v-else>
                 <el-result
                     icon="success"
                     title="Sukces"
@@ -80,65 +81,85 @@
     </div>
 </template>
 
-<script>
-import { reactive } from 'vue'
+<script setup>
+    import { ref, reactive } from 'vue';
+    import { useAuthStore } from '@/stores/AuthStore';
+    import NotificationService from '@/services/notification.service'
 
-export default {
-    name: 'SettingsSecurity',
-    setup() {
-        const formState = reactive({
-            isFormSubmitting: false,
-            isFormValidating: false,
-            isFormDone: false
-        })
+    const authStore = useAuthStore();
 
-        const credentials = reactive({
-            password_current: '',
-            password: '',
-            password_confirmation: ''
-        })
+    const credentialsForm = ref();
 
-        const validationRules = {
-            password_current: [
-                {
-                    required: true,
-                    message: 'Hasło jest wymagane',
-                    trigger: 'blur'
-                }
-            ],
-            password: [
-                {
-                    required: true,
-                    message: 'Hasło jest wymagane',
-                    trigger: 'blur'
-                },
-                {
-                    min: 6,
-                    message: 'Hasło musi posiadać przynajmniej 6 znaków',
-                    trigger: 'blur'
-                },
-                {
-                    max: 128,
-                    message: 'Hasło może posiadać maksymalnie 128 znaków',
-                    trigger: 'blur'
-                }
-            ],
-            password_confirmation: [
-                {
-                    required: true,
-                    message: 'Potwierdzenie hasła jest wymagane',
-                    trigger: 'blur'
-                }
-            ]
-        }
+    const credentials = reactive({
+        passwordCurrent: '',
+        password: '',
+        passwordConfirmation: ''
+    });
 
-        return {
-            formState,
-            credentials,
-            validationRules
-        }
+    const formState = reactive({
+        isFormSubmitting: false,
+        isFormDone: false
+    });
+
+    const validationRules = {
+        password_current: [
+            {
+                required: true,
+                message: 'Hasło jest wymagane',
+                trigger: 'blur'
+            }
+        ],
+        password: [
+            {
+                required: true,
+                message: 'Hasło jest wymagane',
+                trigger: 'blur'
+            },
+            {
+                min: 6,
+                message: 'Hasło musi posiadać przynajmniej 6 znaków',
+                trigger: 'blur'
+            },
+            {
+                max: 255,
+                message: 'Hasło może posiadać maksymalnie 255 znaków',
+                trigger: 'blur'
+            }
+        ],
+        password_confirmation: [
+            {
+                validator: (rule, value, callback) => {
+					if (value === '') {
+						callback(new Error('Potwierdzenie hasła jest wymagane'))
+					} else if (value !== credentials.password) {
+						callback(new Error("Podane hasła nie zgadzają się"))
+					} else {
+						callback()
+					}
+				},
+				trigger: "blur"
+            }
+        ]
     }
-}
+
+    const validateCredentials = () => {
+		credentialsForm.value.validate((valid) => {
+			if (!valid) return;
+			changePassword();
+		});
+	};
+
+    const changePassword = () => {
+		formState.isFormSubmitting = true;
+		authStore.changePassword(credentials)
+			.then(() => formState.isFormDone = true)
+            .catch((e) => NotificationService.displayError('Zmiana hasła nie powiodła się', e.message))
+			.finally(() => formState.isFormSubmitting = false);
+	};
+
+    const forceLogout = () => {
+        authStore.forceLogout();
+    };
 </script>
 
 <style scoped lang="scss">
@@ -161,7 +182,7 @@ export default {
             position: absolute;
             width: 1px;
             height: 100%;
-            background: $--color-text;
+            background: $--color-text-muted-3;
             right: -25px;
         }
     }

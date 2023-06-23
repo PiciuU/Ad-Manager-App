@@ -305,6 +305,19 @@ class UserController extends Controller
     }
 
     /**
+     * Logout all user instances by destroying his tokens.
+     *
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function forceLogout() {
+        auth()->user()->tokens()->delete();
+
+        $this->logController->createLogEntry('AUTH/LOGOUT', ['user_id' =>auth()->user()->id]);
+
+        return $this->successResponse('Logout successful');
+    }
+
+    /**
      * Get the data of the authenticated user.
      *
      * @return \App\Http\Traits\ResponseTrait

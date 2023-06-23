@@ -30,6 +30,11 @@ export const router = createRouter({
                     component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Settings.vue')
                 },
                 {
+                    name: 'Notifications',
+                    path: 'powiadomienia',
+                    component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Notifications.vue')
+                },
+                {
                     path: 'admin',
                     component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/layouts/Admin.vue'),
                     children: [

@@ -8,6 +8,29 @@
         </div>
         <div class="header__group">
             <div class="options">
+                <div class="options__notification" :class="{'options__notification-unseen': hasUnseenNotification}">
+                    <font-awesome-icon @click="showNotifications" class="options__icon" icon="bell" title="Powiadomienia" />
+                    <transition name="fade">
+                        <div v-show="isNotificationsVisible" @click="showNotifications" class="notification__overlay"></div>
+                    </transition>
+                    <transition name="fade">
+                        <div class="notification" v-show="isNotificationsVisible">
+                            <div class="notification__item" v-for="notification in notifications" :key="notification.id" :class="{'notification__not-seen': notification.isSeen == 0}">
+                                <span>
+                                    <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}" class="notification__text">
+                                        {{ truncateString(notification .title, 75) }}
+                                    </router-link>
+                                </span>
+                                <font-awesome-icon @click="changeSeenStatus(notification)" class="options__icon" icon="eye" title="Zaznacz jako odczytana" />
+                            </div>
+                            <div class="notification__footer">
+                                <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}">
+                                    Wyświetl wszystkie powiadomienia
+                                </router-link>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
                 <router-link class="options__link" :to="{path: '/panel/ustawienia'}"><font-awesome-icon class="options__icon" icon="cog" title="Ustawienia konta" /></router-link>
                 <font-awesome-icon class="options__icon" icon="sign-out-alt" title="Wyloguj" @click="authStore.logout" />
             </div>
@@ -23,14 +46,15 @@
 </template>
 
 <script setup>
-    import { watchEffect } from 'vue';
+    import { ref, reactive, watchEffect } from 'vue';
+    import { truncateString } from '@/common/helpers/utility.helper';
     import { useDataStore } from '@/stores/DataStore';
     import { useAuthStore } from '@/stores/AuthStore';
 
     const dataStore = useDataStore();
     const authStore = useAuthStore();
 
-    function handleAction() {
+    const handleAction = () => {
         if (window.innerWidth > 768) dataStore.collapseSidebar();
         else dataStore.hideSidebar();
     }
@@ -39,6 +63,51 @@
         if (dataStore.isScrollDisabled) document.querySelector('body').classList.add('disable-scroll')
         else document.querySelector('body').classList.remove('disable-scroll')
     });
+
+    /* Notifications */
+
+    const isNotificationsVisible = ref(false);
+
+    const showNotifications = () => {
+        if (notifications === null){
+            // authStore.fetchLastNotifications()
+            //     .then((response) => {
+            //         notifications = response.data;
+            //     })
+        }
+        isNotificationsVisible.value = !isNotificationsVisible.value;
+    }
+
+    const hasUnseenNotification = ref(true); // Change to authStore.getUser.notification
+
+    const notifications = reactive([
+        {
+            id: 1,
+            title: "Nieopłacona faktura za reklamę",
+            description: "Masz nieopłaconą fakturę (INV-05404520) za reklamę \"Rerum repudiandae laudantium et dolorem hic.\".",
+            isSeen: 0
+        },
+        {
+            id: 2,
+            title: "Zakończenie publikacji reklamy",
+            description: "Twoja reklama \"Beatae ut adipisci aut aliquid accusantium.\" zakończyła swoją publikację.",
+            isSeen: 1
+        },
+        {
+            id: 3,
+            title: "Nieopłacona faktura za reklamę",
+            description: "Masz nieopłaconą fakturę (INV-05404520) za reklamę \"Recusandae alias harum consequuntur neque vel assumenda.\".",
+            isSeen: 1
+        },
+    ]);
+
+    const changeSeenStatus = (notification) => {
+        notification.isSeen = !notification.isSeen;
+
+        if (hasUnseenNotification.value == true && !notifications.some(notification => notification.isSeen == 0)) {
+            hasUnseenNotification.value = false;
+        }
+    };
 </script>
 
 <style lang="scss" scoped>
@@ -103,13 +172,32 @@
 
         &__icon {
             padding: 10px;
-            font-size: 18px;
+            font-size: 1.8rem;
             cursor: pointer;
             transition: color .15s ease-in-out;
 
             &:hover {
                 transition: color .15s ease-in-out;
-                color: $--color-text-muted-3;
+                color: $--color-primary;
+            }
+        }
+
+        &__notification {
+            display: inline-block;
+            position: relative;
+
+        }
+
+        &__notification-unseen {
+                &:after {
+                content: '';
+                position: absolute;
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                top: 5px;
+                right: 5px;
+                background:$--color-error;
             }
         }
     }
@@ -128,12 +216,12 @@
 
         &__name {
             word-break: break-word;
-            font-size: 18px;
+            font-size: 1.8rem;
         }
 
         &__company {
             word-break: break-word;
-            font-size: 14px;
+            font-size: 1.4rem;
             color: #e2dfdf;
         }
 
@@ -164,4 +252,104 @@
             }
         }
     }
+
+    .notification {
+        width: 400px;
+        height: 200px;
+        background: $--color-overlay;
+        box-shadow: 5px 5px 20px 0 rgba(black, 0.2);
+        border-radius: 5px;
+        border: 1px solid $--color-text-muted-3;
+        position: absolute;
+        left: -182px;
+        top: 40px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        z-index: 200;
+
+        &:after {
+            content: "";
+            position: absolute;
+            top: 0px;
+            right: 182px;
+            width: 0;
+            height: 0;
+            transform: translate(-10px, -100%);
+            border-left: 0.75rem solid transparent;
+            border-right: 0.75rem solid transparent;
+            border-bottom: 0.75rem solid $--color-text-muted-3;
+        }
+
+        &__overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        &__item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: $--color-text-muted-2;
+
+            a {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            &:after {
+                position: absolute;
+                content: '';
+                width: 95%;
+                left: 50%;
+                transform: translateX(-50%);
+                height: 1px;
+                background: $--color-text-muted-3;
+                bottom: -7.5px;
+            }
+        }
+
+        &__not-seen {
+            color: $--color-primary;
+        }
+
+        &__text {
+            flex: 1;
+            padding: 0px 10px;
+            font-size: 1.4rem;
+        }
+
+        .options__icon {
+            font-size: 1.2rem;
+        }
+
+        &__footer {
+            margin-top: auto;
+            text-align: center;
+            margin-bottom: 5px;
+
+            a {
+                color: $--color-text;
+                text-decoration: none;
+                font-size: 1.4rem;
+            }
+        }
+    }
+
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity 0.5s ease;
+    }
+
+    .fade-enter-from, .fade-leave-to {
+        opacity: 0;
+    }
+
 </style>
