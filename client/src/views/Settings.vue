@@ -6,15 +6,14 @@
                 <el-card class="card">
                     <div class="container__title">Ustawienia konta</div>
                     <el-tabs
-                        v-model="activeName"
+                        v-model="activeTab"
                         type="card"
-                        class="demo-tabs"
-                        @tab-click="handleClick"
+                        class="card__tabs"
                     >
-                        <el-tab-pane label="Bezpieczeństwo" name="first">
+                        <el-tab-pane label="Bezpieczeństwo" name="security" lazy>
                             <SettingsSecurity />
                         </el-tab-pane>
-                        <el-tab-pane label="Preferencje" name="second">
+                        <el-tab-pane label="Preferencje" name="preferences" lazy>
                             <SettingsPreferences />
                         </el-tab-pane>
                     </el-tabs>
@@ -25,27 +24,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import SettingsSecurity from '@/modules/components/SettingsSecurity.vue'
-import SettingsPreferences from '@/modules/components/SettingsPreferences.vue'
+    import { ref } from 'vue'
+    import SettingsSecurity from '@/modules/components/SettingsSecurity.vue'
+    import SettingsPreferences from '@/modules/components/SettingsPreferences.vue'
 
-const activeName = ref('first')
-const handleClick = (tab, event) => {
-    console.log(tab, event)
-}
+    const activeTab = ref('security');
 </script>
 
-<style scoped lang="scss">
-.demo-tabs,
-.container__title,
-.el-tabs__content {
-    padding: 32px;
-    color: #6b778c;
-    font-size: 2rem;
-    font-weight: 600;
-}
-
-.container__title {
-    padding: 0;
-}
+<style lang="scss" scoped>
+    .card__tabs {
+        margin-top: 10px;
+    }
 </style>

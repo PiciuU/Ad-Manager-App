@@ -94,6 +94,18 @@ export const useAdminStore = defineStore('adminStore', {
                 this.loading = false;
             }
         },
+        async sendNotification(payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.post(`/admin/notification`, payload);
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
         async getLogs(page = 1) {
             try {
                 this.loading = true;

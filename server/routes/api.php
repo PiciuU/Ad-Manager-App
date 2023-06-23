@@ -36,6 +36,7 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
         Route::put('user/mail', [UserController::class, 'updateMail']);
         Route::put('user/password', [UserController::class, 'updatePassword']);
         Route::get('logout', [UserController::class, 'logout']);
+        Route::get('logout/all', [UserController::class, 'forceLogout']);
     });
 
     /* Only admin has access to these endpoints */

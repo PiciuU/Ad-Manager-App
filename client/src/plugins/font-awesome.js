@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import { faTwitter } from '@fortawesome/free-brands-svg-icons'
 
-import { faUserSecret, faArrowDown, faHome, faSearch, faSignOutAlt, faUser, faBars, faAddressCard, faChartBar, faWrench, faCircleUser, faCompass, faQuestion, faLock, faKey, faEnvelope, faChartLine, faChartArea, faEye, faMouse, faCog, faUsers, faRectangleAd, faBook, faUserShield }  from '@fortawesome/free-solid-svg-icons';
+import { faUserSecret, faArrowDown, faHome, faSearch, faSignOutAlt, faUser, faBars, faAddressCard, faChartBar, faWrench, faCircleUser, faCompass, faQuestion, faLock, faKey, faEnvelope, faChartLine, faChartArea, faEye, faMouse, faCog, faUsers, faRectangleAd, faBook, faUserShield, faBell, faLink }  from '@fortawesome/free-solid-svg-icons';
 
 
 library.add(
@@ -34,7 +34,9 @@ library.add(
     faUsers,
     faRectangleAd,
     faBook,
-    faUserShield
+    faUserShield,
+    faBell,
+    faLink
 )
 
 export const fontAwesome = {
