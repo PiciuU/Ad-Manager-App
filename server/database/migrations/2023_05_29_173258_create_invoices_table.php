@@ -18,6 +18,7 @@ return new class extends Migration
             $table->double('price', 8, 2);
             $table->date('date');
             $table->enum('status', ['paid', 'unpaid'])->default('unpaid');
+            $table->string('notes', 255)->nullable();
             $table->timestamps();
         });
     }

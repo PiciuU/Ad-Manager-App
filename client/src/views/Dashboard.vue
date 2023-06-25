@@ -44,7 +44,7 @@
                 <el-card class="card cardstats">
                     <div class="card__title">Wszystkie wyświetlenia (ostatni rok)</div>
                     <line-chart
-                        v-if="!adStore.isLoading"
+                        v-if="!adStore.isLoading && isRendered"
                         download="Wyswietlenia_podsumowanie"
                         empty="Brak danych"
                         :data="{
@@ -70,7 +70,7 @@
                 <el-card class="card">
                     <div class="card__title">Wszystkie kliknięcia (ostatni rok)</div>
                     <line-chart
-                        v-if="!adStore.isLoading"
+                        v-if="!adStore.isLoading && isRendered"
                         download="Klikniecia_podsumowanie"
                         empty="Brak danych"
                         :data="{
@@ -97,10 +97,20 @@
 </template>
 
 <script setup>
-    import { reactive, onMounted } from 'vue';
+    import { ref, reactive, onMounted, onActivated, onDeactivated } from 'vue';
     import { useAdStore } from '@/stores/AdStore';
 
     const adStore = useAdStore();
+
+    const isRendered = ref('');
+
+    onActivated(() => {
+		isRendered.value = true;
+	})
+
+	onDeactivated(() => {
+		isRendered.value = false;
+	})
 
     const data = reactive({
         summary: {},
