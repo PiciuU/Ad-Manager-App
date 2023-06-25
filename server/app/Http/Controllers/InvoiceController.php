@@ -158,14 +158,13 @@ class InvoiceController extends Controller
      */
     public function show($id) // CURRENTLY NOT USED
     {
-        $invoice = Invoice::findOrFail($id);
-
+        $invoice = Invoice::find($id);
+        if (!$invoice) return $this->errorResponse("Invoice doesn\'t exists", 404);
         // Sprawdzenie uprawnień użytkownika
         if (auth()->user()->isAdmin() || $invoice->ad->user_id === auth()->user()->id) {
-            return response()->json($invoice);
+            return new InvoiceResource($invoice);
         }
-
-        return response()->json(['message' => 'Unauthorized'], 401);
+        return $this->errorResponse('An error occured', 403);
     }
 
     /**
@@ -184,8 +183,6 @@ class InvoiceController extends Controller
         if (!$invoice) return $this->errorResponse('Invoice not found', 404);
 
         if (!($invoice->update($request->validate([])))) return $this->errorResponse('An error occurred while updating the Invoice, please try again later', 500);
-
-
 
         return $this->successResponse('Invoice has been successfully updated', new InvoiceResource($invoice));
     }

@@ -22,16 +22,6 @@ class AdResource extends JsonResource
      */
     public function toArray($request)
     {
-
-        // Return only specified fields
-        if (!empty($this->fields)) {
-            $result = [];
-            foreach ($this->fields as $field) {
-                $result[Str::camel($field)] = $this->$field;
-            }
-            return $result;
-        }
-
         if ($request->user()->tokenCan('admin')) {
             return [
                 'id' => $this->id,

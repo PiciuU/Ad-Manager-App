@@ -10,10 +10,28 @@ class AdStatsResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
-     * @return array<string, mixed>
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
      */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
-        return parent::toArray($request);
+        // Include additional fields if the user is an administrator
+        // $additionalFields = [];
+        if ($request->user()->tokenCan('admin')) {
+            return [
+                'id' => $this->id,
+                'adId' => $this->ad_id,
+                'date' => $this->date,
+                'views' => $this->views,
+                'clicks' => $this->clicks
+            ];
+        } else {
+            return [
+                'adId' => $this->ad_id,
+                'date' => $this->date,
+                'views' => $this->views,
+                'clicks' => $this->clicks
+            ];
+        }
     }
 }

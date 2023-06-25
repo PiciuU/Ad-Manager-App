@@ -14,6 +14,21 @@ class NotificationResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        // Include additional fields if the user is an administrator
+        // $additionalFields = [];
+        if ($request->user()->tokenCan('admin')) {
+            return [
+                'userId' => $this->user_id,
+                'title' => $this->title,
+                'description' => $this->description,
+                'date' => date('Y-m-d H:i:s'),
+            ];
+        } else {
+            return [
+                'title' => $this->title,
+                'description' => $this->description,
+                'date' => date('Y-m-d H:i:s'),
+            ];
+        }
     }
 }

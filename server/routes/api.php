@@ -93,7 +93,7 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
 
 
 Route::group(['prefix' => 'auth'], function () {
-    Route::group(['prefix' => 'validate'], function() {
+    Route::group(['prefix' => 'validate'], function () {
         Route::put('key', [UserController::class, 'validateAuthenticationKey']);
         Route::put('login', [UserController::class, 'validateLogin']);
         Route::put('email', [UserController::class, 'validateEmail']);
