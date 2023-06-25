@@ -20,7 +20,8 @@ class Invoice extends Model
         'number',
         'price',
         'date',
-        'status'
+        'status',
+        'notes'
     ];
 
     protected $hidden = [

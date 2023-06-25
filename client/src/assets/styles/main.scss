@@ -269,8 +269,16 @@ i.el-icon.el-notification__closeBtn {
     }
 }
 
-/*  Disable border for specific el-card header */
-
+/* Disable border for specific el-card header */
 .auth-container .el-card__header {
     border: none;
+}
+
+/* Fix margin and padding of alerts used in forms as hints */
+
+.el-alert div.el-alert__content {
+    padding: 0px 16px;
+}
+.el-alert p.el-alert__description {
+    margin: 0px;
 }

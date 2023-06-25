@@ -16,6 +16,7 @@ class InvoiceRequest extends FormRequest
     {
         return $this->user()->tokenCan('admin');
     }
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -23,8 +24,6 @@ class InvoiceRequest extends FormRequest
     {
         return true;
     }
-
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -37,31 +36,27 @@ class InvoiceRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules for creating invoice
      *
      * @return array
      */
     protected function store(): array
     {
-
-        $rules = [];
         if ($this->hasAdminPrivileges()) {
-            $rules = array_merge($rules, [
+            return [
                 'ad_id' => ['required', 'string'],
                 'number' => ['required'],
                 'price' => ['required', 'numeric', 'regex:/^\d{0,6}\.\d{2}$/'],
                 'date' => ['required', 'date'],
                 'status' => ['required', 'string']
-            ]);
-
-            return $rules;
+            ];
         }
 
-        return $rules;
+        return [];
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules for updating invoice
      *
      * @return array
      */
@@ -76,6 +71,9 @@ class InvoiceRequest extends FormRequest
         ];
     }
 
+    /**
+     * Prepare the data for validation.
+     */
     protected function prepareForValidation()
     {
         if (($this->hasAdminPrivileges()) && ($this->filled('userId'))) {

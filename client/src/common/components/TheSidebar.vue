@@ -27,7 +27,7 @@
                         <span>Strona główna</span>
                     </el-menu-item>
 
-                    <el-menu-item index="/panel/szczegoly">
+                    <el-menu-item index="/panel/reklamy" :class="{ 'is-active': route.path == `/panel/reklamy/${route.params.id}` }">
                         <font-awesome-icon class="nav__icon" icon="chart-bar" />
                         <span>Szczegóły reklam</span>
                     </el-menu-item>

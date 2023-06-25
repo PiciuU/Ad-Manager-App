@@ -1,13 +1,8 @@
 const ADVERT_STATUSES = {
     active: 'Aktywna',
-    inactive: 'Nieaktywna'
-}
-
-const ADVERT_TYPES = {
-    top: 'Baner poziomy - "Billboard"',
-    ad200: 'Kwadrat na stronie głównej',
-    ad: 'Ogłoszenie na stronie głównej',
-    v_right: 'Baner pionowy - "Duży wieżowiec"'
+    inactive: 'Nieaktywna',
+    unpaid: 'Nieopłacona',
+    expired: 'Wygasła'
 }
 
 export function isStringEmpty(string) {
@@ -32,14 +27,8 @@ export function advertStatusToLocaleString(status) {
     return stringToLocale(ADVERT_STATUSES[key])
 }
 
-export function advertTypeToLocaleString(type) {
-    const key = Object.keys(ADVERT_TYPES).find((key) => key === type)
-    return stringToLocale(ADVERT_TYPES[key])
-}
-
 export default {
     advertStatusToLocaleString,
-    advertTypeToLocaleString,
     stringToLocale,
     isStringEmpty,
     isObjectEmpty,

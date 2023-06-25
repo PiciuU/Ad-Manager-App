@@ -236,26 +236,6 @@
     &__button {
         margin-top: 5px;
     }
-
-    &__links {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
-
-    &__link {
-        text-decoration: none;
-    }
-
-    &__link--primary {
-        color: var(--color-dark-blue);
-        font-weight: bold;
-    }
-
-    &__link--secondary {
-        color: var(--color-gray);
-    }
 }
 
 @media screen and (max-width: 1000px) {
