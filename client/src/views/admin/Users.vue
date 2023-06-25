@@ -118,6 +118,7 @@
                             <el-button @click="toggleModal('password')" class="card__button" type="primary" plain>Zmień hasło użytkownika</el-button>
                             <el-button v-if="!data.user.activationKey && !data.user.activatedAt" @click="toggleModal('activation')" class="card__button" type="primary" plain>Wygeneruj klucz aktywacyjny</el-button>
                             <el-button @click="toggleModal('ban')" class="card__button" type="primary" plain>{{ data.user.isBanned == true ? 'Odblokuj użytkownika' : 'Zablokuj użytkownika' }}</el-button>
+                            <el-button @click="toggleModal('notification')" class="card__button" type="primary" plain>Wyślij powiadomienie</el-button>
                         </div>
                     </el-card>
                 </el-col>
@@ -214,6 +215,8 @@
         <ModalUserPassword v-if="modals.currentModal === 'password'" :user="data.user" @close="toggleModal"/>
         <ModalUserActivationKey v-if="modals.currentModal === 'activation'" :user="data.user" @update="updateUser" @close="toggleModal"/>
         <ModalUserBan v-if="modals.currentModal === 'ban'" :user="data.user" @update="updateUser" @close="toggleModal"/>
+        <ModalUserNotification v-if="modals.currentModal === 'notification'" :user="data.user" @close="toggleModal"/>
+
 
         <ModalLogEdit v-if="modals.currentModal === 'log'" :log="data.log" @update="updateLog" @close="toggleModal"/>
     </el-main>
@@ -231,6 +234,7 @@
     import ModalUserPassword from '@/modules/components/admin/ModalUserPassword.vue';
     import ModalUserEdit from '@/modules/components/admin/ModalUserEdit.vue';
     import ModalUserCreate from '@/modules/components/admin/ModalUserCreate.vue';
+    import ModalUserNotification from '@/modules/components/admin/ModalUserNotification.vue';
     import ModalLogEdit from '@/modules/components/admin/ModalLogEdit.vue';
 
     const adminStore = useAdminStore();
@@ -330,14 +334,21 @@
 
 <style lang="scss" scoped>
 
+    .button__group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        .card__button {
+            margin-left: 0px;
+        }
+    }
+
     @media screen and (max-width: $--breakpoint-medium-devices){
         .button__group {
-            gap: 10px;
-            display: flex;
             flex-direction: column;
             .card__button {
                 width: 100%;
-                margin-left: 0px;
             }
         }
     }

@@ -27,7 +27,7 @@
                         <span>Strona główna</span>
                     </el-menu-item>
 
-                    <el-menu-item index="/panel/szczegoly">
+                    <el-menu-item index="/panel/reklamy" :class="{ 'is-active': route.path == `/panel/reklamy/${route.params.id}` }">
                         <font-awesome-icon class="nav__icon" icon="chart-bar" />
                         <span>Szczegóły reklam</span>
                     </el-menu-item>
@@ -81,18 +81,13 @@
                         <div class="nav__company">{{ authStore.getUser.name }}</div>
                     </div>
                     <div class="nav__options">
-                        <router-link
-                            class="options__link"
-                            :to="{ path: '/panel/ustawienia' }"
-                            @click="dataStore.handleAction"
-                        >
+                        <router-link class="options__link" :class="{'nav__notification-unseen': hasUnseenNotification}" :to="{ path: '/panel/powiadomienia' }" @click="handleAction">
+                            <font-awesome-icon class="nav__icon--secondary" icon="bell" />
+                        </router-link>
+                        <router-link class="options__link" :to="{ path: '/panel/ustawienia' }" @click="handleAction">
                             <font-awesome-icon class="nav__icon--secondary" icon="cog" />
                         </router-link>
-                        <font-awesome-icon
-                            class="nav__icon--secondary"
-                            icon="sign-out-alt"
-                            @click="authStore.logout"
-                        />
+                        <font-awesome-icon class="nav__icon--secondary" icon="sign-out-alt" @click="authStore.logout"/>
                     </div>
                 </div>
             </el-col>
@@ -101,13 +96,16 @@
 </template>
 
 <script setup>
-    import { useRoute } from 'vue-router'
-    import { useDataStore } from '@/stores/DataStore'
-    import { useAuthStore } from '@/stores/AuthStore'
+    import { ref } from 'vue';
+    import { useRoute } from 'vue-router';
+    import { useDataStore } from '@/stores/DataStore';
+    import { useAuthStore } from '@/stores/AuthStore';
 
     const dataStore = useDataStore();
     const authStore = useAuthStore();
     const route = useRoute();
+
+    const hasUnseenNotification = ref(true); // Change to authStore.getUser.notification
 
     const handleAction = () => {
         if (!dataStore.isSidebarHidden) dataStore.hideSidebar();
@@ -271,6 +269,19 @@
 
         &:first-child {
             margin-right: 10px;
+        }
+    }
+
+    &__notification-unseen {
+        &:after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            top: -5px;
+            right: 10px;
+            background:$--color-error;
         }
     }
 }

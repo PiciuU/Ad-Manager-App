@@ -16,11 +16,11 @@ return new class extends Migration
             $table->string('name', 255);
             $table->unsignedBigInteger('user_id');
             $table->enum('status', ['unpaid', 'active', 'inactive', 'expired'])->default('unpaid');
-            $table->timestamp('ad_start_date')->nullable();
-            $table->timestamp('ad_end_date')->nullable();
-            $table->string('file_name', 255);
-            $table->enum('file_type', ['img', 'video']);
-            $table->string('url', 255);
+            $table->date('ad_start_date')->nullable();
+            $table->date('ad_end_date')->nullable();
+            $table->string('file_name', 255)->nullable();
+            $table->enum('file_type', ['img', 'video'])->nullable();
+            $table->string('url', 255)->nullable();
             $table->timestamps();
         });
     }

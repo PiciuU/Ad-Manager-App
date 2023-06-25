@@ -39,10 +39,6 @@
 
     const adminStore = useAdminStore();
 
-    const props = defineProps({
-        user: { type: Object, required: true, default: {} }
-    });
-
     const emit = defineEmits(['close', 'update']);
 
     const isLoading = ref(false);

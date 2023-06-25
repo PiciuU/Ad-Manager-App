@@ -27,6 +27,7 @@ class InvoiceResource extends JsonResource
                 'date' => $this->date,
                 'status' => $this->status,
                 'number' => $this->number,
+                'notes' => $this->notes
             ];
         } else {
             return [
@@ -35,6 +36,7 @@ class InvoiceResource extends JsonResource
                 'date' => $this->date,
                 'status' => $this->status,
                 'number' => $this->number,
+                'notes' => $this->notes
             ];
         }
     }

@@ -4,10 +4,16 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Http\Requests\AdRequest;
 
 class AdResource extends JsonResource
 {
+    protected $fields = [];
+
+    public function returnFields($fields) {
+        $this->fields = $fields;
+    }
     /**
      * Transform the resource into an array.
      *
@@ -16,13 +22,12 @@ class AdResource extends JsonResource
      */
     public function toArray($request)
     {
-        // Include additional fields if the user is an administrator
         if ($request->user()->tokenCan('admin')) {
             return [
                 'id' => $this->id,
                 'name' => $this->name,
                 'userId' => $this->user_id,
-                'status' => 'unpaid',
+                'status' => $this->status,
                 'adStartDate' => $this->ad_start_date,
                 'adEndDate' => $this->ad_end_date,
                 'fileName' => $this->file_name,
@@ -32,7 +37,7 @@ class AdResource extends JsonResource
         } else {
             return [
                 'name' => $this->name,
-                'status' => 'unpaid',
+                'status' => $this->status,
                 'adStartDate' => $this->ad_start_date,
                 'adEndDate' => $this->ad_end_date,
                 'fileName' => $this->file_name,

@@ -45,6 +45,11 @@ class UserRequest extends FormRequest
         return false;
     }
 
+    /**
+     * Get the method name for the current request action.
+     *
+     * @return string
+     */
     protected function getMethodName(): string
     {
         $action = $this->route()->getActionMethod();
