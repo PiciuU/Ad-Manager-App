@@ -5,26 +5,12 @@ namespace App\Http\Requests;
 use App\Models\User;
 
 use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\ValidationException;
 
 class UserRequest extends FormRequest
 {
-    // protected function failedValidation(Validator $validator)
-    // {
-    //     $response = response()->json([
-    //         'status' => "Error",
-    //         'message' => "Validation failed. Please check the following fields:",
-    //         'data' => $validator->errors(),
-    //     ], 422);
-
-    //     throw (new ValidationException($validator, $response))
-    //         ->errorBag($this->errorBag)
-    //         ->redirectTo($this->getRedirectUrl());
-    // }
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -55,7 +41,6 @@ class UserRequest extends FormRequest
         $action = $this->route()->getActionMethod();
         return Str::camel($action);
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -124,7 +109,7 @@ class UserRequest extends FormRequest
     {
         return [
             'activation_key' => ['required', 'string', 'size:32', Rule::exists('users', 'activation_key')],
-            'email' => ['required', 'string', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')]
+            'email' => ['required', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')]
         ];
     }
 
@@ -138,7 +123,7 @@ class UserRequest extends FormRequest
         return [
             'activation_key' => ['required', 'string', 'size:32', Rule::exists('users', 'activation_key')],
             'login' => ['required', 'string', 'min:2', 'max:32', 'regex:/^[a-z0-9_]*$/i', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')],
-            'email' => ['required', 'string', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')],
+            'email' => ['required', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore(User::where('activation_key', $this->activationKey)->first()?->id, 'id')],
             'password' => ['required', 'string', 'confirmed', 'min:6', 'max:255'],
         ];
     }
@@ -151,8 +136,8 @@ class UserRequest extends FormRequest
     protected function login(): array
     {
         return [
-            'login' => ['required'],
-            'password' => ['required']
+            'login' => ['required', 'string'],
+            'password' => ['required', 'string']
         ];
     }
 
@@ -176,13 +161,13 @@ class UserRequest extends FormRequest
     protected function resetPassword() : array
     {
         return [
-            'hash'=> ['required'],
+            'hash'=> ['required', 'string'],
             'password' => ['required', 'string', 'confirmed', 'min:6', 'max:255'],
         ];
     }
 
     /**
-     * Get the validation rules for updating the user's data.
+     * Get the validation rules for updating the user data.
      *
      * @return array
      */
@@ -190,13 +175,13 @@ class UserRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'representative' => ['sometimes', 'string', 'max:255'],
-            'representative_phone' => ['sometimes', 'string', 'max:32', 'not_regex:/[a-z]/i'],
-            'address' => ['sometimes', 'string', 'max:255'],
-            'postal_code' => ['sometimes', 'string', 'max:255'],
-            'nip' => ['sometimes', 'string', 'max:10', 'not_regex:/[a-z]/i'],
-            'company_email' => ['sometimes', 'nullable', 'string', 'email', 'max:255'],
-            'company_phone' => ['sometimes', 'nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
+            'representative' => ['sometimes', 'nullable', 'max:255'],
+            'representative_phone' => ['sometimes', 'nullable', 'max:32', 'not_regex:/[a-z]/i'],
+            'address' => ['sometimes', 'nullable', 'max:255'],
+            'postal_code' => ['sometimes', 'nullable', 'max:255'],
+            'nip' => ['sometimes', 'nullable', 'max:10', 'not_regex:/[a-z]/i'],
+            'company_email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'company_phone' => ['sometimes', 'nullable', 'max:32', 'not_regex:/[a-z]/i'],
         ];
     }
 
@@ -207,7 +192,7 @@ class UserRequest extends FormRequest
      */
     protected function updateMail() : array {
         return [
-            'email' => ['sometimes', 'required', 'string', 'email', 'min:3', 'max:255', 'unique:users'],
+            'email' => ['sometimes', 'required', 'email', 'min:3', 'max:255', 'unique:users'],
         ];
     }
 
@@ -239,7 +224,7 @@ class UserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'min:3', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'max:255'],
-            'user_role_id' => ['required', Rule::in([1])],
+            'user_role_id' => ['required', 'integer', Rule::in([1])],
         ];
     }
 
@@ -254,14 +239,14 @@ class UserRequest extends FormRequest
             'login' => ['sometimes', 'required', 'string', 'min:2', 'max:32', 'regex:/^[a-z0-9_]*$/i', Rule::unique('users')->ignore($this->id, 'id')],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'string', 'email', 'min:3', 'max:255', Rule::unique('users')->ignore($this->id, 'id')],
-            'representative' => ['sometimes','nullable', 'string', 'max:255'],
-            'representative_phone' => ['sometimes','nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
-            'address' => ['sometimes','nullable', 'string', 'max:255'],
-            'postal_code' => ['sometimes','nullable', 'string', 'max:255'],
-            'country' => ['sometimes','nullable', 'string', 'max:255'],
-            'nip' => ['sometimes','nullable', 'string', 'max:10', 'not_regex:/[a-z]/i'],
-            'company_email' => ['sometimes', 'nullable', 'string', 'email', 'max:255'],
-            'company_phone' => ['sometimes', 'nullable', 'string', 'max:32', 'not_regex:/[a-z]/i'],
+            'representative' => ['sometimes', 'nullable', 'max:255'],
+            'representative_phone' => ['sometimes', 'nullable', 'max:32', 'not_regex:/[a-z]/i'],
+            'address' => ['sometimes', 'nullable', 'max:255'],
+            'postal_code' => ['sometimes', 'nullable', 'max:255'],
+            'country' => ['sometimes', 'nullable', 'max:255'],
+            'nip' => ['sometimes', 'nullable', 'max:10', 'not_regex:/[a-z]/i'],
+            'company_email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'company_phone' => ['sometimes', 'nullable', 'max:32', 'not_regex:/[a-z]/i'],
         ];
     }
 
@@ -313,13 +298,6 @@ class UserRequest extends FormRequest
         if ($this->isMethod('POST')) {
             $this->merge([
                 'user_role_id' => 1
-            ]);
-            $this->merge([
-                'name' => $this->login
-            ]);
-        } else if ($this->filled('userRoleId')) {
-            $this->merge([
-                'user_role_id' => $this->userRoleId
             ]);
         }
 

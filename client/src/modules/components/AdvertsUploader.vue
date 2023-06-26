@@ -34,15 +34,17 @@
 </template>
 
 <script setup>
-    import { ref, computed, watch, onMounted } from 'vue';
+    import { ref, onMounted } from 'vue';
 
+    import { useAdminStore } from '@/stores/AdminStore';
     import { useAdStore } from '@/stores/AdStore';
     import NotificationService from '@/services/notification.service';
 
-    const adStore = useAdStore();
+    let store = useAdStore();
 
     const props = defineProps({
-        advert: { type: Object, required: true, default: {} }
+        advert: { type: Object, required: true, default: {} },
+        mode: { type: String, required: false, default: 'user' }
     });
 
     const emit = defineEmits(['update']);
@@ -50,19 +52,14 @@
     const isFileListLoading = ref(false);
     const fileList = ref([]);
 
-    // const advertId = computed(() => props.advert.id);
-
     onMounted(() => {
+        if (props.mode === 'admin') store = useAdminStore();
         fetchFiles();
     });
 
-    // watch(advertId, () => {
-    //     fetchFiles();
-    // });
-
     const fetchFiles = () => {
         isFileListLoading.value = true;
-        adStore.fetchFiles(props.advert.id)
+        store.fetchFiles(props.advert.id)
                 .then((response) => {
                     fileList.value = response.data;
                 })
@@ -77,11 +74,11 @@
             return;
         }
 
-        const notify = NotificationService.displayMessage('info', 'Trwa przesyłanie pliku...');
+        const notify = NotificationService.displayMessage('info', 'Trwa przesyłanie pliku...', 0);
         const formData = new FormData();
         formData.append('file', form.file);
 
-        adStore.uploadFile(props.advert.id, formData)
+        store.uploadFile(props.advert.id, formData)
             .then((response) => {
                 fileList.value.push(response.data.file);
                 emit('update', response.data.fileName, response.data.fileType);
@@ -101,8 +98,8 @@
             if (!isConfirmed) return;
         }
 
-        const notify = NotificationService.displayMessage('info', 'Trwa usuwanie pliku...');
-        adStore.deleteFile(props.advert.id, file.name)
+        const notify = NotificationService.displayMessage('info', 'Trwa usuwanie pliku...', 0);
+        store.deleteFile(props.advert.id, file.name)
             .then((response) => {
                 NotificationService.displayMessage('success', 'Pomyślnie usunieto plik.');
                 emit('update', response.data.fileName, response.data.fileType);
@@ -120,8 +117,8 @@
     };
 
     const handleFileHighlight = (file) => {
-        const notify = NotificationService.displayMessage('info', 'Trwa ustawianie aktywnego pliku reklamy...');
-        adStore.highlightFile(props.advert.id, file.name)
+        const notify = NotificationService.displayMessage('info', 'Trwa ustawianie aktywnego pliku reklamy...', 0);
+        store.highlightFile(props.advert.id, file.name)
             .then((response) => {
                 NotificationService.displayMessage('success', 'Pomyślnie ustawiono aktywny plik.');
                 emit('update', response.data.fileName, response.data.fileType);

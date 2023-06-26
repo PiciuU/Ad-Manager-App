@@ -10,10 +10,35 @@ export const useAdminStore = defineStore('adminStore', {
         isLoading: (state) => state.loading,
     },
     actions: {
-        async getUsers() {
+        /* Manage User */
+        async fetchUsers() {
             try {
                 this.loading = true;
                 const response = await ApiService.get('/admin/users');
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchUser(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/users/${id}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchUserAdverts(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/users/${id}/ads`);
                 return Promise.resolve(response);
             }
             catch (error) {
@@ -94,10 +119,11 @@ export const useAdminStore = defineStore('adminStore', {
                 this.loading = false;
             }
         },
+        /* Manage Notifications */
         async sendNotification(payload) {
             try {
                 this.loading = true;
-                const response = await ApiService.post(`/admin/notification`, payload);
+                const response = await ApiService.post(`/admin/notifications`, payload);
                 return Promise.resolve();
             }
             catch (error) {
@@ -106,7 +132,130 @@ export const useAdminStore = defineStore('adminStore', {
                 this.loading = false;
             }
         },
-        async getLogs(page = 1) {
+        /* Manage Advert */
+        async fetchAdverts() {
+            try {
+                this.loading = true;
+                const response = await ApiService.get('/admin/ads');
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchAdvert(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async createAdvert(payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.post('/admin/ads', payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async updateAdvert(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put(`/admin/ads/${id}`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async deactivateAdvert(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}/deactivate`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async renewAdvert(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put(`/admin/ads/${id}/renew`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+         /* Manage Invoices */
+         async fetchInvoices(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}/invoices`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async payInvoice(id, invoiceId) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}/invoices/${invoiceId}/payment`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async createInvoice(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}/invoices/create`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async updateInvoice(id, invoiceId, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put(`/admin/ads/${id}/invoices/${invoiceId}`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        /* Manage Logs */
+        async fetchLogs(page = 1) {
             try {
                 this.loading = true;
                 const response = await ApiService.get(`/admin/logs?page=${page}`);
@@ -118,10 +267,22 @@ export const useAdminStore = defineStore('adminStore', {
                 this.loading = false;
             }
         },
-        async getUserLogs(id, page = 1) {
+        async fetchUserLogs(id, page = 1) {
             try {
                 this.loading = true;
-                const response = await ApiService.get(`/admin/logs/${id}?page=${page}`);
+                const response = await ApiService.get(`/admin/logs/users/${id}?page=${page}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async fetchAdvertLogs(id, page = 1) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/logs/ads/${id}?page=${page}`);
                 return Promise.resolve(response);
             }
             catch (error) {
@@ -142,5 +303,54 @@ export const useAdminStore = defineStore('adminStore', {
                 this.loading = false;
             }
         },
+        /* Manage Files */
+        async fetchFiles(id) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}/files`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async uploadFile(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.post(`/admin/ads/${id}/files`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async highlightFile(id, fileName) {
+            try {
+                this.loading = true;
+                const response = await ApiService.get(`/admin/ads/${id}/files/${fileName}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async deleteFile(id, fileName) {
+            try {
+                this.loading = true;
+                const response = await ApiService.delete(`/admin/ads/${id}/files/${fileName}`);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        }
     }
 });

@@ -8,6 +8,16 @@ class LogRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    protected function hasAdminPrivileges(): bool
+    {
+        return $this->user()->tokenCan('admin');
+    }
+
+    /**
+     * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
@@ -21,8 +31,12 @@ class LogRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'notes' => ['sometimes', 'nullable', 'string']
-        ];
+        if ($this->hasAdminPrivileges()) {
+            return [
+                'notes' => ['sometimes', 'nullable']
+            ];
+        }
+
+        return [];
     }
 }

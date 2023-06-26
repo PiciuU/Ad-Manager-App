@@ -16,12 +16,7 @@ export const router = createRouter({
                 },
                 {
                     name: 'Ads',
-                    path: 'reklamy',
-                    component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Adverts.vue'),
-                },
-                {
-                    name: 'Ad',
-                    path: 'reklamy/:id',
+                    path: 'reklamy/:id?',
                     component: () => import(/* webpackChunkName: "group-authorized" */ '@/views/Adverts.vue'),
                 },
                 {
@@ -45,8 +40,13 @@ export const router = createRouter({
                     children: [
                         {
                             name: 'AdminUsers',
-                            path: 'uzytkownicy',
+                            path: 'uzytkownicy/:id?',
                             component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/views/admin/Users.vue')
+                        },
+                        {
+                            name: 'AdminAds',
+                            path: 'reklamy/:id?',
+                            component: () => import(/* webpackChunkName: "group-authorized-admin" */ '@/views/admin/Adverts.vue')
                         },
                         {
                             name: 'AdminLogs',

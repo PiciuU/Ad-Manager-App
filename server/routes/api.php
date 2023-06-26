@@ -49,10 +49,37 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
         Route::put('user/password', [UserController::class, 'changePassword']);
 
         Route::get('logs', [LogController::class, 'index']);
-        Route::get('logs/{id}', [LogController::class, 'show']);
+        Route::get('logs/users/{id}', [LogController::class ,'showUser']);
+        Route::get('logs/ads/{id}', [LogController::class ,'showAd']);
         Route::put('logs/{id}', [LogController::class, 'update']);
+
+         /* Notifications */
+        Route::post('notifications', [NotificationController::class, 'store']);
+
+        /* Ads */
+        Route::get('users/{id}/ads', [AdController::class, 'indexShowAsAdmin']);
+
+        Route::get('ads', [AdController::class, 'indexAsAdmin']);
+        Route::post('ads', [AdController::class, 'storeAsAdmin']);
+        Route::get('ads/{id}', [AdController::class, 'showAsAdmin']);
+        Route::put('ads/{id}', [AdController::class, 'updateAsAdmin']);
+        Route::put('ads/{id}/renew', [AdController::class, 'renewAsAdmin']);
+        Route::get('ads/{id}/deactivate', [AdController::class, 'deactivateAsAdmin']);
+
+        /* Files of ad */
+        Route::get('ads/{id}/files', [FileController::class, 'fetchAsAdmin']);
+        Route::post('ads/{id}/files', [FileController::class, 'uploadAsAdmin']);
+        Route::get('ads/{id}/files/{fileName}', [FileController::class, 'highlightAsAdmin']);
+        Route::delete('ads/{id}/files/{fileName}', [FileController::class, 'deleteAsAdmin']);
+
+        /* Invoices of ad */
+        Route::get('ads/{id}/invoices', [InvoiceController::class, 'indexAsAdmin']);
+        Route::get('ads/{id}/invoices/{invoiceId}/payment', [InvoiceController::class, 'paymentAsAdmin']);
+        Route::get('ads/{id}/invoices/create', [InvoiceController::class, 'storeAsAdmin']);
+        Route::put('ads/{id}/invoices/{invoiceId}', [InvoiceController::class, 'updateAsAdmin']);
     });
 
+    /* Ads */
     Route::get('ads', [AdController::class, 'index']);
     Route::post('ads', [AdController::class, 'store']);
     Route::get('ads/{id}', [AdController::class, 'show']);
@@ -60,37 +87,27 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
     Route::put('ads/{id}/renew', [AdController::class, 'renew']);
     Route::get('ads/{id}/deactivate', [AdController::class, 'deactivate']);
 
+    /* Files of ad */
     Route::get('ads/{id}/files', [FileController::class, 'fetch']);
     Route::post('ads/{id}/files', [FileController::class, 'upload']);
     Route::get('ads/{id}/files/{fileName}', [FileController::class, 'highlight']);
     Route::delete('ads/{id}/files/{fileName}', [FileController::class, 'delete']);
 
-    Route::get('ad/{id}/invoices', [InvoiceController::class, 'index']);
-    Route::get('ad/{id}/invoices/{invoiceId}/payment', [InvoiceController::class, 'payment']);
+    /* Invoices of ad */
+    Route::get('ads/{id}/invoices', [InvoiceController::class, 'index']);
+    Route::get('ads/{id}/invoices/{invoiceId}/payment', [InvoiceController::class, 'payment']);
 
+    /* User notifications */
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/latest', [NotificationController::class, 'latest']);
+    Route::get('notifications/{id}/seen', [NotificationController::class, 'isSeen']);
 
-
-    // Route::put('ads/{id}', [AdController::class, 'update']);
-    // Route::delete('ads/{id}', [AdController::class, 'destroy']);
-
+    /* Temp */
     Route::get('stats', [AdStatsController::class, 'index']);
     Route::get('stats/{ad_id}/{stat_id?}', [AdStatsController::class, 'show']);
     Route::post('stats/{stat_id}', [AdStatsController::class, 'update']); //admin only
     Route::get('stats/{stat_id}/delete', [AdStatsController::class, 'delete']); //admin only
-
-    Route::post('invoice', [InvoiceController::class, 'store']);
-    Route::get('invoice/{id}', [InvoiceController::class, 'show']);
-    Route::put('invoice/{id}', [InvoiceController::class, 'update']); //admin only
-    Route::delete('invoice/{id}', [InvoiceController::class, 'destroy']); //admin only
-
-    Route::get('notification', [NotificationController::class, 'index']);
-    Route::post('notification', [NotificationController::class, 'store']);
-    Route::get('notification/{id}', [NotificationController::class, 'show']);
-    Route::get('notification/{id}/seen', [NotificationController::class, 'isSeen']);
-    Route::post('notification/{id}', [NotificationController::class, 'update']);
-    Route::get('notification/{id}/delete', [NotificationController::class, 'delete']);
 });
-
 
 Route::group(['prefix' => 'auth'], function () {
     Route::group(['prefix' => 'validate'], function () {

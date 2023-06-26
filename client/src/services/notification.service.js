@@ -1,8 +1,3 @@
-import 'element-plus/es/components/notification/style/css';
-import 'element-plus/es/components/message/style/css';
-import 'element-plus/es/components/message-box/style/css';
-import { ElNotification, ElMessage, ElMessageBox } from 'element-plus';
-
 const NotificationService = {
 	displayError(title = 'Ups... Coś poszło nie tak.', message = 'Wystąpił nieoczekiwany błąd. Prosimy odswieżyć stronę lub spróbować ponownie później.', duration = 3000) {
 		ElNotification({
@@ -13,21 +8,22 @@ const NotificationService = {
 		});
 	},
 
-	displaySuccess(title = 'Sukces!', message = 'Pomyślnie wykonano żądaną operację.') {
+	displaySuccess(title = 'Sukces!', message = 'Pomyślnie wykonano żądaną operację.', duration = 3000) {
 		ElNotification({
 			type: 'success',
 			title: title,
 			message: message,
-			duration: 3000
+			duration: duration
 		});
 	},
 
-	displayMessage(type = 'warning', message = 'Wystąpił nieoczekiwany błąd. Prosimy odswieżyć stronę lub spróbować ponownie później.') {
+	displayMessage(type = 'warning', message = 'Wystąpił nieoczekiwany błąd. Prosimy odswieżyć stronę lub spróbować ponownie później.', duration = 3000) {
 		return ElMessage({
 			showClose: true,
 			message: message,
 			type: type,
-			center: true
+			center: true,
+			duration: duration
 		})
 	},
 

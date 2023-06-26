@@ -2,18 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Invoice;
 use App\Models\Ad;
+use App\Http\Resources\AdResource;
 
-use App\Http\Resources\InvoiceResource;
-use App\Http\Resources\InvoiceCollection;
+use App\Models\Invoice;
 use App\Http\Requests\InvoiceRequest;
+use App\Http\Resources\InvoiceCollection;
+use App\Http\Resources\InvoiceResource;
 
 use Carbon\Carbon;
 
 class InvoiceController extends Controller
 {
     const PRICE_PER_DAY = 10;
+
+    private $logController;
+
+    public function __construct(LogController $logController = new LogController())
+    {
+        $this->logController = $logController;
+    }
 
     /**
      * Generate the next invoice number based on the last invoice number in the database.
@@ -32,6 +40,7 @@ class InvoiceController extends Controller
         }
 
         $invoiceNumber = 'INV-' . $nextNumber;
+
         return $invoiceNumber;
     }
 
@@ -70,8 +79,8 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Internal Method
      * Create a new invoice based on the payload.
+     * This method is internal and should only be called by an instance of InvoiceController.
      *
      * @param  array  $payload
      * @return \App\Http\Resources\InvoiceResource
@@ -91,38 +100,60 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Get the list of invoices for a specific ad.
+     * Checks if the user has administrator privileges.
+     *
+     * @return bool
+     */
+    public function hasAccess()
+    {
+        return auth()->user()->hasAdminPrivileges();
+    }
+
+    /**
+     * =====================
+     *     ADMIN SECTION
+     * =====================
+     */
+
+    /**
+     * Retrieve a list of invoices.
+     * This method is accessible only to administrators.
      *
      * @param  int  $id
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function index($id)
+    public function indexAsAdmin($id)
     {
-        $ad = auth()->user()->ads()->where('id', $id)->first();
+        if (!$this->hasAccess()) return $this->errorResponse("You do not have access to this resource!", 403);
 
-        if (!$ad) return $this->errorResponse('Ad not found.', 404);
+        $ad = Ad::where('id', $id)->first();
+
+        if (!$ad) return $this->errorResponse("Ad not found.", 404);
 
         $invoices = new InvoiceCollection($ad->invoices()->orderBy('id', 'desc')->get());
 
-        return $this->successResponse('Invoices has been successfully found', $invoices);
+        return $this->successResponse("Invoices has been successfully found.", $invoices);
     }
 
     /**
      * Mark the invoice as paid and update the dates of the associated ad.
+     * This method is accessible only to administrators.
      *
      * @param  int  $id
      * @param  int  $invoiceId
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function payment($id, $invoiceId)
+    public function paymentAsAdmin($id, $invoiceId)
     {
-        $ad = auth()->user()->ads()->where('id', $id)->first();
+        if (!$this->hasAccess()) return $this->errorResponse("You do not have access to this resource!", 403);
 
-        if (!$ad) return $this->errorResponse('Ad not found.', 404);
+        $ad = Ad::where('id', $id)->first();
+
+        if (!$ad) return $this->errorResponse("Ad not found.", 404);
 
         $invoice = $ad->invoices()->where('id', $invoiceId)->first();
 
-        if (!$invoice) return $this->errorResponse('Invoice not found.', 404);
+        if (!$invoice) return $this->errorResponse("Invoice not found.", 404);
 
         /* Recalculate dates of advert emission */
         $startDate = Carbon::parse($ad->ad_start_date);
@@ -147,61 +178,167 @@ class InvoiceController extends Controller
             'ad_end_date' => $endDate->format('Y-m-d')
         ]);
 
-        return $this->successResponse('Invoice has been successfully paid, the ad is now active', ['advert' => $ad, 'invoice' => $invoice]);
+        $this->logController->createLogEntry('ADMIN/INVOICE/PAYMENT', ['user_id' => auth()->user()->id, 'ad_id' => $ad->id]);
+
+        return $this->successResponse("Invoice has been successfully paid, the ad is now active.", ['advert' => new AdResource($ad), 'invoice' => new InvoiceResource($invoice)]);
     }
 
     /**
-     * Display the specified invoice.
+     * Store a new invoice.
+     * This method is accessible only to administrators.
+     *
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function storeAsAdmin($id)
+    {
+        if (!$this->hasAccess()) return $this->errorResponse("You do not have access to this resource!", 403);
+
+        $ad = Ad::where('id', $id)->first();
+
+        if (!$ad) return $this->errorResponse("Ad not found.", 404);
+
+        $invoice = self::createInvoice([
+            'ad_id' => $ad->id,
+            'ad_start_date' => $ad->ad_start_date,
+            'ad_end_date' => $ad->ad_end_date,
+        ]);
+
+        $this->logController->createLogEntry('ADMIN/INVOICE/CREATE', ['user_id' => auth()->user()->id, 'ad_id' => $ad->id]);
+
+        return $this->successResponse("Invoice has been successfully created.", $invoice);
+    }
+
+    /**
+     * Retrieve a specific invoice by its ID.
+     * This method is accessible only to administrators.
+     * (Currently not used)
      *
      * @param  int  $id
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function show($id) // CURRENTLY NOT USED
+    public function showAsAdmin($id)
     {
+        if (!$this->hasAccess()) return $this->errorResponse("You do not have access to this resource!", 403);
+
         $invoice = Invoice::find($id);
-        if (!$invoice) return $this->errorResponse("Invoice doesn\'t exists", 404);
-        // Sprawdzenie uprawnień użytkownika
-        if (auth()->user()->isAdmin() || $invoice->ad->user_id === auth()->user()->id) {
-            return new InvoiceResource($invoice);
-        }
-        return $this->errorResponse('An error occured', 403);
+
+        if (!$invoice) return $this->errorResponse("Invoice not found.", 404);
+
+        return $this->successResponse("Invoice has been successfully found.", new InvoiceResource($ad));
     }
 
     /**
-     * Update the invoice with the given ID.
+     * Update an existing invoice.
+     * This method is accessible only to administrators.
+     * (Currently not used)
      *
      * @param  int  $id
      * @param  \App\Http\Requests\InvoiceRequest  $request
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function update($id, InvoiceRequest $request) // CURRENTLY NOT USED
+    public function updateAsAdmin($id, $invoiceId, InvoiceRequest $request)
     {
-        $user = auth()->user();
-        if ($user->tokenCan('admin')) $invoice = Invoice::find($id);
-        // else return $this->errorResponse('Unauthorized', 500);
+        if (!$this->hasAccess()) return $this->errorResponse("You do not have access to this resource!", 403);
 
-        if (!$invoice) return $this->errorResponse('Invoice not found', 404);
+        $ad = Ad::where('id', $id)->first();
 
-        if (!($invoice->update($request->validate([])))) return $this->errorResponse('An error occurred while updating the Invoice, please try again later', 500);
+        if (!$ad) return $this->errorResponse("Ad not found.", 404);
 
-        return $this->successResponse('Invoice has been successfully updated', new InvoiceResource($invoice));
+        $invoice = Invoice::find($invoiceId);
+
+        if (!$invoice) return $this->errorResponse("Invoice not found.", 404);
+
+        if (!$invoice->update($request->validated())) return $this->errorResponse("An error occurred while updating the invoice, try again later.", 500);
+
+        return $this->successResponse("Invoice has been successfully updated.", new InvoiceResource($invoice));
     }
 
     /**
      * Delete the invoice with the given ID.
+     * This method is accessible only to administrators.
+     * (Currently not used)
      *
      * @param  int  $id
      * @return \App\Http\Traits\ResponseTrait
      */
-    public function destroy($id) // CURRENTLY NOT USED
+    public function deleteAsAdmin($id)
     {
-        $user = auth()->user();
+        if (!$this->hasAccess()) return $this->errorResponse("You do not have access to this resource!", 403);
+
         $invoice = Invoice::find($id);
-        if ($user->tokenCan('admin')) {
-            if (!$invoice) return $this->errorResponse('Invoice not found!', 404);
-            if (!$invoice->delete()) return $this->errorResponse('An error occurred while deleting the Invoice, please try again later', 500);
-            return $this->successResponse('Invoice has been successfully deleted');
+
+        if (!$invoice) return $this->errorResponse("Invoice not found.", 404);
+
+        if (!$invoice->delete()) return $this->errorResponse("An error occurred while deleting the invoice, try again later.", 500);
+
+        return $this->successResponse("Invoice has been successfully deleted.");
+    }
+
+    /**
+     * =====================
+     *     USER SECTION
+     * =====================
+     */
+
+    /**
+     * Retrieve a list of invoices.
+     *
+     * @param  int  $id
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function index($id)
+    {
+        $ad = auth()->user()->ads()->where('id', $id)->first();
+
+        if (!$ad) return $this->errorResponse("Ad not found.", 404);
+
+        $invoices = new InvoiceCollection($ad->invoices()->orderBy('id', 'desc')->get());
+
+        return $this->successResponse("Invoices has been successfully found.", $invoices);
+    }
+
+    /**
+     * Mark the invoice as paid and update the dates of the associated ad.
+     *
+     * @param  int  $id
+     * @param  int  $invoiceId
+     * @return \App\Http\Traits\ResponseTrait
+     */
+    public function payment($id, $invoiceId)
+    {
+        $ad = auth()->user()->ads()->where('id', $id)->first();
+
+        if (!$ad) return $this->errorResponse("Ad not found.", 404);
+
+        $invoice = $ad->invoices()->where('id', $invoiceId)->first();
+
+        if (!$invoice) return $this->errorResponse("Invoice not found.", 404);
+
+        /* Recalculate dates of advert emission */
+        $startDate = Carbon::parse($ad->ad_start_date);
+        $endDate = Carbon::parse($ad->ad_end_date);
+        $currentDate = Carbon::now();
+
+        $diffInDays = $endDate->diffInDays($startDate);
+
+        if ($startDate < $currentDate) {
+            $startDate = $currentDate;
+            $endDate = $startDate->copy()->addDays($diffInDays);
         }
-        return $this->errorResponse('Invoice not available', 403);
+
+        $invoice->update([
+            'status' => 'paid',
+            'date' => Carbon::now()->format('Y-m-d')
+        ]);
+
+        $ad->update([
+            'status' => 'active',
+            'ad_start_date' => $startDate->format('Y-m-d'),
+            'ad_end_date' => $endDate->format('Y-m-d')
+        ]);
+
+        $this->logController->createLogEntry('INVOICE/PAYMENT', ['user_id' => auth()->user()->id, 'ad_id' => $ad->id]);
+
+        return $this->successResponse("Invoice has been successfully paid, the ad is now active.", ['advert' => new AdResource($ad), 'invoice' => new InvoiceResource($invoice)]);
     }
 }

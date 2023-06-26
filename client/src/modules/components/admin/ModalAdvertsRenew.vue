@@ -1,22 +1,16 @@
 <template>
-    <el-dialog :model-value="true" title="Kreator reklam" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
+    <el-dialog :model-value="true" :title="`Odnowienie reklamy (ID: ${props.advert.id})`" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <el-form ref="form" label-position="top" :hide-required-asterisk="true" :model="formData" :rules="validationRules" @submit.prevent="validateData">
-            <el-form-item prop="name" label="Nazwa reklamy">
-                <el-input v-model="formData.name" maxlength="255" placeholder="Wprowadź nazwę swojej reklamy..."></el-input>
-            </el-form-item>
             <el-form-item prop="adStartDate" label="Termin publikacji reklamy (Maksymalny okres emisji wynosi 30 dni)">
                 <el-date-picker
                 v-model="selectedDateRange"
                 type="daterange"
                 range-separator="do"
-                start-placeholder="Początek emisji reklamy"
-                end-placeholder="Koniec emisji reklamy"
+                start-placeholder="Początek"
+                end-placeholder="Koniec"
                 :disabled-date="disabledDates"
                 @change="handleDateRangeChange"
                 ></el-date-picker>
-            </el-form-item>
-            <el-form-item prop="url" label="Adres przekierowania">
-                <el-input v-model="formData.url" maxlength="255" placeholder="(Opcjonalne) Wprowadź adres na który ma przekierować reklama..."></el-input>
             </el-form-item>
         </el-form>
         <div v-if="estimatedPrice">
@@ -28,7 +22,7 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="closeModal" :loading="isLoading">Anuluj</el-button>
-                <el-button type="primary" @click="validateData" :loading="isLoading">Utwórz reklamę</el-button>
+                <el-button type="primary" @click="validateData" :loading="isLoading">Odnów reklamę</el-button>
             </span>
         </template>
     </el-dialog>
@@ -37,38 +31,30 @@
 <script setup>
     import { ref, reactive, computed } from 'vue'
     import { useAdStore } from '@/stores/AdStore';
+    import { useAdminStore } from '@/stores/AdminStore';
 
     import { isToday, convertToDateFormat } from '@/common/helpers/date.helper';
     import NotificationService from '@/services/notification.service'
 
     const adStore = useAdStore();
+    const adminStore = useAdminStore();
 
-    const emit = defineEmits(['close', 'add']);
+    const props = defineProps({
+        advert: { type: Object, required: true, default: {} }
+    });
+
+    const emit = defineEmits(['close', 'update']);
 
     const isLoading = ref(false);
 
     const form = ref()
 
     const formData = reactive({
-        name: '',
         adStartDate: '',
         adEndDate: '',
-        url: '',
     })
 
     const validationRules = {
-        name: [
-			{
-				required: true,
-				message: 'Nazwa reklamy jest wymagana',
-				trigger: 'blur'
-			},
-			{
-				max: 255,
-				message: "Nazwa reklamy może posiadać maksymalnie 255 znaków",
-				trigger: "blur"
-			},
-		],
         adStartDate: [
 			{
 				required: true,
@@ -79,13 +65,6 @@
 				type: 'date',
 				message: 'Termin publikacji reklamy musi być datą',
 				trigger: 'blur'
-			},
-		],
-        url: [
-			{
-				max: 255,
-				message: "Adres przekierowania może posiadać maksymalnie 255 znaków",
-				trigger: "blur"
 			},
 		],
     }
@@ -103,21 +82,22 @@
 
     const submitForm = () => {
         isLoading.value = true;
-        adStore.createAdvert(formData)
+        adminStore.renewAdvert(props.advert.id, formData)
             .then((response) => {
-                emit('add', response.data);
+                emit('update', response.data.advert, response.data.invoice);
                 emit('close');
-                NotificationService.displayMessage('success', 'Pomyślnie stworzono reklamę.');
+                NotificationService.displayMessage('success', 'Pomyślnie odnowiono reklamę.');
             })
-            .catch(() => {
-                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy tworzeniu reklamy, prosimy spróbować ponownie później.');
+            .catch((e) => {
+                console.log(e);
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy odnawianiu reklamy, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;
             })
     };
 
-    /* DATA */
+    /* Date */
 
     const selectedDateRange = ref([]);
 

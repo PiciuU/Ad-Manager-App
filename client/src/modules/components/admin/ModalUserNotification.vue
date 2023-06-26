@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :model-value="true" title="Wyślij powiadomienie do użytkownika" @close="$emit('close')" :lock-scroll="true" :close-on-click-modal="true">
+    <el-dialog :model-value="true" title="Wyślij powiadomienie do użytkownika" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <el-form ref="form" label-position="top" :hide-required-asterisk="true" :model="formData" :rules="validationRules" @submit.prevent="validateData">
             <el-form-item prop="title" label="Tytuł">
                 <el-input v-model="formData.title" maxlength="255" placeholder="Wprowadź tytuł powiadomienia..." />
@@ -11,8 +11,8 @@
 
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="$emit('close')" :loading="adminStore.isLoading">Anuluj zmiany</el-button>
-                <el-button type="primary" @click="validateData" :loading="adminStore.isLoading">Wyślij</el-button>
+                <el-button @click="closeModal" :loading="isLoading">Anuluj zmiany</el-button>
+                <el-button type="primary" @click="validateData" :loading="isLoading">Wyślij</el-button>
             </span>
         </template>
     </el-dialog>
@@ -21,22 +21,29 @@
 <script setup>
     import { ref, reactive } from 'vue'
     import { useAdminStore } from '@/stores/AdminStore';
+
+    import { convertToDateFormat } from '@/common/helpers/date.helper';
     import NotificationService from '@/services/notification.service'
 
     const adminStore = useAdminStore();
 
     const props = defineProps({
-        user: { type: Object, required: true, default: {} }
+        userId: { type: [String, Number], required: true, default: '' },
+        advertId: { type: [String, Number], required: false, default: '' }
     });
 
     const emit = defineEmits(['close']);
 
-    const form = ref()
+    const isLoading = ref(false);
+
+    const form = ref();
 
     const formData = reactive({
-        userId: props.user.id,
+        userId: props.userId,
+        adId: props.advertId,
         title: '',
-        description: ''
+        description: '',
+        date: convertToDateFormat(new Date(), 'yyyy-MM-dd HH:mm:ss')
     })
 
     const validationRules = {
@@ -66,6 +73,10 @@
         ],
     }
 
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
+    }
+
     const validateData = () => {
         form.value.validate((valid) => {
             if (!valid) return;
@@ -74,6 +85,7 @@
     }
 
     const submitForm = () => {
+        isLoading.value = true;
         adminStore.sendNotification(formData)
             .then(() => {
                 NotificationService.displaySuccess('Sukces', 'Pomyślnie wysłano powiadomienie do użytkownika.');
@@ -82,6 +94,9 @@
             .catch((e) => {
                 console.log(e);
                 NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            })
+            .finally(() => {
+                isLoading.value = false;
             })
     };
 </script>

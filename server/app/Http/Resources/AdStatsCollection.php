@@ -7,6 +7,12 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class AdStatsCollection extends ResourceCollection
 {
+    protected $fields = [];
+
+    public function returnFields($fields) {
+        $this->fields = $fields;
+    }
+
     /**
      * Transform the resource collection into an array.
      *
@@ -14,6 +20,11 @@ class AdStatsCollection extends ResourceCollection
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return $this->collection->map(function ($ad) use ($request) {
+            $resource = new AdStatsResource($ad);
+            if (!empty($this->fields)) $resource->returnFields($this->fields);
+
+            return $resource->toArray($request);
+        })->all();
     }
 }

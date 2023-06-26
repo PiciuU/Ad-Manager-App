@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -30,14 +30,6 @@ class AdRequest extends FormRequest
     }
 
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
      * Get the method name for the current request action.
      *
      * @return string
@@ -57,9 +49,9 @@ class AdRequest extends FormRequest
     {
         $methodName = $this->getMethodName();
 
-        if ($methodName === 'store') return $this->store();
-        elseif ($methodName === 'update') return $this->update();
-        elseif ($methodName === 'renew') return $this->renew();
+        if ($methodName === 'store' || $methodName === 'storeAsAdmin') return $this->store();
+        elseif ($methodName === 'update' || $methodName === 'updateAsAdmin') return $this->update();
+        elseif ($methodName === 'renew' || $methodName === 'renewAsAdmin') return $this->renew();
 
         return [];
     }
@@ -84,10 +76,10 @@ class AdRequest extends FormRequest
         return [
             'name' => ['required', 'string'],
             'user_id' => ['required', 'integer'],
-            'status' => ['required', Rule::in(['unpaid'])],
+            'status' => ['required', 'string', Rule::in(['unpaid'])],
             'ad_start_date' => ['required', 'date', 'date_format:Y-m-d', 'after_or_equal:'. date('Y-m-d')],
             'ad_end_date' => ['required', 'date', 'date_format:Y-m-d', 'after:ad_start_date'],
-            'url' => ['sometimes', 'nullable', 'string']
+            'url' => ['sometimes', 'nullable']
         ];
     }
 
@@ -98,24 +90,23 @@ class AdRequest extends FormRequest
      */
     protected function update()
     {
-        $rules = [
-            'name' => ['sometimes', 'required', 'string'],
-            'url' => ['sometimes', 'nullable', 'string'],
-        ];
+        if ($this->hasAdminPrivileges()) {
+            return [
+                'name' => ['sometimes', 'required', 'string'],
+                'user_id' => ['sometimes', 'required', 'integer'],
+                'status' => ['sometimes', 'required', 'string', Rule::in(['unpaid', 'active', 'expired', 'inactive'])],
+                'ad_start_date' => ['sometimes', 'required', 'date', 'date_format:Y-m-d'],
+                'ad_end_date' => ['sometimes', 'required', 'date', 'date_format:Y-m-d'],
+                'file_name' => ['sometimes', 'required', 'string'],
+                'file_type' => ['sometimes', 'required',  Rule::in(['img', 'video'])],
+                'url' => ['sometimes', 'nullable']
+            ];
+        }
 
-        // if ($this->hasAdminPrivileges()) {
-        //     $rules = array_merge($rules, [
-        //         'name' => ['sometimes', 'required', 'string'],
-        //         'user_id' => ['sometimes', 'required', 'integer'],
-        //         'status' => ['sometimes', 'required', Rule::in(['unpdaid', 'paid', 'expired', 'inactive'])],
-        //         'ad_start_date' => ['sometimes', 'required', 'date'],
-        //         'ad_end_date' => ['sometimes', 'required', 'date'],
-        //         'file_name' => ['sometimes', 'required', 'string'],
-        //         'file_type' => ['sometimes', 'required', Rule::in(['img', 'video'])],
-        //         'url' => ['sometimes', 'required', 'string']
-        //     ]);
-        // }
-        return $rules;
+        return [
+            'name' => ['sometimes', 'required', 'string'],
+            'url' => ['sometimes', 'nullable'],
+        ];
     }
 
     /**
@@ -153,7 +144,9 @@ class AdRequest extends FormRequest
             $this->merge([
                 'status' => 'unpaid',
             ]);
-        } else if ($this->hasAdminPrivileges() && $this->filled('userId')) {
+        }
+
+        if ($this->hasAdminPrivileges() && $this->filled('userId')) {
             $this->merge([
                 'user_id' => $this->userId,
             ]);

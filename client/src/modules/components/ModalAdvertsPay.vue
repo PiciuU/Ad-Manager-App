@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :model-value="true" title="Opłacenie faktury" @close="$emit('close')" :lock-scroll="true" :close-on-click-modal="true">
+    <el-dialog :model-value="true" title="Opłacenie faktury" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <el-form label-position="top" @submit.prevent="submitForm">
             <el-alert class="alert" type="info" show-icon :closable="false">
                 <p>Termin publikacji został przeliczony w oparciu o podany wcześniej okres emisji względem terminu płatności</p>
@@ -28,7 +28,7 @@
         </el-form>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="$emit('close')" :loading="isLoading">Anuluj</el-button>
+                <el-button @click="closeModal" :loading="isLoading">Anuluj</el-button>
                 <el-button type="primary" @click="submitForm" :loading="isLoading">Opłać fakturę</el-button>
             </span>
         </template>
@@ -63,6 +63,10 @@
     const emit = defineEmits(['close', 'update']);
 
     const isLoading = ref(false);
+
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
+    }
 
     const submitForm = () => {
         isLoading.value = true;

@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :model-value="true" title="Generator klucza aktywacyjnego" @close="$emit('close')" :lock-scroll="true" :close-on-click-modal="true">
+    <el-dialog :model-value="true" title="Generator klucza aktywacyjnego" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <div v-if="!activationKey">Generowanie klucza aktywacyjnego...</div>
         <div v-else>Wygenerowany klucz aktywacyjny: {{ activationKey }}</div>
 
@@ -40,6 +40,10 @@
 
     const isLoading = ref(false);
     const activationKey = ref('');
+
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
+    }
 
     const handleAction = () => {
         if (!activationKey.value) return;

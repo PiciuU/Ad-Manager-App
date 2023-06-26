@@ -4,14 +4,16 @@
             <el-col>
                 <el-card class="card">
                     <div class="card__title">Lista powiadomień</div>
-                    <el-table :data="notifications.entries" stripe v-loading="authStore.isLoading" :row-class-name="isNotificationSeen">
+                    <el-table :data="notifications.entries" stripe v-loading="isNotificationsFetching" :row-class-name="isNotificationSeen">
                         <el-table-column prop="date" label="Data" width="180"/>
                         <el-table-column prop="title" label="Tytuł" min-width="200"/>
                         <el-table-column prop="description" label="Szczegóły" min-width="300"/>
                         <el-table-column label="Operacje" width="100">
                             <template #default="scope">
                                 <font-awesome-icon @click="changeSeenStatus(scope.row)" class="notification__icon" icon="eye" title="Zaznacz jako odczytana" />
-                                <font-awesome-icon v-if="scope.row.advertId" @click="changeSeenStatus(scope.row)" class="notification__icon" icon="link" title="Wyświetl reklamę" />
+                                <router-link v-if="scope.row.adId" :to="{ name: 'Ads', params: { id: scope.row.adId }}">
+                                    <font-awesome-icon class="notification__icon" icon="link" title="Wyświetl reklamę" />
+                                </router-link>
                             </template>
                         </el-table-column>
                     </el-table>
@@ -35,7 +37,7 @@
 
 
 <script setup>
-    import { reactive, onMounted } from 'vue'
+    import { ref, onMounted } from 'vue'
 
     import { isObjectEmpty } from '@/common/helpers/utility.helper'
 
@@ -43,48 +45,22 @@
 
     const authStore = useAuthStore();
 
+    const isNotificationsFetching = ref(false);
+    const notifications = ref('');
+
     onMounted(() => {
-        authStore.fetchNotifications(1)
+        handlePageChange(1);
+    });
+
+    const changeSeenStatus = async (notification) => {
+        await authStore.changeNotificationStatus(notification.id)
             .then((response) => {
-                notifications = response.data;
+                notification.isSeen = response.data.isSeen;
             })
-    });
 
-    const notifications = reactive({
-        current_page: 1,
-        per_page: 10,
-        total: 20,
-        entries: [
-            {
-                id: 1,
-                advertId: 1,
-                date: "2023-06-22 00:06:27",
-                title: "Nieopłacona faktura za reklamę",
-                description: "Masz nieopłaconą fakturę (INV-05404520) za reklamę \"Rerum repudiandae laudantium et dolorem hic.\".",
-                isSeen: 0
-            },
-            {
-                id: 2,
-                date: "2023-06-21 09:17:32",
-                title: "Zakończenie publikacji reklamy",
-                description: "Twoja reklama \"Beatae ut adipisci aut aliquid accusantium.\" zakończyła swoją publikację.",
-                isSeen: 1
-            },
-            {
-                id: 3,
-                date: "2023-06-19 22:12:55",
-                title: "Nieopłacona faktura za reklamę",
-                description: "Masz nieopłaconą fakturę (INV-05404520) za reklamę \"Recusandae alias harum consequuntur neque vel assumenda.\".",
-                isSeen: 1
-            },
-        ]
-    });
-
-    const changeSeenStatus = (notification) => {
-        authStore.changeNotificationStatus(notification.id, { isSeen: !notification.isSeen })
-            .then(() => {
-                notification.isSeen = !notification.isSeen;
-            })
+        if (authStore.getUser.hasUnseenNotification == true && !notifications.value.entries.some(notification => notification.isSeen == 0)) {
+            authStore.user.hasUnseenNotification = false;
+        }
     };
 
     const isNotificationSeen = (data) => {
@@ -93,9 +69,13 @@
     };
 
     const handlePageChange = (newPage) => {
+        isNotificationsFetching.value = true;
         authStore.fetchNotifications(newPage)
             .then((response) => {
-                notifications = response.data;
+                notifications.value = response.data;
+            })
+            .finally(() => {
+                isNotificationsFetching.value = false;
             })
     };
 </script>
@@ -118,7 +98,17 @@
         margin-top: 15px;
     }
 
+    a {
+        color: $--color-text;
+        text-decoration: none;
+    }
+
     ::v-deep(.notification__unseen) {
         color: $--color-primary;
+
+        a {
+            color: $--color-primary;
+            text-decoration: none;
+        }
     }
 </style>

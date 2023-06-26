@@ -4,21 +4,15 @@
             <el-col :span="24">
                 <el-card class="card">
                     <div class="card__title">Dziennik zdarzeń użytkownika</div>
-                    <el-table @row-click="editLog" :data="data.logs.entries" stripe style="width: 100%" v-loading="adminStore.isLoading">
+                    <el-table @row-click="editLog" :data="data.logs.entries" stripe style="width: 100%" v-loading="adminStore.isLoading" class-name="make-clickable">
                         <el-table-column prop="id" label="ID" width="50"/>
                         <el-table-column prop="createdAt" label="Data" width="200"/>
                         <el-table-column label="Typ" min-width="200">
                             <template #default="scope">
-                                <el-popover effect="light" trigger="hover" placement="top" width="auto">
-                                    <template #default>
-                                        <div>Notatki administratora: {{ stringToLocale(scope.row.notes) }}</div>
-                                    </template>
-                                    <template #reference>
-                                        <el-tag>{{ scope.row.operationTags }}</el-tag>
-                                    </template>
-                                </el-popover>
+                                <el-tag>{{ scope.row.operationTags }}</el-tag>
                             </template>
                         </el-table-column>
+                        <el-table-column prop="userLogin" label="Użytkownik" min-width="100"/>
                         <el-table-column prop="message" label="Opis" min-width="300" width="auto"/>
                     </el-table>
                     <el-pagination
@@ -72,7 +66,7 @@
 	});
 
     onMounted(() => {
-        adminStore.getLogs()
+        adminStore.fetchLogs()
             .then((response) => {
                 data.logs = response.data;
             })
@@ -81,7 +75,7 @@
     /* Logs */
 
     const handlePageChange = (newPage) => {
-        adminStore.getLogs(newPage)
+        adminStore.fetchLogs(newPage)
                 .then((response) => {
                     data.logs = response.data;
                 })
@@ -103,5 +97,9 @@
         display: flex;
         justify-content: center;
         margin-top: 15px;
+    }
+
+    .make-clickable {
+        cursor: pointer;
     }
 </style>

@@ -19,11 +19,14 @@ export const useAuthStore = defineStore('authStore', {
         isAuthenticated: (state) => !!state.token && Object.keys(state.user).length != 0 && state.user.constructor === Object,
     },
     actions: {
+        /* Authorization */
         async register(credentials) {
             try {
                 this.loading = true;
                 const response = await ApiService.put('/auth/activate', credentials);
-                this.setAuthorization(response.data.token, response.data.user, false);
+                if (response.data) {
+                    this.setAuthorization(response.data.token, response.data.user, false);
+                }
             }
             catch (error) {
                 return Promise.reject(error.data);
@@ -142,6 +145,31 @@ export const useAuthStore = defineStore('authStore', {
                 this.loading = false;
             }
         },
+        /* User data */
+        async fetchUser() {
+            try {
+                this.loading = true;
+                const response = await ApiService.get('auth/user');
+                this.user = response.data;
+            } catch (error) {
+               this.clearAuthorization();
+            } finally {
+                this.loading = false;
+            }
+        },
+        async updateData(payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.put('/auth/user', payload);
+                this.user = response.data
+                return Promise.resolve();
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
         async changeMail(payload) {
             try {
                 this.loading = true;
@@ -167,34 +195,11 @@ export const useAuthStore = defineStore('authStore', {
                 this.loading = false;
             }
         },
-        async updateData(payload) {
+        /* User Notifications */
+        async fetchLatestNotifications() {
             try {
                 this.loading = true;
-                const response = await ApiService.put('/auth/user', payload);
-                this.user = response.data
-                return Promise.resolve();
-            }
-            catch (error) {
-                return Promise.reject(error.data);
-            } finally {
-                this.loading = false;
-            }
-        },
-        async fetchUser() {
-            try {
-                this.loading = true;
-                const response = await ApiService.get('auth/user');
-                this.user = response.data;
-            } catch (error) {
-               this.clearAuthorization();
-            } finally {
-                this.loading = false;
-            }
-        },
-        async fetchLastNotifications() {
-            try {
-                this.loading = true;
-                const response = await ApiService.get('notification/latest');
+                const response = await ApiService.get('notifications/latest');
                 return Promise.resolve(response);
             } catch (error) {
                 return Promise.reject(error.data);
@@ -205,7 +210,7 @@ export const useAuthStore = defineStore('authStore', {
         async fetchNotifications(page = 1) {
             try {
                 this.loading = true;
-                const response = await ApiService.get(`notification?page=${page}`);
+                const response = await ApiService.get(`notifications?page=${page}`);
                 return Promise.resolve(response);
             } catch (error) {
                return Promise.reject(error.data);
@@ -213,10 +218,10 @@ export const useAuthStore = defineStore('authStore', {
                 this.loading = false;
             }
         },
-        async changeNotificationStatus(id, payload) {
+        async changeNotificationStatus(id) {
             try {
                 this.loading = true;
-                const response = await ApiService.put(`notification/${id}/seen`, payload);
+                const response = await ApiService.get(`notifications/${id}/seen`);
                 return Promise.resolve(response);
             } catch (error) {
                return Promise.reject(error.data);
@@ -224,6 +229,7 @@ export const useAuthStore = defineStore('authStore', {
                 this.loading = false;
             }
         },
+        /* Synchronous Methods */
         setAuthorization(token, user, redirect = true) {
             this.user = user;
             this.token = token;

@@ -27,6 +27,7 @@ class AdStatsResource extends JsonResource
             ];
         } else {
             return [
+                'id' => $this->id,
                 'adId' => $this->ad_id,
                 'date' => $this->date,
                 'views' => $this->views,

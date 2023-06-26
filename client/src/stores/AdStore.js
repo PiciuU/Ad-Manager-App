@@ -20,7 +20,7 @@ export const useAdStore = defineStore('adStore', {
                 this.loading = true;
                 const response = await ApiService.get('/ads');
                 this.adverts = response.data;
-                return Promise.resolve();
+                return Promise.resolve(response);
             }
             catch (error) {
                 return Promise.reject(error.data);
@@ -92,7 +92,7 @@ export const useAdStore = defineStore('adStore', {
         async fetchInvoices(id) {
             try {
                 this.loading = true;
-                const response = await ApiService.get(`/ad/${id}/invoices`);
+                const response = await ApiService.get(`/ads/${id}/invoices`);
                 return Promise.resolve(response);
             }
             catch (error) {
@@ -104,7 +104,7 @@ export const useAdStore = defineStore('adStore', {
         async payInvoice(id, invoiceId) {
             try {
                 this.loading = true;
-                const response = await ApiService.get(`/ad/${id}/invoices/${invoiceId}/payment`);
+                const response = await ApiService.get(`/ads/${id}/invoices/${invoiceId}/payment`);
                 return Promise.resolve(response);
             }
             catch (error) {
