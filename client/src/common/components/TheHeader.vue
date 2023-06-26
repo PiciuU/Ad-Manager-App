@@ -8,25 +8,37 @@
         </div>
         <div class="header__group">
             <div class="options">
-                <div class="options__notification" :class="{'options__notification-unseen': hasUnseenNotification}">
+                <div class="options__notification" :class="{'options__notification-unseen': authStore.getUser.hasUnseenNotification}">
                     <font-awesome-icon @click="showNotifications" class="options__icon" icon="bell" title="Powiadomienia" />
                     <transition name="fade">
                         <div v-show="isNotificationsVisible" @click="showNotifications" class="notification__overlay"></div>
                     </transition>
                     <transition name="fade">
                         <div class="notification" v-show="isNotificationsVisible">
-                            <div class="notification__item" v-for="notification in notifications" :key="notification.id" :class="{'notification__not-seen': notification.isSeen == 0}">
-                                <span>
-                                    <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}" class="notification__text">
-                                        {{ truncateString(notification .title, 75) }}
+                            <div v-if="notifications" class="notification__content">
+                                <div class="notification__item" v-for="notification in notifications" :key="notification.id" :class="{'notification__not-seen': notification.isSeen == 0}">
+                                    <span>
+                                        <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}" class="notification__text">
+                                            {{ truncateString(notification .title, 75) }}
+                                        </router-link>
+                                    </span>
+                                    <font-awesome-icon @click="changeSeenStatus(notification)" class="options__icon" icon="eye" title="Zaznacz jako odczytana" />
+                                </div>
+                                <div class="notification__footer">
+                                    <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}">
+                                        Wyświetl wszystkie powiadomienia
                                     </router-link>
-                                </span>
-                                <font-awesome-icon @click="changeSeenStatus(notification)" class="options__icon" icon="eye" title="Zaznacz jako odczytana" />
+                                </div>
                             </div>
-                            <div class="notification__footer">
-                                <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}">
-                                    Wyświetl wszystkie powiadomienia
-                                </router-link>
+                            <div v-else class="notification__content notification__content-loading" >
+                                <div class="notification__item">
+                                    <span>Trwa wczytywanie powiadomień...</span>
+                                </div>
+                                <div class="notification__footer">
+                                    <router-link @click="showNotifications" :to="{path: '/panel/powiadomienia'}">
+                                        Wyświetl wszystkie powiadomienia
+                                    </router-link>
+                                </div>
                             </div>
                         </div>
                     </transition>
@@ -46,7 +58,7 @@
 </template>
 
 <script setup>
-    import { ref, reactive, watchEffect } from 'vue';
+    import { ref, watchEffect } from 'vue';
     import { truncateString } from '@/common/helpers/utility.helper';
     import { useDataStore } from '@/stores/DataStore';
     import { useAuthStore } from '@/stores/AuthStore';
@@ -67,45 +79,26 @@
     /* Notifications */
 
     const isNotificationsVisible = ref(false);
+    const notifications = ref('');
 
     const showNotifications = () => {
-        if (notifications === null){
-            // authStore.fetchLastNotifications()
-            //     .then((response) => {
-            //         notifications = response.data;
-            //     })
+        if (!notifications.value){
+            authStore.fetchLatestNotifications()
+                .then((response) => {
+                    notifications.value = response.data;
+                })
         }
         isNotificationsVisible.value = !isNotificationsVisible.value;
-    }
+    };
 
-    const hasUnseenNotification = ref(true); // Change to authStore.getUser.notification
+    const changeSeenStatus = async (notification) => {
+        await authStore.changeNotificationStatus(notification.id)
+            .then((response) => {
+                notification.isSeen = response.data.isSeen;
+            })
 
-    const notifications = reactive([
-        {
-            id: 1,
-            title: "Nieopłacona faktura za reklamę",
-            description: "Masz nieopłaconą fakturę (INV-05404520) za reklamę \"Rerum repudiandae laudantium et dolorem hic.\".",
-            isSeen: 0
-        },
-        {
-            id: 2,
-            title: "Zakończenie publikacji reklamy",
-            description: "Twoja reklama \"Beatae ut adipisci aut aliquid accusantium.\" zakończyła swoją publikację.",
-            isSeen: 1
-        },
-        {
-            id: 3,
-            title: "Nieopłacona faktura za reklamę",
-            description: "Masz nieopłaconą fakturę (INV-05404520) za reklamę \"Recusandae alias harum consequuntur neque vel assumenda.\".",
-            isSeen: 1
-        },
-    ]);
-
-    const changeSeenStatus = (notification) => {
-        notification.isSeen = !notification.isSeen;
-
-        if (hasUnseenNotification.value == true && !notifications.some(notification => notification.isSeen == 0)) {
-            hasUnseenNotification.value = false;
+        if (authStore.getUser.hasUnseenNotification == true && !notifications.value.some(notification => notification.isSeen == 0)) {
+            authStore.user.hasUnseenNotification = false;
         }
     };
 </script>
@@ -268,6 +261,17 @@
         flex-direction: column;
         z-index: 200;
 
+        &__content {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        &__content.notification__content-loading &__item {
+            flex: 1;
+            justify-content: center;
+        }
+
         &:after {
             content: "";
             position: absolute;
@@ -332,9 +336,8 @@
         }
 
         &__footer {
-            margin-top: auto;
+            margin: auto;
             text-align: center;
-            margin-bottom: 5px;
 
             a {
                 color: $--color-text;

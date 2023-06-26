@@ -4,9 +4,19 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class InvoiceRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -18,11 +28,14 @@ class InvoiceRequest extends FormRequest
     }
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Get the method name for the current request action.
+     *
+     * @return string
      */
-    public function authorize(): bool
+    protected function getMethodName(): string
     {
-        return true;
+        $action = $this->route()->getActionMethod();
+        return Str::camel($action);
     }
 
     /**
@@ -32,7 +45,13 @@ class InvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->isMethod('POST') ? $this->store() : $this->update();
+        $methodName = $this->getMethodName();
+
+        if ($this->hasAdminPrivileges()) {
+            if ($methodName === 'storeAsAdmin') return $this->store();
+            elseif ($methodName === 'updateAsAdmin') return $this->update();
+        }
+        return [];
     }
 
     /**
@@ -42,16 +61,6 @@ class InvoiceRequest extends FormRequest
      */
     protected function store(): array
     {
-        if ($this->hasAdminPrivileges()) {
-            return [
-                'ad_id' => ['required', 'string'],
-                'number' => ['required'],
-                'price' => ['required', 'numeric', 'regex:/^\d{0,6}\.\d{2}$/'],
-                'date' => ['required', 'date'],
-                'status' => ['required', 'string']
-            ];
-        }
-
         return [];
     }
 
@@ -63,11 +72,12 @@ class InvoiceRequest extends FormRequest
     protected function update(): array
     {
         return [
-            'ad_id' => ['sometimes', 'string'],
-            'number' => ['sometimes', 'required'],
-            'price' => ['sometimes', 'required', 'numeric', 'regex:/^\d{0,6}\.\d{2}$/'],
-            'date' => ['sometimes', 'required', 'date'],
-            'status' => ['sometimes', 'required', 'string']
+            'ad_id' => ['sometimes', 'required', 'integer'],
+            'number' => ['sometimes', 'required', 'string'],
+            'price' => ['sometimes', 'required', 'numeric'],
+            'date' => ['sometimes', 'required', 'date', 'date_format:Y-m-d'],
+            'status' => ['sometimes', 'required', 'string', Rule::in(['unpaid', 'paid'])],
+            'notes' => ['sometimes', 'nullable']
         ];
     }
 
@@ -76,13 +86,13 @@ class InvoiceRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        if (($this->hasAdminPrivileges()) && ($this->filled('userId'))) {
+        if ($this->filled('userId')) {
             $this->merge([
                 'user_id' => $this->userId,
             ]);
         }
 
-        if (($this->hasAdminPrivileges()) && ($this->filled('adId'))) {
+        if ($this->filled('adId')) {
             $this->merge([
                 'ad_id' => $this->adId
             ]);

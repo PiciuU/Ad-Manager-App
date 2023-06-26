@@ -1,59 +1,69 @@
 <template>
-    <el-dialog :model-value="true" title="Kreator reklam" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
+    <el-dialog :model-value="true" :title="`Edycja reklamy (ID: ${props.advert.id})`" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <el-form ref="form" label-position="top" :hide-required-asterisk="true" :model="formData" :rules="validationRules" @submit.prevent="validateData">
             <el-form-item prop="name" label="Nazwa reklamy">
-                <el-input v-model="formData.name" maxlength="255" placeholder="Wprowadź nazwę swojej reklamy..."></el-input>
+                <el-input v-model="formData.name" maxlength="255" placeholder="Wprowadź nazwę reklamy..."></el-input>
             </el-form-item>
-            <el-form-item prop="adStartDate" label="Termin publikacji reklamy (Maksymalny okres emisji wynosi 30 dni)">
+            <el-form-item prop="adStartDate" label="Okres emisji reklamy">
                 <el-date-picker
                 v-model="selectedDateRange"
                 type="daterange"
                 range-separator="do"
-                start-placeholder="Początek emisji reklamy"
-                end-placeholder="Koniec emisji reklamy"
-                :disabled-date="disabledDates"
+                start-placeholder="Początek"
+                end-placeholder="Koniec"
                 @change="handleDateRangeChange"
                 ></el-date-picker>
+            </el-form-item>
+            <el-form-item prop="status" label="Status">
+                <el-select v-model="formData.status" placeholder="Wybierz status reklamy..." class="full-width">
+                    <el-option label="Aktywna" value="active" />
+                    <el-option label="Nieaktywna" value="inactive" />
+                    <el-option label="Wygasła" value="expired" />
+                    <el-option label="Nieopłacona" value="unpaid" />
+                </el-select>
             </el-form-item>
             <el-form-item prop="url" label="Adres przekierowania">
                 <el-input v-model="formData.url" maxlength="255" placeholder="(Opcjonalne) Wprowadź adres na który ma przekierować reklama..."></el-input>
             </el-form-item>
         </el-form>
-        <div v-if="estimatedPrice">
-            <el-alert type="info" show-icon :closable="false">
-                <p>Koszt publikacji reklamy wyniesie: {{ estimatedPrice }} zł.</p>
-                <p>Kwota ta została obliczona na podstawie okresu emisji, gdzie koszt jednego dnia wynosi {{ adStore.getPricePerDay }} zł.</p>
-            </el-alert>
-        </div>
         <template #footer>
             <span class="dialog-footer">
                 <el-button @click="closeModal" :loading="isLoading">Anuluj</el-button>
-                <el-button type="primary" @click="validateData" :loading="isLoading">Utwórz reklamę</el-button>
+                <el-button type="primary" @click="validateData" :loading="isLoading">Zapisz zmiany</el-button>
             </span>
         </template>
     </el-dialog>
 </template>
 
 <script setup>
-    import { ref, reactive, computed } from 'vue'
-    import { useAdStore } from '@/stores/AdStore';
+    import { ref, reactive, onMounted } from 'vue'
+    import { useAdminStore } from '@/stores/AdminStore';
 
-    import { isToday, convertToDateFormat } from '@/common/helpers/date.helper';
+    import { convertToDateFormat } from '@/common/helpers/date.helper';
     import NotificationService from '@/services/notification.service'
 
-    const adStore = useAdStore();
+    const adminStore = useAdminStore();
 
-    const emit = defineEmits(['close', 'add']);
+    const props = defineProps({
+        advert: { type: Object, required: true, default: {} }
+    });
+
+    const emit = defineEmits(['close', 'update']);
 
     const isLoading = ref(false);
 
     const form = ref()
 
     const formData = reactive({
-        name: '',
-        adStartDate: '',
-        adEndDate: '',
-        url: '',
+        name: props.advert.name,
+        adStartDate: props.advert.adStartDate,
+        adEndDate: props.advert.adEndDate,
+        status: props.advert.status,
+        url: props.advert.url,
+    })
+
+    onMounted(() => {
+        selectedDateRange.value = [formData.adStartDate, formData.adEndDate];
     })
 
     const validationRules = {
@@ -103,34 +113,23 @@
 
     const submitForm = () => {
         isLoading.value = true;
-        adStore.createAdvert(formData)
+        adminStore.updateAdvert(props.advert.id, formData)
             .then((response) => {
-                emit('add', response.data);
+                emit('update', response.data);
                 emit('close');
-                NotificationService.displayMessage('success', 'Pomyślnie stworzono reklamę.');
+                NotificationService.displayMessage('success', 'Pomyślnie zaktualizowano dane reklamy.');
             })
-            .catch(() => {
-                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy tworzeniu reklamy, prosimy spróbować ponownie później.');
+            .catch((e) => {
+                console.log(e);
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy edycji reklamy, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;
             })
     };
 
-    /* DATA */
-
+    /* Date */
     const selectedDateRange = ref([]);
-
-    const estimatedPrice = computed(() => {
-        if (!formData.adStartDate || !formData.adEndDate) {
-            return 0;
-        }
-
-        const msInDay = 24 * 60 * 60 * 1000;
-        const diffInDays = Math.round(Math.abs((new Date(formData.adEndDate) - new Date(formData.adStartDate)) / msInDay));
-
-        return diffInDays * adStore.getPricePerDay;
-    });
 
     const handleDateRangeChange = () => {
         if (selectedDateRange.value == null) {
@@ -138,22 +137,14 @@
             formData.adEndDate = ''
             return;
         }
-        const [startDate, endDate] = selectedDateRange.value;
 
-        const msInDay = 24 * 60 * 60 * 1000;
-        const maxRange = 30;
-
-        const diffInDays = Math.round(Math.abs((endDate - startDate) / msInDay));
-        if (diffInDays > maxRange) {
-            const newEndDate = new Date(startDate.getTime() + maxRange * msInDay);
-            selectedDateRange.value = [startDate, newEndDate];
-        }
         formData.adStartDate = convertToDateFormat(selectedDateRange.value[0], 'yyyy-MM-dd');
         formData.adEndDate = convertToDateFormat(selectedDateRange.value[1], 'yyyy-MM-dd');
     };
-
-    const disabledDates = (date) => {
-        const currentDate = new Date();
-        return date < currentDate && !isToday(date);
-    };
 </script>
+
+<style lang="scss" scoped>
+    .full-width {
+        width: 100%;
+    }
+</style>

@@ -153,7 +153,7 @@
 		formState.isFormSubmitting = true;
 		authStore.changePassword(credentials)
 			.then(() => formState.isFormDone = true)
-            .catch((e) => NotificationService.displayError('Zmiana hasła nie powiodła się', e.message))
+            .catch(() => NotificationService.displayMessage('error', 'Zmiana hasła nie powiodła się, upewnij się o podaniu poprawnego aktualnego hasła.'))
 			.finally(() => formState.isFormSubmitting = false);
 	};
 

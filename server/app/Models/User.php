@@ -15,9 +15,6 @@ class User extends Authenticatable
     use HasFactory, HasApiTokens, Notifiable;
 
     protected $table = 'users';
-    protected $casts = [
-        'is_banned' => 'boolean',
-    ];
 
     protected $dates = [
         'created_at',

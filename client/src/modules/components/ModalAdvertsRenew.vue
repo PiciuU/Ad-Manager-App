@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :model-value="true" title="Odnowienie reklamy" @close="$emit('close')" :lock-scroll="true" :close-on-click-modal="true">
+    <el-dialog :model-value="true" title="Odnowienie reklamy" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <el-form ref="form" label-position="top" :hide-required-asterisk="true" :model="formData" :rules="validationRules" @submit.prevent="validateData">
             <el-form-item prop="adStartDate" label="Termin publikacji reklamy (Maksymalny okres emisji wynosi 30 dni)">
                 <el-date-picker
@@ -21,7 +21,7 @@
         </div>
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="$emit('close')" :loading="isLoading">Anuluj</el-button>
+                <el-button @click="closeModal" :loading="isLoading">Anuluj</el-button>
                 <el-button type="primary" @click="validateData" :loading="isLoading">Odnów reklamę</el-button>
             </span>
         </template>
@@ -65,6 +65,10 @@
 				trigger: 'blur'
 			},
 		],
+    }
+
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
     }
 
     const validateData = () => {

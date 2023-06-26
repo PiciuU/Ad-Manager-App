@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :model-value="true" title="Tworzenie nowego użytkownika" @close="$emit('close')" :lock-scroll="true" :close-on-click-modal="true">
+    <el-dialog :model-value="true" title="Tworzenie nowego użytkownika" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
 
         <el-form ref="form" label-position="top" :hide-required-asterisk="true" :model="formData" :rules="validationRules" @submit.prevent="validateData">
             <el-form-item prop="login" label="Login">
@@ -24,7 +24,7 @@
 
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="$emit('close')" :loading="isLoading">Anuluj zmiany</el-button>
+                <el-button @click="closeModal" :loading="isLoading">Anuluj zmiany</el-button>
                 <el-button type="primary" @click="validateData" :loading="isLoading">Utwórz konto</el-button>
             </span>
         </template>
@@ -62,6 +62,13 @@
 			{
 				max: 32,
 				message: "Login może posiadać maksymalnie 32 znaki",
+				trigger: "blur"
+			},
+            {
+				validator: (rule, value, callback) => {
+					if (/^[a-z0-9_]*$/i.test(value)) callback();
+					else callback(new Error("Login może zawierać litery bez znaków diaktrycznych, cyfry oraz znak \"_\""));
+				},
 				trigger: "blur"
 			},
 		],
@@ -128,6 +135,10 @@
         }
 
         formData.password = password;
+    }
+
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
     }
 
     const validateData = () => {

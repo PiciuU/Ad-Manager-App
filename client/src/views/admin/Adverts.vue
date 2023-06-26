@@ -1,7 +1,9 @@
 <template>
     <el-main>
-        <el-row class="cards__container" :gutter="32">
-            <el-col :span="24" :md="16">
+         <!-- Lista reklam -->
+
+        <el-row class="cards__container">
+            <el-col :span="24">
                 <el-card class="card">
                     <div class="card__title">Lista reklam</div>
                     <el-select
@@ -9,33 +11,33 @@
                         filterable
                         @change="handleAdvertChange"
                         v-model="filter.advertId"
-                        :loading="!adStore.getAdverts"
-                        :disabled="isAdvertFetching"
+                        :loading="!data.adverts"
+                        :disabled="loaders.isAdvertsFetching"
                         loading-text="Wyszukiwanie reklam..."
                         placeholder="Wybierz reklamę..."
                         no-data-text="Nie znaleziono żadnych reklam."
                         clearable
                     >
-                        <el-option v-for="advert in adStore.adverts" :key="advert.id" :label="advert.name" :value="advert.id"></el-option>
+                        <el-option v-for="advert in data.adverts" :key="advert.id" :label="advert.name" :value="advert.id"></el-option>
                     </el-select>
-                </el-card>
-            </el-col>
-            <el-col :span="24" :md="8">
-                <el-card class="card">
-                    <div class="card__title">Operacje</div>
-                    <el-button @click="toggleModal('create')" class="card__button card__button--fill" type="primary" plain>Utwórz nową reklamę</el-button>
                 </el-card>
             </el-col>
         </el-row>
 
+        <!-- Szczegóły reklamy -->
+
         <div v-if="filter.advertId && filter.advertId != null">
-            <!-- Szczegóły -->
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24" :md="12">
                     <el-card class="card">
-                        <div class="card__title">Szczegóły reklamy</div>
-                        <div v-if="!isAdvertFetching">
+                        <div class="card__title">Szczegóły reklamy (ID: {{ data.advert.id ?? '...'}})</div>
+                        <div v-if="data.advert && !loaders.isAdvertFetching">
                             <el-descriptions :column="1">
+                                <el-descriptions-item label="Użytkownik: " label-class-name="card__data-label">
+                                    <router-link :to="{ name: 'AdminUsers', params: { id: data.advert.userId }}" class="card__url" target="_blank">
+                                        {{ data.advert.userLogin }}
+                                    </router-link>
+                                </el-descriptions-item>
                                 <el-descriptions-item label="Nazwa reklamy: " label-class-name="card__data-label">
                                     {{ stringToLocale(data.advert.name) }}
                                 </el-descriptions-item>
@@ -61,8 +63,8 @@
                 <el-col :span="24" :md="12">
                     <el-card class="card">
                         <div class="card__title">Pliki reklamy</div>
-                        <div v-if="!isAdvertFetching">
-                            <AdvertsUploader @update="updateAdvertFile" :advert="data.advert"/>
+                        <div v-if="!loaders.isAdvertFetching">
+                            <AdvertsUploader @update="updateAdvertFile" :advert="data.advert" :mode="'admin'"/>
                         </div>
                         <el-skeleton :rows="5" animated v-else />
                     </el-card>
@@ -74,17 +76,17 @@
                 <el-col :span="24">
                     <el-card class="card">
                         <div class="card__title">Operacje na reklamie</div>
-                        <div v-if="!isAdvertFetching">
-                            <div class="button__group" v-if="data.advert.status == 'unpaid'">
-                                <el-button @click="toggleModal('pay')" class="card__button" type="primary" plain>Opłać fakturę</el-button>
-                            </div>
-                            <div class="button__group" v-else>
+                        <div v-if="data.advert && !loaders.isAdvertFetching">
+                            <div class="button__group">
                                 <el-button @click="toggleModal('edit')" class="card__button" type="primary" plain>Edytuj reklamę</el-button>
                                 <el-button v-if="data.advert.status == 'active'" @click="deactivateAdvert" class="card__button" type="primary" plain>Zdezaktywuj reklamę</el-button>
                                 <el-button v-if="data.advert.status == 'inactive' || data.advert.status == 'expired'" @click="toggleModal('renew')" class="card__button" type="primary" plain>Odnów reklamę</el-button>
                                 <router-link :to="{path: '/panel/powiadomienia'}" class="card__url" target="_blank">
                                     <el-button class="card__button" type="primary" plain>Wyświetl podgląd reklamy</el-button>
                                 </router-link>
+                                <el-button @click="activateAdvert" class="card__button" type="primary" plain>Opłać fakturę</el-button>
+                                <el-button @click="createInvoice" class="card__button" type="primary" plain>Wygeneruj fakturę</el-button>
+                                <el-button @click="toggleModal('notification')" class="card__button" type="primary" plain>Wyślij powiadomienie do użytkownika</el-button>
                             </div>
                         </div>
                         <el-skeleton :rows="1" animated v-else />
@@ -96,9 +98,10 @@
             <el-row class="cards__container">
                 <el-col :span="24">
                     <el-card class="card">
-                        <div class="card__title">Twoje faktury</div>
-                        <div v-if="!isAdvertFetching">
-                            <el-table :data="invoicesPagination.invoices" stripe style="width: 100%">
+                        <div class="card__title">Faktury</div>
+                        <div v-if="data.advert?.invoices && !loaders.isAdvertFetching">
+                            <el-table @row-click="editInvoice" :data="invoicesPagination.invoices" stripe style="width: 100%" class-name="make-clickable">
+                                <el-table-column prop="id" label="ID" width="50"/>
                                 <el-table-column prop="number" label="Numer faktury" width="150"/>
                                 <el-table-column label="Status" width="120">
                                     <template #default="scope">
@@ -121,7 +124,6 @@
                             </el-table>
 
                             <el-pagination
-                                v-if="data.advert.invoices"
                                 class="card__pagination"
                                 :current-page="invoicesPagination.current_page"
                                 :page-size="invoicesPagination.per_page"
@@ -136,88 +138,109 @@
                     </el-card>
                 </el-col>
             </el-row>
+
+            <!-- Dziennik Zdarzeń -->
+            <el-row class="cards__container" :gutter="32">
+                <el-col :span="24">
+                    <el-card class="card">
+                        <div class="card__title">Dziennik zdarzeń reklamy</div>
+                        <div v-if="data.advert?.logs">
+                            <el-table @row-click="editLog" :data="data.advert.logs.entries" stripe style="width: 100%" v-loading="loaders.isAdvertLogsFetching" class-name="make-clickable">
+                                <el-table-column prop="id" label="ID" width="50"/>
+                                <el-table-column prop="createdAt" label="Data" width="200"/>
+                                <el-table-column label="Typ" min-width="200">
+                                    <template #default="scope">
+                                        <el-tag>{{ scope.row.operationTags }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="message" label="Opis" min-width="300" width="auto"/>
+                            </el-table>
+                            <el-pagination
+                                class="card__pagination"
+                                :current-page="data.advert.logs.current_page"
+                                :page-size="data.advert.logs.per_page"
+                                :total="data.advert.logs.total"
+                                :small="true"
+                                :disabled="false"
+                                :background="true"
+                                layout="prev, pager, next, jumper"
+                                @current-change="fetchAdvertLogs"
+                            />
+                        </div>
+                        <el-skeleton :rows="2" animated v-else />
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
 
         <!-- Modale -->
-        <ModalAdvertsCreate v-if="modals.currentModal === 'create'" @add="addAdvert" @close="toggleModal"/>
-        <ModalAdvertsPay v-if="modals.currentModal === 'pay'" :advert="data.advert" @update="activateAdvert" @close="toggleModal"/>
         <ModalAdvertsEdit v-if="modals.currentModal === 'edit'" :advert="data.advert" @update="updateAdvert" @close="toggleModal"/>
         <ModalAdvertsRenew v-if="modals.currentModal === 'renew'" :advert="data.advert" @update="renewAdvert" @close="toggleModal"/>
+        <ModalAdvertsInvoice v-if="modals.currentModal === 'invoice'" :advert="data.advert" :invoice="data.advert.invoice" @update="updateInvoice" @close="toggleModal"/>
+
+        <ModalUserNotification v-if="modals.currentModal === 'notification'" :userId="data.advert.userId" :advertId="data.advert.id" @close="toggleModal"/>
+        <ModalLogEdit v-if="modals.currentModal === 'log'" :log="data.advert.log" @update="updateLog" @close="toggleModal"/>
     </el-main>
 </template>
 
 <script setup>
-    import { ref, reactive, computed, onMounted, onUpdated } from 'vue';
+    import { reactive, computed, onMounted, onUpdated } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
 
-    import { useAdStore } from '@/stores/AdStore';
-    import DateHelper from '@/common/helpers/date.helper';
-    import NotificationService from '@/services/notification.service';
     import { advertStatusToLocaleString, stringToLocale } from '@/common/helpers/utility.helper';
+
+    import { useAdminStore } from '@/stores/AdminStore';
+
+    import ModalUserNotification from '@/modules/components/admin/ModalUserNotification.vue';
+
+    import NotificationService from '@/services/notification.service';
 
     const route = useRoute();
     const router = useRouter();
-    const adStore = useAdStore();
+    const adminStore = useAdminStore();
+
+    const loaders = reactive({
+        isAdvertsFetching: false,
+        isAdvertFetching: false,
+        isAdvertLogsFetching: false,
+    });
+
+   /* Main Data */
+
+	const data = reactive({
+		adverts: {},
+		advert: {},
+	});
+
+	const filter = reactive({
+		advertId: null,
+    });
 
     onMounted(() => {
-        adStore.fetchAdverts()
-                .then(() => {
+        loaders.isAdvertsFetching = true;
+        adminStore.fetchAdverts()
+                .then((response) => {
+                    data.adverts = response.data;
                     if (route.params.id) {
                         filter.advertId = parseInt(route.params.id);
                         handleAdvertChange();
                     }
                 })
                 .catch(() => {
-                    NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy pobieraniu listy reklam, prosimy spróbować ponownie później.');
+                    NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy pobieraniu listy reklam, spróbuj ponownie później.');
+                })
+                .finally(() => {
+                    loaders.isAdvertsFetching = false;
                 })
     });
 
     onUpdated(() => {
+        console.log('onUpdated');
         if (route.params.id && filter.advertId !== parseInt(route.params.id)) {
             filter.advertId = parseInt(route.params.id);
             handleAdvertChange();
         }
     })
-
-	const data = reactive({
-		ads: {},
-		advert: {},
-		views: {},
-		clicks: {},
-		summary: {
-			most_views: {},
-			least_views: {},
-			most_clicks: {},
-			least_clicks: {}
-		}
-	});
-
-	const filter = reactive({
-		advertId: null,
-		type: 'month',
-		week: DateHelper.getCurrentWeek(),
-		month: DateHelper.getCurrentMonth(),
-		year: DateHelper.getCurrentYear(),
-		monthrange: DateHelper.getCurrentMonthRange(),
-		graphs:{
-			currentViewsTab: 'line',
-			currentClicksTab: 'line',
-		},
-		shortcuts: [
-			{
-				text: 'Ostatnie 3 miesiące',
-				value: () => DateHelper.getCurrentMonthRange(2),
-			},
-			{
-				text: 'Ostatnie 6 miesięcy',
-				value: () => DateHelper.getCurrentMonthRange(5),
-			},
-			{
-				text: 'Ostatni rok',
-				value: () => DateHelper.getCurrentMonthRange(11),
-			},
-		]
-	});
 
     /* Modals */
     const modals = reactive({
@@ -225,32 +248,25 @@
     });
 
     const toggleModal = (modal = '') => {
-        if (modal == 'pay' && data.advert.invoices.length == 0) {
-            NotificationService.displayMessage('error', 'Wystąpił krytyczny błąd przy odczytywaniu faktury, prosimy o kontakt z właścicielem strony.');
-            return;
-        }
         modals.currentModal = modal;
     };
 
     /*  Advert */
-    const isAdvertFetching = ref(false);
-
 	const handleAdvertChange = async () => {
-        router.push({ name: 'Ads', params: { id: filter.advertId }});
+        router.push({ name: 'AdminAds', params: { id: filter.advertId }});
 
-		if (!filter.advertId || filter.advertId === null) {
-			data.advert = {};
-			return;
-		}
+        data.advert = {};
 
-        isAdvertFetching.value = true;
+		if (!filter.advertId || filter.advertId === null) return;
+
+        loaders.isAdvertFetching = true;
 
         let isErrorOccurred = false;
         let advertResponseHandler = null;
         let invoicesResponseHandler = null;
 
         await Promise.all([
-            adStore.fetchAdvert(filter.advertId)
+            adminStore.fetchAdvert(filter.advertId)
             .then((response) => {
                 advertResponseHandler = response.data;
             })
@@ -258,7 +274,7 @@
                 isErrorOccurred = true;
             }),
 
-            adStore.fetchInvoices(filter.advertId)
+            adminStore.fetchInvoices(filter.advertId)
             .then((response) => {
                 invoicesResponseHandler = response.data;
             })
@@ -267,10 +283,10 @@
             })
         ])
 
-        isAdvertFetching.value = false;
+        loaders.isAdvertFetching = false;
 
         if (isErrorOccurred) {
-            NotificationService.displayMessage('error', 'Wystąpił błąd przy pobieraniu wybranej reklamy, prosimy spróbować ponownie później.');
+            NotificationService.displayMessage('error', 'Wystąpił błąd przy pobieraniu wybranej reklamy, spróbuj ponownie później.');
             filter.advertId = null;
             return;
         }
@@ -278,46 +294,95 @@
         data.advert = advertResponseHandler;
         data.advert.invoices = invoicesResponseHandler;
         invoicesPagination.invoices = data.advert.invoices.slice(0, invoicesPagination.per_page);
+
+        fetchAdvertLogs(1);
 	};
 
-    /* Create Advert */
-    import ModalAdvertsCreate from '@/modules/components/ModalAdvertsCreate.vue';
+    /* Create Invoice */
+    const createInvoice = async () => {
+        const isConfirmed = await NotificationService.displayConfirmation('Czy na pewno chcesz wygenerować fakturę dla tej reklamy?');
+        if (!isConfirmed) return;
 
-    const addAdvert = (advert) => {
-        adStore.adverts.unshift(advert);
-    }
+        const notify = NotificationService.displayMessage('info', 'Generowanie faktury w toku...', 0);
+
+        adminStore.createInvoice(data.advert.id)
+            .then((response) => {
+                data.advert.invoices.unshift(response.data);
+                handlePageChange();
+                NotificationService.displayMessage('success', 'Faktura została pomyślnie wygenerowana.');
+            })
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił błąd przy generowaniu faktury, spróbuj ponownie później.');
+            })
+            .finally(() => {
+                notify.close();
+            })
+    };
 
     /* Pay Invoice */
-    import ModalAdvertsPay from '@/modules/components/ModalAdvertsPay.vue';
+    const activateAdvert = async () => {
+        let unpaidInvoice = data.advert.invoices?.find((invoice) => invoice.status === 'unpaid');
 
-    const activateAdvert = (advert, invoice) => {
-        Object.assign(data.advert, advert);
-        data.advert.invoices.forEach((inv) => {
-            if (inv.id == invoice.id) {
-                Object.assign(inv, invoice);
-            }
-        });
+        if (!unpaidInvoice) {
+            NotificationService.displayMessage('error', 'Nie udało się odnaleźć nieopłaconej faktury, spróbuj wygenerować nową fakturę ręcznie.');
+            return;
+        }
+
+        const isConfirmed = await NotificationService.displayConfirmation('Czy na pewno chcesz opłacić fakturę i aktywować reklamę użytkownika?');
+        if (!isConfirmed) return;
+
+        const notify = NotificationService.displayMessage('info', 'Aktywowanie reklamy w toku...', 0);
+
+        adminStore.payInvoice(data.advert.id, unpaidInvoice.id)
+            .then((response) => {
+                Object.assign(data.advert, response.data.advert);
+                data.advert.invoices.forEach((invoice) => {
+                    if (invoice.id == response.data.invoice.id) {
+                        Object.assign(invoice, response.data.invoice);
+                    }
+                });
+                NotificationService.displayMessage('success', 'Faktura została pomyślnie opłacona, reklama została aktywowana.');
+            })
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił błąd przy opłacaniu faktury, spróbuj ponownie później.');
+            })
+            .finally(() => {
+                notify.close();
+            })
+    };
+
+    /* Edit Invoice */
+    import ModalAdvertsInvoice from '@/modules/components/admin/ModalAdvertsInvoice.vue';
+
+    const editInvoice = (invoice) => {
+        data.advert.invoice = invoice;
+        toggleModal('invoice');
+    };
+
+    const updateInvoice = (updatedInvoice) => {
+        const invoice = data.advert.invoices.find((inv) => inv.id == updatedInvoice.id);
+        Object.assign(invoice, updatedInvoice);
     };
 
     /* Edit Advert */
-    import ModalAdvertsEdit from '@/modules/components/ModalAdvertsEdit.vue';
+    import ModalAdvertsEdit from '@/modules/components/admin/ModalAdvertsEdit.vue';
 
     const updateAdvert = (advert) => {
         if (data.advert.name != advert.name) {
-            const ad = adStore.adverts.find((ad) => ad.name == data.advert.name);
+            const ad = data.adverts.find((ad) => ad.name == data.advert.name);
             ad.name = advert.name;
         }
         Object.assign(data.advert, advert);
-    }
+    };
 
     /* Renew Advert */
-    import ModalAdvertsRenew from '@/modules/components/ModalAdvertsRenew.vue';
+    import ModalAdvertsRenew from '@/modules/components/admin/ModalAdvertsRenew.vue';
 
     const renewAdvert = (advert, invoice) => {
         Object.assign(data.advert, advert);
         data.advert.invoices.unshift(invoice);
         handlePageChange();
-    }
+    };
 
     /* Deactivate Advert */
 
@@ -325,16 +390,12 @@
         const isConfirmed = await NotificationService.displayConfirmation('Czy na pewno chcesz zdezaktywać reklamę przed zakończeniem jej emisji? Ponowna aktywacja wymagać będzie uiszczenia opłaty za nową fakturę.');
         if (!isConfirmed) return;
 
-        const notify = NotificationService.displayMessage('info', 'Trwa dezaktywowanie reklamy...', 0);
-        adStore.deactivateAdvert(data.advert.id)
+        adminStore.deactivateAdvert(data.advert.id)
             .then((response) => {
                 Object.assign(data.advert, response.data);
                 NotificationService.displayMessage('success', 'Pomyślnie zdezaktywowano reklamę.');
             })
-            .finally(() => {
-                notify.close();
-            })
-    }
+    };
 
     /* File Upload */
     import AdvertsUploader from '@/modules/components/AdvertsUploader.vue';
@@ -344,7 +405,7 @@
         data.advert.fileType = fileType;
     };
 
-    /* Invoices List */
+    /* Invoices Table & Pagination */
     const invoicesPagination = reactive({
         invoices: [],
         current_page: 1,
@@ -356,6 +417,30 @@
         invoicesPagination.current_page = newPage;
         const offset = (invoicesPagination.current_page - 1) * invoicesPagination.per_page;
         invoicesPagination.invoices = data.advert.invoices.slice(offset, invoicesPagination.per_page + offset);
+    };
+
+    /* Logs */
+    import ModalLogEdit from '@/modules/components/admin/ModalLogEdit.vue';
+
+    const fetchAdvertLogs = (page) => {
+        loaders.isAdvertLogsFetching = true;
+        adminStore.fetchAdvertLogs(data.advert.id, page)
+            .then((response) => {
+                data.advert.logs = response.data;
+            })
+            .finally(() => {
+                loaders.isAdvertLogsFetching = false;
+            })
+    };
+
+    const editLog = (log) => {
+        data.advert.log = log;
+        toggleModal('log');
+    };
+
+    const updateLog = (item) => {
+        let log = data.advert.logs.entries.find((log) => log.id === item.id);
+        Object.assign(log, item);
     };
 </script>
 
@@ -412,6 +497,10 @@
 
     .btn-spacing {
         margin-left: 10px;
+    }
+
+    .make-clickable {
+        cursor: pointer;
     }
 
 </style>

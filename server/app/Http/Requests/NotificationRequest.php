@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use Illuminate\Validation\Rule;
+
 class NotificationRequest extends FormRequest
 {
     /**
@@ -35,7 +37,7 @@ class NotificationRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get the validation rules for creating notification.
      *
      * @return array
      */
@@ -44,23 +46,37 @@ class NotificationRequest extends FormRequest
         if ($this->hasAdminPrivileges()) {
             return [
                 'user_id' => ['required', 'integer'],
+                'ad_id' => ['sometimes', 'required', 'integer'],
                 'title' => ['required', 'string'],
                 'description' => ['required', 'string'],
                 'date' => ['required', 'date'],
             ];
         }
+
+        return [];
     }
 
+    /**
+     * Get the validation rules for updating notification.
+     *
+     * @return array
+     */
     protected function update()
     {
         if ($this->hasAdminPrivileges()) {
             return [
                 'user_id' => ['sometimes', 'required', 'integer'],
+                'ad_id' => ['sometimes', 'required', 'integer'],
                 'title' => ['sometimes', 'required', 'string'],
                 'description' => ['sometimes', 'required', 'string'],
                 'date' => ['sometimes', 'required', 'date'],
+                'is_seen' => ['sometimes', 'required', 'integer', Rule::in([0, 1])]
             ];
         }
+
+        return [
+            'is_seen' => ['required', 'integer', Rule::in([0, 1])]
+        ];
     }
 
     /**
@@ -68,9 +84,21 @@ class NotificationRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        if (($this->hasAdminPrivileges()) && ($this->filled('userId'))) {
+        if ($this->filled('userId')) {
             $this->merge([
                 'user_id' => $this->userId,
+            ]);
+        }
+
+        if ($this->filled('adId')) {
+            $this->merge([
+                'ad_id' => $this->adId,
+            ]);
+        }
+
+        if ($this->filled('isSeen')) {
+            $this->merge([
+                'is_seen' => $this->isSeen
             ]);
         }
     }

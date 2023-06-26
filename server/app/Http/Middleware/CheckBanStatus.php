@@ -17,7 +17,7 @@ class CheckBanStatus
     {
         if (auth()->check() && auth()->user()->is_banned) {
             auth()->user()->tokens()->delete();
-            return response()->json(['status' => 'error', 'message' => 'Your account has been suspended. :D', 'data' => auth()->user()->ban_reason], 401);
+            return response()->json(['status' => 'error', 'message' => 'Your account has been suspended.', 'data' => auth()->user()->ban_reason], 401);
         }
 
         return $next($request);

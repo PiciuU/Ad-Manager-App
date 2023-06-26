@@ -5,7 +5,6 @@ import router from './router'
 
 /* Styles */
 import '@/assets/styles/main.scss'
-import 'element-plus/theme-chalk/dark/css-vars.css'
 
 /* Font Awesome */
 import { fontAwesome } from '@/plugins/font-awesome'
