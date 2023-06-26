@@ -65,13 +65,13 @@ body {
 
 /* Utility classes for hiding elements */
 
-@media (max-width: $--breakpoint-small-devices) {
+@media (max-width: calc($--breakpoint-small-devices - 1px)) {
     .el-hidden-xs-and-down {
         display: none !important;
     }
 }
 
-@media (max-width: $--breakpoint-medium-devices) {
+@media (max-width: calc($--breakpoint-medium-devices - 1px)) {
     .el-hidden-sm-and-down {
         display: none !important;
     }
@@ -85,192 +85,162 @@ body {
 
 /* Custom styling */
 
-.el-empty {
-    padding: 0px !important;
-
-    &__description {
-        margin-top: 10px;
-    }
-}
-
-.el-select-dropdown__item {
-    height: 42px;
-    line-height: 42px;
-}
-
-.el-select-dropdown {
-    max-width: 2px;
-    text-align: left;
-}
 
 /* // DatePicker RWD support for mobile devices */
 
-.el-picker-panel__shortcut {
-    position: relative;
-    margin-bottom: 20px;
-    line-height: 20px;
-    padding-left: 15px;
+// .el-picker-panel__shortcut {
+//     position: relative;
+//     margin-bottom: 20px;
+//     line-height: 20px;
+//     padding-left: 15px;
 
-    &:first-child {
-        padding-top: 5px;
-    }
-}
+//     &:first-child {
+//         padding-top: 5px;
+//     }
+// }
 
-.el-picker-panel__shortcut:after {
-    content: '';
-    position: absolute;
-    width: 90%;
-    height: 2px;
-    background: #f5f8fa;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-}
+// .el-picker-panel__shortcut:after {
+//     content: '';
+//     position: absolute;
+//     width: 90%;
+//     height: 2px;
+//     background: #f5f8fa;
+//     bottom: -10px;
+//     left: 50%;
+//     transform: translateX(-50%);
+// }
 
-@media screen and (max-width: $--breakpoint-small-devices) {
-    .el-date-range-picker.has-sidebar {
-        width: 100% !important;
-
-        .el-picker-panel__sidebar {
-            display: none;
-        }
-
-        .el-picker-panel__body-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .el-picker-panel__body {
-            width: 90%;
-            min-width: unset;
-            margin: 0;
-        }
-    }
-}
-
+/* DatePicker RWD support for mobile devices */
 @media screen and (max-width: $--breakpoint-mobile) {
-    .el-picker-panel__body {
-        display: flex;
-        flex-direction: column;
+    .el-picker__popper {
+        width: 90%;
+
+        .el-date-range-picker {
+            width: 100%;
+            overflow: scroll;
+            height: 50vh;
+        }
+
+        .el-date-range-picker .el-picker-panel__body {
+            min-width: unset;
+        }
+
+        .el-picker-panel__content {
+            width: 100%;
+        }
+
+        .el-picker-panel__content.is-left {
+            border-right: unset;
+        }
     }
-
-    .el-date-range-picker__content {
-        width: 100% !important;
-    }
-
-    .el-date-range-picker__content.is-left {
-        border-right: unset;
-    }
 }
 
-/* Add space between inputs [default=18px v1.3.0-beta.5] */
-.el-form-item--default {
-    margin-bottom: 20px;
-}
-
-/* Imitate position absolute for form errors, but without overlapping form items */
-.el-form-item__error {
-    position: initial;
-    margin-bottom: -16px;
-    text-align: left;
-}
-
-/* Fix button text display for small devices */
-.el-button {
-    white-space: normal;
-}
-/* Fix popover text display */
-.el-popover.el-popper {
-    text-align: left !important;
-    word-break: break-word !important;
-}
-
-/* Fix element-plus@1.2.0-beta.4 issue with input prefixes positioning */
-.el-input__prefix-inner {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Fix text align in notifications */
-.el-notification__content {
-    text-align: left !important;
-}
-
-/* Notification RWD support for mobile devices */
+/* Notification RWD support for mobile devices & fix displaying */
 .el-notification {
     max-width: 90%;
-}
 
-.el-notification__group {
-    width: 100%;
-}
+    /* Fix group width */
+    .el-notification__group {
+        width: 100%;
+    }
 
-/* Fix position of closeButton due to position relative on *, *::after, *::before */
-i.el-icon.el-notification__closeBtn {
-    top: 0px;
-    right: -10px;
+    /* Fix alignment for content */
+    .el-notification__content {
+        text-align: left;
+    }
+
+    /* Fix position of closeButton due to position relative on *, *::after, *::before */
+    .el-notification__closeBtn {
+        top: 0px;
+        right: -10px;
+    }
 }
 
 /* MessageBox RWD support for mobile devices */
 .el-message-box {
-    width: 500px;
+    max-width: 500px;
+    width: 100%;
     border-radius: 10px;
-    max-width: 90%;
 }
 
-/* Descriptions Two Column layout RWD support for long text */
-.el-descriptions-two-column > tr > td:first-child {
-    margin-right: 10px;
-}
-
-/* Dialog Modal RWD support for mobile devices & Correct styles */
-.el-dialog {
+/* Dialog RWD support for mobile devices & Correct styles */
+div.el-dialog {
     border: 1px solid $--color-text-muted-3;
-    border-radius: 10px !important;
+    border-radius: 10px;
+
+    @media screen and (max-width: $--breakpoint-medium-devices) {
+        width: 60%;
+    }
 
     @media screen and (max-width: $--breakpoint-small-devices) {
-        width: 400px !important;
+        width: 80%;
     }
 
     @media screen and (max-width: $--breakpoint-mobile) {
         display: flex;
         flex-direction: column;
-        width: 100% !important;
+        width: 100%;
         min-height: 100%;
-        margin: 0px !important;
+        margin: 0px;
         border-radius: 0px;
+        border: none;
 
-        &__footer {
+        .el-dialog__footer {
             margin-top: auto;
         }
     }
 
-    &__header {
-        margin-right: 0px !important;
+    .el-dialog__header {
+        margin-right: 0px;
         text-align: center;
     }
 
-    &__header > &__title {
+    .el-dialog__header > .el-dialog__title {
         font-weight: bold;
     }
 
-    &__body {
-        padding: calc(var(--el-dialog-padding-primary) + 10px)
-            calc(var(--el-dialog-padding-primary) + 10px);
-    }
-
-    &__footer {
+    .el-dialog__footer {
         /* Fix issue with position of loader resulting in breaking layout */
-        .el-icon.is-loading {
-            display: initial;
-        }
+        // .el-icon.is-loading {
+        //     display: initial;
+        // }
     }
 }
 
-/*  Disable border for specific el-card header */
+/* Message RWD support for mobile devices */
+@media screen and (max-width: $--breakpoint-small-devices) {
+    .el-message {
+        width: 100%;
+    }
+}
 
-.auth-container .el-card__header {
-    border: none;
+/* Fix margin and padding of alerts used in forms as hints */
+.el-alert {
+    div.el-alert__content {
+        padding: 0px 16px;
+    }
+    p.el-alert__description {
+        margin: 0px;
+    }
+}
+
+/* Fix button text overlapping */
+.el-button {
+    white-space: normal;
+}
+
+/* Fix popover text display */
+.el-popper.el-popover {
+    text-align: left !important;
+    word-break: break-word !important;
+}
+
+/* Fix width of select dropdown in weird way but it works somehow */
+.el-select-dropdown {
+    max-width: 1px;
+}
+
+/* Fix word break in table rows */
+.el-table div.cell {
+    word-break: break-word;
 }

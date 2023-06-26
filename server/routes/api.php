@@ -10,6 +10,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\AdStatsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\FileController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -23,10 +24,6 @@ use Illuminate\Support\Facades\Hash;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
 
 Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanctum', 'check.ban']], function () {
 
@@ -52,45 +49,68 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
         Route::put('user/password', [UserController::class, 'changePassword']);
 
         Route::get('logs', [LogController::class, 'index']);
-        Route::get('logs/{id}', [LogController::class, 'show']);
+        Route::get('logs/users/{id}', [LogController::class ,'showUser']);
+        Route::get('logs/ads/{id}', [LogController::class ,'showAd']);
         Route::put('logs/{id}', [LogController::class, 'update']);
+
+         /* Notifications */
+        Route::post('notifications', [NotificationController::class, 'store']);
+
+        /* Ads */
+        Route::get('users/{id}/ads', [AdController::class, 'indexShowAsAdmin']);
+
+        Route::get('ads', [AdController::class, 'indexAsAdmin']);
+        Route::post('ads', [AdController::class, 'storeAsAdmin']);
+        Route::get('ads/{id}', [AdController::class, 'showAsAdmin']);
+        Route::put('ads/{id}', [AdController::class, 'updateAsAdmin']);
+        Route::put('ads/{id}/renew', [AdController::class, 'renewAsAdmin']);
+        Route::get('ads/{id}/deactivate', [AdController::class, 'deactivateAsAdmin']);
+
+        /* Files of ad */
+        Route::get('ads/{id}/files', [FileController::class, 'fetchAsAdmin']);
+        Route::post('ads/{id}/files', [FileController::class, 'uploadAsAdmin']);
+        Route::get('ads/{id}/files/{fileName}', [FileController::class, 'highlightAsAdmin']);
+        Route::delete('ads/{id}/files/{fileName}', [FileController::class, 'deleteAsAdmin']);
+
+        /* Invoices of ad */
+        Route::get('ads/{id}/invoices', [InvoiceController::class, 'indexAsAdmin']);
+        Route::get('ads/{id}/invoices/{invoiceId}/payment', [InvoiceController::class, 'paymentAsAdmin']);
+        Route::get('ads/{id}/invoices/create', [InvoiceController::class, 'storeAsAdmin']);
+        Route::put('ads/{id}/invoices/{invoiceId}', [InvoiceController::class, 'updateAsAdmin']);
     });
 
-
-    Route::get('ads/{id}', [AdController::class, 'show']);
+    /* Ads */
     Route::get('ads', [AdController::class, 'index']);
     Route::post('ads', [AdController::class, 'store']);
-    Route::put('ads/{id}', [AdController::class, 'update']); //lkjlkjlkjlkjlkjlkj
-    Route::delete('ads/{id}', [AdController::class, 'destroy']);
+    Route::get('ads/{id}', [AdController::class, 'show']);
+    Route::put('ads/{id}', [AdController::class, 'update']);
+    Route::put('ads/{id}/renew', [AdController::class, 'renew']);
+    Route::get('ads/{id}/deactivate', [AdController::class, 'deactivate']);
 
+    /* Files of ad */
+    Route::get('ads/{id}/files', [FileController::class, 'fetch']);
+    Route::post('ads/{id}/files', [FileController::class, 'upload']);
+    Route::get('ads/{id}/files/{fileName}', [FileController::class, 'highlight']);
+    Route::delete('ads/{id}/files/{fileName}', [FileController::class, 'delete']);
+
+    /* Invoices of ad */
+    Route::get('ads/{id}/invoices', [InvoiceController::class, 'index']);
+    Route::get('ads/{id}/invoices/{invoiceId}/payment', [InvoiceController::class, 'payment']);
+
+    /* User notifications */
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/latest', [NotificationController::class, 'latest']);
+    Route::get('notifications/{id}/seen', [NotificationController::class, 'isSeen']);
+
+    /* Temp */
     Route::get('stats', [AdStatsController::class, 'index']);
     Route::get('stats/{ad_id}/{stat_id?}', [AdStatsController::class, 'show']);
     Route::post('stats/{stat_id}', [AdStatsController::class, 'update']); //admin only
     Route::get('stats/{stat_id}/delete', [AdStatsController::class, 'delete']); //admin only
-
-    Route::get('invoice', [InvoiceController::class, 'index']);
-    Route::post('invoice', [InvoiceController::class, 'store']);
-    Route::get('invoice/{id}', [InvoiceController::class, 'show']);
-    Route::put('invoice/{id}', [InvoiceController::class, 'update']); //admin only
-    Route::delete('invoice/{id}', [InvoiceController::class, 'destroy']); //admin only
-
-    Route::get('notification', [NotificationController::class, 'index']);
-    Route::post('notification', [NotificationController::class, 'store']);
-    Route::get('notification/{id}', [NotificationController::class, 'show']);
-    Route::get('notification/{id}/seen', [NotificationController::class, 'isSeen']);
-    Route::post('notification/{id}', [NotificationController::class, 'update']);
-    Route::get('notification/{id}/delete', [NotificationController::class, 'delete']);
-
-    // Route::apiResource('ads', AdsController::class);
-    // Route::apiResource('adStats', AdStatsController::class);
-    // Route::apiResource('invoice', InvoiceController::class);
-    // Route::apiResource('log', LogController::class);
-    // Route::apiResource('notification', NotificationController::class);
 });
 
-
 Route::group(['prefix' => 'auth'], function () {
-    Route::group(['prefix' => 'validate'], function() {
+    Route::group(['prefix' => 'validate'], function () {
         Route::put('key', [UserController::class, 'validateAuthenticationKey']);
         Route::put('login', [UserController::class, 'validateLogin']);
         Route::put('email', [UserController::class, 'validateEmail']);
@@ -101,46 +121,6 @@ Route::group(['prefix' => 'auth'], function () {
     Route::get('recover/{hash}', [UserController::class, 'recoverToken']);
     Route::post('recover', [UserController::class, 'recover']);
     Route::post('reset', [UserController::class, 'resetPassword']);
-});
-
-Route::get('/setup', function () {
-    $credentials = [
-        'user_role_id' => 2,
-        'login' => 'admin',
-        'name' => 'Admin',
-        'email' => 'admin@test.pl',
-        'password' => 'Piciu103'
-    ];
-
-    if (!Auth::attempt($credentials)) {
-        $user = new User();
-
-        $user->user_role_id = $credentials['user_role_id'];
-        $user->login = $credentials['login'];
-        $user->name = $credentials['name'];
-        $user->email = $credentials['email'];
-        $user->password = Hash::make($credentials['password']);
-        $user->save();
-
-        $cred = [
-            'email' => 'admin@test.pl',
-            'password' => 'Piciu103'
-        ];
-
-        if (Auth::attempt($cred)) {
-            $user = Auth::user();
-
-            $adminToken = $user->createToken('admin-token', ['all']);
-            $verifiedToken = $user->createToken('verified-token', ['advanced']);
-            $basicToken = $user->createToken('basic-token', ['basic']);
-
-            return [
-                'admin' => $adminToken->plainTextToken,
-                'verified' => $verifiedToken->plainTextToken,
-                'basic' => $basicToken->plainTextToken,
-            ];
-        }
-    }
 });
 
 Route::fallback(function () {

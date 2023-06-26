@@ -10,6 +10,7 @@ class Invoice extends Model
     use HasFactory;
 
     protected $table = 'invoices';
+
     protected $dates = [
         'created_at',
         'updated_at'
@@ -20,7 +21,8 @@ class Invoice extends Model
         'number',
         'price',
         'date',
-        'status'
+        'status',
+        'notes'
     ];
 
     protected $hidden = [

@@ -28,4 +28,8 @@
 		width: 100%;
 		flex: 1;
 	}
+
+	::v-deep(.el-card__header) {
+		border: none;
+	}
 </style>

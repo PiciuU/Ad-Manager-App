@@ -1,9 +1,8 @@
 <template>
     <el-main>
+        <!-- Lista użytkowników -->
+
         <el-row class="cards__container" :gutter="32">
-
-            <!-- Spis użytkowników -->
-
             <el-col :span="24" :md="16">
                 <el-card class="card">
                     <div class="card__title">Lista użytkowników</div>
@@ -11,8 +10,8 @@
                         class="card__select"
                         filterable
                         @change="handleUserChange"
-                        v-model="searchFilter.userId"
-                        :loading="loaders.isUsersLoading"
+                        v-model="filter.userId"
+                        :loading="loaders.isUsersFetching"
                         loading-text="Wyszukiwanie użytkowników..."
                         placeholder="Wybierz użytkownika..."
                         no-data-text="Nie znaleziono żadnych użytkowników."
@@ -32,200 +31,185 @@
 
          <!-- Szczegóły użytkownika -->
 
-        <div v-if="Object.keys(data.user).length > 0">
+        <div v-if="filter.userId && filter.userId != null">
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24" :md="16">
                     <el-card class="card">
-                        <div class="card__title">Konto użytkownika {{ data.user.login }}</div>
-                        <el-descriptions :column="2">
-                            <el-descriptions-item label="Adres email: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.email) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Nazwa firmy: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.name) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Osoba kontaktowa: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.representative) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Telefon kontaktowy: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.representativePhone) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Adres firmowy: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.address) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Kod pocztowy: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.postalCode) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Kraj: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.country) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="NIP: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.nip) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Firmowy adres email: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.companyEmail) }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Firmowy telefon: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.companyPhone) }}
-                            </el-descriptions-item>
-                        </el-descriptions>
+                        <div class="card__title">Konto użytkownika {{ data.user.login }} (ID: {{ data.user.id ?? '...'}})</div>
+                        <div v-if="data.user && !loaders.isUserFetching">
+                            <el-descriptions :column="2">
+                                <el-descriptions-item label="Adres email: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.email) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Nazwa firmy: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.name) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Osoba kontaktowa: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.representative) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Telefon kontaktowy: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.representativePhone) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Adres firmowy: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.address) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Kod pocztowy: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.postalCode) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Kraj: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.country) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="NIP: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.nip) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Firmowy adres email: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.companyEmail) }}
+                                </el-descriptions-item>
+                                <el-descriptions-item label="Firmowy telefon: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.companyPhone) }}
+                                </el-descriptions-item>
+                            </el-descriptions>
+                        </div>
+                        <el-skeleton :rows="5" animated v-else />
                     </el-card>
                 </el-col>
 
                 <el-col :span="24" :md="8">
                     <el-card class="card">
                         <div class="card__title">Informacje o użytkowniku</div>
-                        <el-descriptions :column="1">
-                            <el-descriptions-item label="Identyfikator użytkownika: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ data.user.id }} | {{ data.user.userRole }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="Data utworzenia konta: " label-class-name="card__data-label" class-name="card__data-line">
-                                {{ stringToLocale(data.user.createdAt) }}
-                            </el-descriptions-item>
-                            <div v-if="data.user.activatedAt">
-                                <el-descriptions-item label="Data aktywacji konta: " label-class-name="card__data-label" class-name="card__data-line">
-                                    {{ stringToLocale(data.user.activatedAt) }}
+                        <div v-if="data.user && !loaders.isUserFetching">
+                            <el-descriptions :column="1">
+                                <el-descriptions-item label="Identyfikator użytkownika: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ data.user.id }} | {{ data.user.userRole == 'User' ? 'Użytkownik' : 'Administrator' }}
                                 </el-descriptions-item>
-                                <el-descriptions-item label="Ostatnio aktywny: " label-class-name="card__data-label" class-name="card__data-line">
-                                    {{ stringToLocale(data.user.recentlyActiveAt) }}
+                                <el-descriptions-item label="Data utworzenia konta: " label-class-name="card__data-label" class-name="card__data-line">
+                                    {{ stringToLocale(data.user.createdAt) }}
                                 </el-descriptions-item>
-                                <el-descriptions-item label="Czy zablokowany: " label-class-name="card__data-label" class-name="card__data-line">
-                                    {{ data.user.isBanned ? 'Tak' : 'Nie' }}
-                                </el-descriptions-item>
-                                <el-descriptions-item label="Powód blokady: " label-class-name="card__data-label" class-name="card__data-line" v-if="data.user.isBanned">
-                                    {{ stringToLocale(data.user.banReason) }}
-                                </el-descriptions-item>
-                            </div>
-                            <div v-else>
-                                <el-descriptions-item label="Status konta: " label-class-name="card__data-label" class-name="card__data-line">
-                                    Konto nieaktywowane
-                                </el-descriptions-item>
-                                <el-descriptions-item label="Klucz aktywacyjny: " label-class-name="card__data-label" class-name="card__data-line">
-                                    {{ stringToLocale(data.user.activationKey) }}
-                                </el-descriptions-item>
-                            </div>
-                        </el-descriptions>
+                                <div v-if="data.user.activatedAt">
+                                    <el-descriptions-item label="Data aktywacji konta: " label-class-name="card__data-label" class-name="card__data-line">
+                                        {{ stringToLocale(data.user.activatedAt) }}
+                                    </el-descriptions-item>
+                                    <el-descriptions-item label="Ostatnio aktywny: " label-class-name="card__data-label" class-name="card__data-line">
+                                        {{ stringToLocale(data.user.recentlyActiveAt) }}
+                                    </el-descriptions-item>
+                                    <el-descriptions-item label="Czy zablokowany: " label-class-name="card__data-label" class-name="card__data-line">
+                                        {{ data.user.isBanned ? 'Tak' : 'Nie' }}
+                                    </el-descriptions-item>
+                                    <el-descriptions-item label="Powód blokady: " label-class-name="card__data-label" class-name="card__data-line" v-if="data.user.isBanned">
+                                        {{ stringToLocale(data.user.banReason) }}
+                                    </el-descriptions-item>
+                                </div>
+                                <div v-else>
+                                    <el-descriptions-item label="Status konta: " label-class-name="card__data-label" class-name="card__data-line">
+                                        Konto nieaktywowane
+                                    </el-descriptions-item>
+                                    <el-descriptions-item label="Klucz aktywacyjny: " label-class-name="card__data-label" class-name="card__data-line">
+                                        {{ stringToLocale(data.user.activationKey) }}
+                                    </el-descriptions-item>
+                                </div>
+                            </el-descriptions>
+                        </div>
+                        <el-skeleton :rows="5" animated v-else />
                     </el-card>
                 </el-col>
             </el-row>
 
+            <!-- Operacje -->
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24">
                     <el-card class="card">
                         <div class="card__title">Operacje na użytkowniku</div>
-                        <div class="button__group">
-                            <el-button @click="toggleModal('edit')" class="card__button" type="primary" plain>Edytuj dane użytkownika</el-button>
-                            <el-button @click="toggleModal('password')" class="card__button" type="primary" plain>Zmień hasło użytkownika</el-button>
-                            <el-button v-if="!data.user.activationKey && !data.user.activatedAt" @click="toggleModal('activation')" class="card__button" type="primary" plain>Wygeneruj klucz aktywacyjny</el-button>
-                            <el-button @click="toggleModal('ban')" class="card__button" type="primary" plain>{{ data.user.isBanned == true ? 'Odblokuj użytkownika' : 'Zablokuj użytkownika' }}</el-button>
-                            <el-button @click="toggleModal('notification')" class="card__button" type="primary" plain>Wyślij powiadomienie</el-button>
+                        <div v-if="data.user && !loaders.isUserFetching">
+                            <div class="button__group">
+                                <el-button @click="toggleModal('edit')" class="card__button" type="primary" plain>Edytuj dane użytkownika</el-button>
+                                <el-button @click="toggleModal('password')" class="card__button" type="primary" plain>Zmień hasło użytkownika</el-button>
+                                <el-button v-if="!data.user.activationKey && !data.user.activatedAt" @click="toggleModal('activation')" class="card__button" type="primary" plain>Wygeneruj klucz aktywacyjny</el-button>
+                                <el-button @click="toggleModal('ban')" class="card__button" type="primary" plain>{{ data.user.isBanned == true ? 'Odblokuj użytkownika' : 'Zablokuj użytkownika' }}</el-button>
+                                <el-button @click="toggleModal('notification')" class="card__button" type="primary" plain>Wyślij powiadomienie</el-button>
+                            </div>
                         </div>
+                        <el-skeleton :rows="1" animated v-else />
                     </el-card>
                 </el-col>
             </el-row>
 
              <!-- Reklamy -->
-
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24">
                     <el-card class="card">
                         <div class="card__title">Reklamy użytkownika</div>
-                        <el-row>
-                            <el-col :span="12" :md="6">
-                                <el-statistic title="Ilość reklam" :value="5" />
-                            </el-col>
-                            <el-col :span="12" :md="6">
-                                <el-statistic title="Aktywne reklamy" :value="2" />
-                            </el-col>
-                            <el-col :span="12" :md="6">
-                                <el-statistic title="Opłacone faktury" :value="2" />
-                            </el-col>
-                            <el-col :span="12" :md="6">
-                                <el-statistic title="Nieopłacone faktury" :value="1" />
-                            </el-col>
-                        </el-row>
-                        <div class="card__title">Lista reklam</div>
-                        <el-row>
-                            <el-col :span="24">
-                                <el-select
-                                    class="card__select"
-                                    filterable
-                                    @change="handleUserChange"
-                                    v-model="searchFilter.adId"
-                                    loading-text="Wyszukiwanie reklam..."
-                                    placeholder="Wybierz reklamę..."
-                                    no-data-text="Nie znaleziono żadnych reklam."
-                                    clearable
-                                >
-                                    <el-option v-for="ad in data.user.ads" :key="ad.id" :label="ad.name" :value="ad.id"></el-option>
-                                </el-select>
-                            </el-col>
-                            <el-col v-if="searchFilter.adId" :span="24">
-                                <el-button class="card__button card__button--fill" type="primary" plain>Przejdź do szczegółów reklamy</el-button>
-                            </el-col>
-                        </el-row>
+                        <div v-if="data.user?.adverts">
+                            <el-select
+                                class="card__select"
+                                filterable
+                                v-model="filter.advertId"
+                                loading-text="Wyszukiwanie reklam..."
+                                placeholder="Wybierz reklamę..."
+                                no-data-text="Nie znaleziono żadnych reklam."
+                                clearable
+                            >
+                                <el-option v-for="advert in data.user.adverts" :key="advert.id" :label="advert.name" :value="advert.id"></el-option>
+                            </el-select>
+                            <router-link v-if="filter.advertId" :to="{ name: 'AdminAds', params: { id: filter.advertId }}">
+                                <el-button class="card__button card__button--fill card__button-margin" type="primary" plain>Przejdź do szczegółów reklamy</el-button>
+                            </router-link>
+                        </div>
+                        <el-skeleton :rows="1" animated v-else />
                     </el-card>
                 </el-col>
             </el-row>
 
             <!-- Dziennik Zdarzeń -->
-
             <el-row class="cards__container" :gutter="32">
                 <el-col :span="24">
                     <el-card class="card">
                         <div class="card__title">Dziennik zdarzeń użytkownika</div>
-                        <el-table @row-click="editLog" :data="data.logs.entries" stripe style="width: 100%" v-loading="loaders.isLogsLoading">
-                            <el-table-column prop="id" label="ID" width="50"/>
-                            <el-table-column prop="createdAt" label="Data" width="200"/>
-                            <el-table-column label="Typ" min-width="200">
-                                <template #default="scope">
-                                    <el-popover effect="light" trigger="hover" placement="top" width="auto">
-                                        <template #default>
-                                            <div>Notatki administratora: {{ stringToLocale(scope.row.notes) }}</div>
-                                        </template>
-                                        <template #reference>
-                                            <el-tag>{{ scope.row.operationTags }}</el-tag>
-                                        </template>
-                                    </el-popover>
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="message" label="Opis" min-width="300" width="auto"/>
-                        </el-table>
-                        <el-pagination
-                            v-if="!isObjectEmpty(data.logs)"
-                            class="card__pagination"
-                            :current-page="data.logs.current_page"
-                            :page-size="data.logs.per_page"
-                            :total="data.logs.total"
-                            :small="true"
-                            :disabled="false"
-                            :background="true"
-                            layout="prev, pager, next, jumper"
-                            @current-change="handlePageChange"
-                        />
+                        <div v-if="data.user?.logs">
+                            <el-table @row-click="editLog" :data="data.user.logs.entries" stripe style="width: 100%" v-loading="loaders.isUserLogsFetching" class-name="make-clickable">
+                                <el-table-column prop="id" label="ID" width="50"/>
+                                <el-table-column prop="createdAt" label="Data" width="200"/>
+                                <el-table-column label="Typ" min-width="200">
+                                    <template #default="scope">
+                                        <el-tag>{{ scope.row.operationTags }}</el-tag>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="message" label="Opis" min-width="300" width="auto"/>
+                            </el-table>
+                            <el-pagination
+                                class="card__pagination"
+                                :current-page="data.user.logs.current_page"
+                                :page-size="data.user.logs.per_page"
+                                :total="data.user.logs.total"
+                                :small="true"
+                                :disabled="false"
+                                :background="true"
+                                layout="prev, pager, next, jumper"
+                                @current-change="fetchUserLogs"
+                            />
+                        </div>
+                        <el-skeleton :rows="2" animated v-else />
                     </el-card>
                 </el-col>
             </el-row>
         </div>
 
         <!-- Modale -->
-
         <ModalUserCreate v-if="modals.currentModal === 'create'" :user="data.user" @add="addUser" @close="toggleModal"/>
         <ModalUserEdit v-if="modals.currentModal === 'edit'" :user="data.user" @update="updateUser" @close="toggleModal"/>
         <ModalUserPassword v-if="modals.currentModal === 'password'" :user="data.user" @close="toggleModal"/>
         <ModalUserActivationKey v-if="modals.currentModal === 'activation'" :user="data.user" @update="updateUser" @close="toggleModal"/>
         <ModalUserBan v-if="modals.currentModal === 'ban'" :user="data.user" @update="updateUser" @close="toggleModal"/>
-        <ModalUserNotification v-if="modals.currentModal === 'notification'" :user="data.user" @close="toggleModal"/>
+        <ModalUserNotification v-if="modals.currentModal === 'notification'" :userId="data.user.id" @close="toggleModal"/>
 
-
-        <ModalLogEdit v-if="modals.currentModal === 'log'" :log="data.log" @update="updateLog" @close="toggleModal"/>
+        <ModalLogEdit v-if="modals.currentModal === 'log'" :log="data.user.log" @update="updateLog" @close="toggleModal"/>
     </el-main>
 </template>
 
 <script setup>
-    import { reactive, onMounted } from 'vue'
+    import { reactive, onMounted, onUpdated } from 'vue'
+    import { useRoute, useRouter } from 'vue-router';
 
-    import { isObjectEmpty, stringToLocale } from '@/common/helpers/utility.helper'
+    import { stringToLocale } from '@/common/helpers/utility.helper'
 
     import { useAdminStore } from '@/stores/AdminStore';
 
@@ -235,24 +219,19 @@
     import ModalUserEdit from '@/modules/components/admin/ModalUserEdit.vue';
     import ModalUserCreate from '@/modules/components/admin/ModalUserCreate.vue';
     import ModalUserNotification from '@/modules/components/admin/ModalUserNotification.vue';
-    import ModalLogEdit from '@/modules/components/admin/ModalLogEdit.vue';
 
+    import NotificationService from '@/services/notification.service';
+
+    const route = useRoute();
+    const router = useRouter();
     const adminStore = useAdminStore();
 
     const loaders = reactive({
-        isUsersLoading: false,
-        isLogsLoading: false,
+        isUsersFetching: false,
+        isUserFetching: false,
+        isUserAdvertsFetching: false,
+        isUserLogsFetching: false,
     });
-
-    /* Modals */
-
-    const modals = reactive({
-        currentModal: ''
-    });
-
-    const toggleModal = (modal = '') => {
-        modals.currentModal = modal;
-    };
 
     /* Main Data */
 
@@ -263,72 +242,130 @@
         log: {}
 	});
 
+    const filter = reactive({
+		userId: null,
+        advertId: null,
+	});
+
     onMounted(() => {
-        loaders.isUsersLoading = true;
-        adminStore.getUsers()
+        loaders.isUsersFetching = true;
+        adminStore.fetchUsers()
             .then((response) => {
                 data.users = response.data;
+                if (route.params.id) {
+                    filter.userId = parseInt(route.params.id);
+                    handleUserChange();
+                }
+            })
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy pobieraniu listy użytkowników, spróbuj ponownie później.');
             })
             .finally(() => {
-                loaders.isUsersLoading = false;
+                loaders.isUsersFetching = false;
             })
 	});
 
-    /* Users List */
-
-    const searchFilter = reactive({
-		userId: null,
-        adId: null,
-	});
-
-    const handleUserChange = () => {
-		if (!searchFilter.userId) data.user = {};
-		else {
-            data.user = data.users.find((user) => user.id === searchFilter.userId);
-            data.logs = {};
-            loaders.isLogsLoading = true;
-            adminStore.getUserLogs(data.user.id)
-                .then((response) => {
-                    data.logs = response.data;
-                })
-                .finally(() => {
-                    loaders.isLogsLoading = false;
-                })
+    onUpdated(() => {
+        console.log('onUpdated');
+        if (route.params.id && filter.userId !== parseInt(route.params.id)) {
+            filter.userId = parseInt(route.params.id);
+            handleUserChange();
         }
+    })
+
+    /* Modals */
+    const modals = reactive({
+        currentModal: ''
+    });
+
+    const toggleModal = (modal = '') => {
+        modals.currentModal = modal;
+    };
+
+    /* User */
+    const handleUserChange = async () => {
+        router.push({ name: 'AdminUsers', params: { id: filter.userId }});
+
+        data.user = {};
+        filter.advertId = null;
+
+		if (!filter.userId || filter.userId === null) return;
+
+        loaders.isUserFetching = true;
+
+        let isErrorOccurred = false;
+        let userResponseHandler = null;
+
+        await adminStore.fetchUser(filter.userId)
+            .then((response) => {
+                userResponseHandler = response.data
+            })
+            .catch(() => {
+                isErrorOccurred = true;
+            })
+
+        loaders.isUserFetching = false;
+
+        if (isErrorOccurred) {
+            NotificationService.displayMessage('error', 'Wystąpił błąd przy pobieraniu wybranego użytkownika, spróbuj ponownie później.');
+            filter.userId = null;
+            return;
+        }
+
+        data.user = userResponseHandler;
+
+        fetchUserAdverts();
+        fetchUserLogs(1);
 	};
 
     /* User Details */
-
-    const updateUser = (newData) => {
-        Object.assign(data.user, newData);
+    const updateUser = (item) => {
+        if (data.user.login != item.login) {
+            const user = data.users.find((user) => user.login == data.user.login);
+            user.login = item.login;
+        }
+        Object.assign(data.user, item);
     };
 
-    const addUser = (newData) => {
-        data.users.push(newData);
-        data.user = newData;
+    const addUser = (item) => {
+        data.users.push(item);
+        data.user = item;
+    };
+
+    /* Adverts */
+    const fetchUserAdverts = () => {
+        loaders.isUserAdvertsFetching = true;
+        adminStore.fetchUserAdverts(data.user.id)
+                .then((response) => {
+                    data.user.adverts = response.data;
+                })
+                .finally(() => {
+                    loaders.isUserAdvertsFetching = false;
+                })
     };
 
     /* Logs */
+    import ModalLogEdit from '@/modules/components/admin/ModalLogEdit.vue';
 
-    const handlePageChange = (newPage) => {
-        loaders.isLogsLoading = true;
-        adminStore.getUserLogs(data.user.id, newPage)
+    const fetchUserLogs = (page) => {
+        loaders.isUserLogsFetching = true;
+        adminStore.fetchUserLogs(data.user.id, page)
                 .then((response) => {
-                    data.logs = response.data;
+                    data.user.logs = response.data;
                 })
                 .finally(() => {
-                    loaders.isLogsLoading = false;
+                    loaders.isUserLogsFetching = false;
                 })
     };
 
     const editLog = (log) => {
-        data.log = log;
+        data.user.log = log;
         toggleModal('log');
     };
 
-    const updateLog = (newData) => {
-        let log = data.logs.entries.find((log) => log.id === newData.id);
-        Object.assign(log, newData);
+    const updateLog = (item) => {
+        let log = data.user.logs.entries.find((log) => log.id === item.id);
+        Object.assign(log, item);
     };
 </script>
 
@@ -357,9 +394,17 @@
         width: 100%;
     }
 
+    .card__button-margin {
+        margin-top: 20px;
+    }
+
     .card__pagination {
         display: flex;
         justify-content: center;
         margin-top: 15px;
+    }
+
+    .make-clickable {
+        cursor: pointer;
     }
 </style>

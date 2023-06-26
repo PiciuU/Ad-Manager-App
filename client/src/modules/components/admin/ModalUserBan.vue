@@ -1,5 +1,5 @@
 <template>
-    <el-dialog :model-value="true" title="Blokada użytkownika" @close="$emit('close')" :lock-scroll="true" :close-on-click-modal="true">
+    <el-dialog :model-value="true" title="Blokada użytkownika" :lock-scroll="true" :before-close="closeModal" :close-on-click-modal="!isLoading" :close-on-press-escape="!isLoading">
         <el-form v-if="user.isBanned == false" ref="form" label-position="top" :hide-required-asterisk="true" :model="formData" :rules="validationRules" @submit.prevent="validateData">
             <el-form-item prop="banReason" label="Powód blokady">
                 <el-input v-model="formData.banReason" maxlength="255" placeholder="Wprowadź powód blokady konta..."></el-input>
@@ -12,7 +12,7 @@
 
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="$emit('close')" :loading="isLoading">Anuluj zmiany</el-button>
+                <el-button @click="closeModal" :loading="isLoading">Anuluj zmiany</el-button>
                 <el-button v-if="user.isBanned == false" type="primary" @click="validateData" :loading="isLoading">Zablokuj użytkownika</el-button>
                 <el-button v-else type="primary" @click="submitForm" :loading="isLoading">Odblokuj użytkownika</el-button>
             </span>
@@ -54,6 +54,10 @@
                 trigger: 'blur'
             }
         ],
+    }
+
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
     }
 
     const validateData = () => {

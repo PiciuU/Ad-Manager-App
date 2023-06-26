@@ -2,9 +2,10 @@
     <el-dialog
         :model-value="true"
         :title="`Edycja danych ${mode == 'person' ? 'kontaktowych' : 'reklamodawcy'}`"
-        @close="$emit('close')"
         :lock-scroll="true"
-        :close-on-click-modal="false"
+        :before-close="closeModal"
+        :close-on-click-modal="!isLoading"
+        :close-on-press-escape="!isLoading"
     >
         <el-form
             v-if="mode == 'person'"
@@ -54,8 +55,8 @@
 
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="$emit('close')" :loading="authStore.isLoading">Anuluj zmiany</el-button>
-                <el-button type="primary" @click="validateData" :loading="authStore.isLoading">Zaktualizuj dane</el-button>
+                <el-button @click="closeModal" :loading="isLoading">Anuluj zmiany</el-button>
+                <el-button type="primary" @click="validateData" :loading="isLoading">Zaktualizuj dane</el-button>
             </span>
         </template>
     </el-dialog>
@@ -76,6 +77,8 @@
     });
 
     const emit = defineEmits(['close']);
+
+    const isLoading = ref(false);
 
     const validationPersonRules = {
         representative: [
@@ -235,21 +238,23 @@
         }
     }
 
+    const closeModal = () => {
+        if (!isLoading.value) emit('close');
+    }
+
     const submitForm = () => {
         const formData = props.mode == 'person' ? personData : companyData
+        isLoading.value = true;
         authStore.updateData(formData)
             .then(() => {
-                NotificationService.displaySuccess(
-                    'Sukces!',
-                    'Pomyślnie zaktualizowano dane konta'
-                )
+                NotificationService.displayMessage('success', 'Pomyślnie zaktualizowano dane konta.');
+                emit('close');
             })
             .catch((e) => {
-                console.log(e);
-                NotificationService.displayError()
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy aktualizacji danych konta, prosimy spróbować ponownie później.');
             })
             .finally(() => {
-                emit('close')
-            });
+                isLoading.value = false;
+            })
     };
 </script>

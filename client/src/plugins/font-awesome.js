@@ -3,39 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import { faTwitter } from '@fortawesome/free-brands-svg-icons'
 
-import {
-    faUserSecret,
-    faArrowDown,
-    faHome,
-    faSearch,
-    faSignOutAlt,
-    faUser,
-    faBars,
-    faAddressCard,
-    faChartBar,
-    faWrench,
-    faCircleUser,
-    faCompass,
-    faQuestion,
-    faLock,
-    faKey,
-    faEnvelope,
-    faChartLine,
-    faChartArea,
-    faEye,
-    faMouse,
-    faCog,
-    faUsers,
-    faRectangleAd,
-    faBook,
-    faUserShield,
-    faBell,
-    faLink,
-    faPhone,
-    faMapMarkerAlt,
-    faIdCard,
-    faClock
-} from '@fortawesome/free-solid-svg-icons'
+import { faUserSecret, faArrowDown, faHome, faSearch, faSignOutAlt, faUser, faBars, faAddressCard, faChartBar, faWrench, faCircleUser, faCompass, faQuestion, faLock, faKey, faEnvelope, faChartLine, faChartArea, faEye, faMouse, faCog, faUsers, faRectangleAd, faBook, faUserShield, faBell, faLink, faCloudArrowUp, faTrash, faStar, faPhone, faMapMarkerAlt, faClock, faIdCard }  from '@fortawesome/free-solid-svg-icons';
+
 
 library.add(
     faChartLine,
@@ -70,7 +39,10 @@ library.add(
     faPhone,
     faMapMarkerAlt,
     faIdCard,
-    faClock
+    faClock,
+    faCloudArrowUp,
+    faTrash,
+    faStar
 )
 
 export const fontAwesome = {

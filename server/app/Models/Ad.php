@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ad extends Model
 {
-    // use HasFactory;
+    use HasFactory;
 
     protected $table = 'ads';
+
     protected $dates = [
         'created_at',
         'updated_at'
@@ -41,10 +42,12 @@ class Ad extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
     public function logs()
     {
         return $this->hasMany(Log::class);
     }
+
     public function adStats()
     {
         return $this->hasMany(AdStats::class);

@@ -153,7 +153,7 @@
 		formState.isFormSubmitting = true;
 		authStore.changePassword(credentials)
 			.then(() => formState.isFormDone = true)
-            .catch((e) => NotificationService.displayError('Zmiana hasła nie powiodła się', e.message))
+            .catch(() => NotificationService.displayMessage('error', 'Zmiana hasła nie powiodła się, upewnij się o podaniu poprawnego aktualnego hasła.'))
 			.finally(() => formState.isFormSubmitting = false);
 	};
 
@@ -235,26 +235,6 @@
 
     &__button {
         margin-top: 5px;
-    }
-
-    &__links {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
-
-    &__link {
-        text-decoration: none;
-    }
-
-    &__link--primary {
-        color: var(--color-dark-blue);
-        font-weight: bold;
-    }
-
-    &__link--secondary {
-        color: var(--color-gray);
     }
 }
 

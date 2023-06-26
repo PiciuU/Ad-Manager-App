@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('ad_id')->nullable();
             $table->timestamp('date');
             $table->string('title', 255);
             $table->string('description', 255);
