@@ -85,44 +85,27 @@ body {
 
 /* Custom styling */
 
-
-/* // DatePicker RWD support for mobile devices */
-
-// .el-picker-panel__shortcut {
-//     position: relative;
-//     margin-bottom: 20px;
-//     line-height: 20px;
-//     padding-left: 15px;
-
-//     &:first-child {
-//         padding-top: 5px;
-//     }
-// }
-
-// .el-picker-panel__shortcut:after {
-//     content: '';
-//     position: absolute;
-//     width: 90%;
-//     height: 2px;
-//     background: #f5f8fa;
-//     bottom: -10px;
-//     left: 50%;
-//     transform: translateX(-50%);
-// }
-
 /* DatePicker RWD support for mobile devices */
 @media screen and (max-width: $--breakpoint-mobile) {
     .el-picker__popper {
         width: 90%;
 
-        .el-date-range-picker {
+        .el-date-range-picker, .el-date-range-picker.has-sidebar {
             width: 100%;
             overflow: scroll;
             height: 50vh;
         }
 
+        .el-picker-panel__sidebar {
+			display: none;
+		}
+
         .el-date-range-picker .el-picker-panel__body {
             min-width: unset;
+        }
+
+        .el-picker-panel__sidebar + .el-picker-panel__body {
+            margin-left: 0px;
         }
 
         .el-picker-panel__content {

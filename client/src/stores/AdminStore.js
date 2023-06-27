@@ -351,6 +351,31 @@ export const useAdminStore = defineStore('adminStore', {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+        /* Ad Stats */
+        async fetchAdvertStats(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.query(`/admin/ads/${id}/stats`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async updateAdvertStats(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.post(`/admin/ads/${id}/stats`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
     }
 });

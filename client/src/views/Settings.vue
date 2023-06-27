@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <el-main>
         <el-row class="cards__container" :gutter="32">

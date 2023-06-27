@@ -196,7 +196,7 @@
 
     &__title {
         position: relative;
-        font-size: 16px;
+        font-size: 1.6rem;
         color: $--color-text;
         font-weight: bold;
         margin-bottom: 20px;
@@ -204,7 +204,7 @@
 
     &__description {
         color: $--color-text;
-        font-size: 14px;
+        font-size: 1.4rem;
     }
 
     &__button {
@@ -216,21 +216,21 @@
     width: 100%;
 
     &__title {
-        font-size: 24px;
+        font-size: 2.4rem;
         font-weight: bold;
         color: $--color-text;
         margin-bottom: 20px;
     }
 
     &__title--big {
-        font-size: 32px;
+        font-size: 3.2rem;
         text-align: center;
     }
 
     &__steps {
         text-align: left;
         margin-bottom: 10px;
-        font-size: 14px;
+        font-size: 1.4rem;
     }
 
     &__button {

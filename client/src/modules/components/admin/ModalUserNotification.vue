@@ -88,12 +88,11 @@
         isLoading.value = true;
         adminStore.sendNotification(formData)
             .then(() => {
-                NotificationService.displaySuccess('Sukces', 'Pomyślnie wysłano powiadomienie do użytkownika.');
+                NotificationService.displayMessage('success', 'Pomyślnie wysłano powiadomienie do użytkownika.');
                 emit('close');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy wysyłaniu powiadomienia, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

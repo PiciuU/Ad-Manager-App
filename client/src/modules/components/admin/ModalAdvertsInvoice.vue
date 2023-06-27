@@ -11,7 +11,7 @@
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item prop="number" label="Data uiszczenia opłaty" class="full-width">
+            <el-form-item prop="date" label="Data uiszczenia opłaty" class="full-width">
                 <el-date-picker
                     v-model="formData.date"
                     type="date"
@@ -117,11 +117,10 @@
             .then((response) => {
                 emit('update', response.data);
                 emit('close');
-                NotificationService.displayMessage('success', 'Pomyślnie zaktualizowano dane reklamy.');
+                NotificationService.displayMessage('success', 'Pomyślnie zaktualizowano dane faktury.');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy edycji reklamy, spróbuj ponownie później.');
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy edycji faktury, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

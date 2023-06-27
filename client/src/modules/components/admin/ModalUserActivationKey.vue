@@ -31,7 +31,7 @@
                 activationKey.value = response.data;
             })
             .catch(() => {
-                NotificationService.displayError('Nieoczekiwany błąd', 'Nie udało się wygenerować klucza aktywacyjnego, spróbuj ponownie później.');
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy generowaniu klucza aktywacyjnego, spróbuj ponownie później');
             })
             .finally(() => {
                 isLoading.value = false;
@@ -52,10 +52,10 @@
             .then((response) => {
                 emit('update', response.data);
                 emit('close');
+                NotificationService.displayMessage('success', 'Pomyślnie przypisano klucz aktywacyjny.');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy przypisywaniu klucza aktywacyjnego, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

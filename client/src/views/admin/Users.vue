@@ -266,7 +266,6 @@
 	});
 
     onUpdated(() => {
-        console.log('onUpdated');
         if (route.params.id && filter.userId !== parseInt(route.params.id)) {
             filter.userId = parseInt(route.params.id);
             handleUserChange();

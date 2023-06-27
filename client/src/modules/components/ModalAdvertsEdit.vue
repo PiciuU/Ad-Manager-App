@@ -81,8 +81,7 @@
                 emit('close');
                 NotificationService.displayMessage('success', 'Pomyślnie zaktualizowano dane reklamy.');
             })
-            .catch((e) => {
-                console.log(e);
+            .catch(() => {
                 NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy edycji reklamy, prosimy spróbować ponownie później.');
             })
             .finally(() => {

@@ -73,10 +73,10 @@
             .then((response) => {
                 emit('update', response.data);
                 emit('close');
+                NotificationService.displayMessage('success', 'Pomyślnie zablokowano użytkownika.');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy blokowaniu użytkownika, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

@@ -88,8 +88,7 @@
                 emit('close');
                 NotificationService.displayMessage('success', 'Pomyślnie odnowiono reklamę.');
             })
-            .catch((e) => {
-                console.log(e);
+            .catch(() => {
                 NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy odnawianiu reklamy, spróbuj ponownie później.');
             })
             .finally(() => {

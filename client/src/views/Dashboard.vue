@@ -1,5 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <el-main>
         <el-row class="cards__container" :gutter="32">
@@ -47,21 +45,8 @@
                         v-if="!adStore.isLoading && isRendered"
                         download="Wyswietlenia_podsumowanie"
                         empty="Brak danych"
-                        :data="{
-                            '2017-05-13': 50,
-                            '2017-01-01': 82,
-                            '2017-02-01': 160,
-                            '2017-03-01': 133,
-                            '2017-04-01': 460,
-                            '2017-05-01': 320,
-                            '2017-06-01': 673,
-                            '2017-07-01': 970,
-                            '2017-08-01': 1900,
-                            '2017-09-01': 2150,
-                            '2017-10-01': 2004,
-                            '2017-11-01': 3402,
-                            '2017-11-01': 4421
-                        }"
+                        :discrete="true"
+                        :data="data.views"
                     ></line-chart>
                     <el-skeleton class="card__skeleton" :rows="5" animated v-else />
                 </el-card>
@@ -73,21 +58,8 @@
                         v-if="!adStore.isLoading && isRendered"
                         download="Klikniecia_podsumowanie"
                         empty="Brak danych"
-                        :data="{
-                            '2017-05-13': 20,
-                            '2017-01-01': 42,
-                            '2017-02-01': 63,
-                            '2017-03-01': 65,
-                            '2017-04-01': 233,
-                            '2017-05-01': 171,
-                            '2017-06-01': 321,
-                            '2017-07-01': 466,
-                            '2017-08-01': 992,
-                            '2017-09-01': 1130,
-                            '2017-10-01': 1000,
-                            '2017-11-01': 1294,
-                            '2017-11-01': 2054
-                        }"
+                        :discrete="true"
+                        :data="data.clicks"
                     ></line-chart>
                     <el-skeleton class="card__skeleton" :rows="5" animated v-else />
                 </el-card>
@@ -116,20 +88,20 @@
         summary: {},
         views: {},
         clicks: {},
-        ctr: '0'
+        ctr: '0.00'
     })
 
-    // onMounted(() => {
-    //     adStore.getSummary()
-    //         .then((response) => {
-    //             Object.assign(data, response.data);
-    //             statisticsCards.forEach((statistic) => {
-    //                 statistic.value = data.summary[statistic.name]
-    //             })
-    //         })
-    // });
+    onMounted(() => {
+        adStore.getSummary()
+            .then((response) => {
+                Object.assign(data, response.data);
+                statisticsCards.forEach((statistic) => {
+                    statistic.value = data.summary[statistic.name]
+                })
+            })
+    });
 
-    const statisticsCards = [
+    const statisticsCards = reactive([
         {
             description: 'Wszystkie reklamy',
             icon: 'chart-line',
@@ -158,7 +130,7 @@
             name: 'num_of_today_clicks',
             value: 0
         }
-    ];
+    ]);
 </script>
 
 <style lang="scss" scoped>

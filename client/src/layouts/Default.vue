@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
 	<main>
 		<div class="container">
@@ -11,11 +10,12 @@
 	</main>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+	:deep() { @import '@/assets/styles/auth.scss'; }
+
 	main {
 		display: flex;
 		flex: 1;
-		padding: 0px 20px;
 	}
 
 	.container {

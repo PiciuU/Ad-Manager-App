@@ -131,12 +131,19 @@
 
         &__logo {
             order: 2;
-            font-size: 1.6rem;
+            font-size: 1.8rem;
 
             a {
                 display: flex;
                 color: $--color-text;
                 text-decoration: none;
+                font-weight: bold;
+                letter-spacing: 1px;
+                transition: color .25s ease-in-out;
+
+                &:hover {
+                    color: $--color-primary;
+                }
             }
 
             img {

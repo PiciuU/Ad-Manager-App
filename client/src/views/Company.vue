@@ -1,5 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
     <el-main>
         <el-row class="cards__container" :gutter="32">
@@ -7,36 +5,18 @@
                 <el-card class="card card--full-height">
                     <div class="card__title">Dane kontaktowe</div>
                     <el-descriptions :column="1">
-                        <el-descriptions-item
-                            label="Osoba kontaktowa: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Osoba kontaktowa: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.representative) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Adres email: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Adres email: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.email) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Telefon: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Telefon: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.representativePhone) }}
                         </el-descriptions-item>
                     </el-descriptions>
                     <div class="card__buttons--left card__buttons--bottom">
-                        <el-button
-                            class="card__button"
-                            type="primary"
-                            @click="toggleCompanyDetails('person')"
-                            plain
-                            >Edytuj dane kontaktowe</el-button
-                        >
+                        <el-button class="card__button" type="primary" @click="toggleCompanyDetails('person')" plain>Edytuj dane kontaktowe</el-button>
                     </div>
                 </el-card>
             </el-col>
@@ -44,64 +24,30 @@
                 <el-card class="card">
                     <div class="card__title">Dane reklamodawcy</div>
                     <el-descriptions :column="1">
-                        <el-descriptions-item
-                            label="Nazwa: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Nazwa: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.name) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Adres: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Adres: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.address) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Kod pocztowy: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Kod pocztowy: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.postalCode) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Kraj: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Kraj: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.country) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="NIP: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="NIP: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.nip) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Firmowy adres email: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Firmowy adres email: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.companyEmail) }}
                         </el-descriptions-item>
-                        <el-descriptions-item
-                            label="Firmowy telefon: "
-                            label-class-name="card__data-label"
-                            class-name="card__data-line"
-                        >
+                        <el-descriptions-item label="Firmowy telefon: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.companyPhone) }}
                         </el-descriptions-item>
                     </el-descriptions>
                     <div class="card__buttons--left">
-                        <el-button
-                            class="card__button card__buttons--bottom"
-                            type="primary"
-                            @click="toggleCompanyDetails('company')"
-                            plain
-                            >Edytuj dane reklamodawcy</el-button
-                        >
+                        <el-button class="card__button card__buttons--bottom" type="primary" @click="toggleCompanyDetails('company')" plain>Edytuj dane reklamodawcy</el-button>
                     </div>
                 </el-card>
             </el-col>
@@ -133,5 +79,3 @@
         modal.mode = type
     };
 </script>
-
-<style lang="scss" scoped></style>

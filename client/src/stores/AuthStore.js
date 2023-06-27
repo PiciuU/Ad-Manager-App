@@ -29,6 +29,7 @@ export const useAuthStore = defineStore('authStore', {
                 }
             }
             catch (error) {
+                NotificationService.displayError();
                 return Promise.reject(error.data);
             } finally {
                 this.loading = false;

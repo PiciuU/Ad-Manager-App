@@ -72,7 +72,7 @@
         isLoading.value = true;
         adStore.payInvoice(props.advert.id, invoice.value.id)
             .then((response) => {
-                NotificationService.displayMessage('success', 'Faktura została pomyślnie opłacona, twoja reklama została aktywowana.');
+                NotificationService.displayMessage('success', 'Pomyślnie opłacono fakturę, reklama została aktywowana.');
                 emit('update', response.data.advert, response.data.invoice);
                 emit('close');
             })

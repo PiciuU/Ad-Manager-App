@@ -77,6 +77,10 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
         Route::get('ads/{id}/invoices/{invoiceId}/payment', [InvoiceController::class, 'paymentAsAdmin']);
         Route::get('ads/{id}/invoices/create', [InvoiceController::class, 'storeAsAdmin']);
         Route::put('ads/{id}/invoices/{invoiceId}', [InvoiceController::class, 'updateAsAdmin']);
+
+        /* Ads Stats */
+        Route::get('ads/{id}/stats', [AdStatsController::class, 'show']);
+        Route::post('ads/{id}/stats', [AdStatsController::class, 'storeAsAdmin']);
     });
 
     /* Ads */
@@ -86,6 +90,10 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
     Route::put('ads/{id}', [AdController::class, 'update']);
     Route::put('ads/{id}/renew', [AdController::class, 'renew']);
     Route::get('ads/{id}/deactivate', [AdController::class, 'deactivate']);
+
+    /* Ads Stats */
+    Route::get('stats', [AdStatsController::class, 'summary']);
+    Route::get('ads/{id}/stats', [AdStatsController::class, 'show']);
 
     /* Files of ad */
     Route::get('ads/{id}/files', [FileController::class, 'fetch']);
@@ -101,12 +109,6 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('notifications/latest', [NotificationController::class, 'latest']);
     Route::get('notifications/{id}/seen', [NotificationController::class, 'isSeen']);
-
-    /* Temp */
-    Route::get('stats', [AdStatsController::class, 'index']);
-    Route::get('stats/{ad_id}/{stat_id?}', [AdStatsController::class, 'show']);
-    Route::post('stats/{stat_id}', [AdStatsController::class, 'update']); //admin only
-    Route::get('stats/{stat_id}/delete', [AdStatsController::class, 'delete']); //admin only
 });
 
 Route::group(['prefix' => 'auth'], function () {

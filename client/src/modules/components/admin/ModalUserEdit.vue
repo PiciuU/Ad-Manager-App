@@ -233,10 +233,10 @@
             .then((response) => {
                 emit('update', response.data);
                 emit('close');
+                NotificationService.displayMessage('success', 'Pomyślnie zaktualizowano dane użytkownika.');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy edycji użytkownika, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

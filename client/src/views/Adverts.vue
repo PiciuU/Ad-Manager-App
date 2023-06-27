@@ -82,9 +82,6 @@
                                 <el-button @click="toggleModal('edit')" class="card__button" type="primary" plain>Edytuj reklamę</el-button>
                                 <el-button v-if="data.advert.status == 'active'" @click="deactivateAdvert" class="card__button" type="primary" plain>Zdezaktywuj reklamę</el-button>
                                 <el-button v-if="data.advert.status == 'inactive' || data.advert.status == 'expired'" @click="toggleModal('renew')" class="card__button" type="primary" plain>Odnów reklamę</el-button>
-                                <router-link :to="{path: '/panel/powiadomienia'}" class="card__url" target="_blank">
-                                    <el-button class="card__button" type="primary" plain>Wyświetl podgląd reklamy</el-button>
-                                </router-link>
                             </div>
                         </div>
                         <el-skeleton :rows="1" animated v-else />
@@ -136,6 +133,148 @@
                     </el-card>
                 </el-col>
             </el-row>
+
+            <!-- Statystyki -->
+            <el-row class="cards__container">
+                <el-col :span="24">
+                    <el-card class="card">
+                        <div class="card__title">Statystyki reklam</div>
+                        <div v-if="!isAdvertFetching">
+                            <el-tabs class="card__tabs" v-model="filter.type">
+                                <el-tab-pane label="Tydzień" name="week">
+                                    <div class="date-picker">
+                                        <el-date-picker
+                                            v-model="filter.week"
+                                            type="week"
+                                            placeholder="Wybierz tydzień"
+                                            format="[Tydzień] ww"
+                                            value-format="YYYY-MM-DD"
+                                            :clearable="false"
+                                            @change="handleAdvertStatsChange"
+                                        >
+                                        </el-date-picker>
+                                        <el-button class="btn-spacing" @click="handleAdvertStatsChange" :disabled="isAdvertStatsFetching">
+                                            <font-awesome-icon icon="search"/>
+                                        </el-button>
+                                    </div>
+                                </el-tab-pane>
+                                <el-tab-pane label="Miesiąc" name="month">
+                                    <div class="date-picker">
+                                        <el-date-picker
+                                            v-model="filter.month"
+                                            type="month"
+                                            placeholder="Wybierz miesiąc"
+                                            format="YYYY/MM"
+                                            value-format="YYYY-MM"
+                                            :clearable="false"
+                                            @change="handleAdvertStatsChange"
+                                        >
+                                        </el-date-picker>
+                                        <el-button class="btn-spacing" @click="handleAdvertStatsChange" :disabled="isAdvertStatsFetching">
+                                            <font-awesome-icon icon="search"/>
+                                        </el-button>
+                                    </div>
+                                </el-tab-pane>
+                                <el-tab-pane label="Rok" name="year">
+                                    <div class="date-picker">
+                                        <el-date-picker
+                                            v-model="filter.year"
+                                            type="year"
+                                            placeholder="Wybierz rok"
+                                            format="YYYY"
+                                            value-format="YYYY"
+                                            :clearable="false"
+                                            @change="handleAdvertStatsChange"
+                                        >
+                                        </el-date-picker>
+                                        <el-button class="btn-spacing" @click="handleAdvertStatsChange" :disabled="isAdvertStatsFetching">
+                                            <font-awesome-icon icon="search"/>
+                                        </el-button>
+                                    </div>
+                                </el-tab-pane>
+                                <el-tab-pane label="Zakres dat" name="monthrange" class="tab-date-picker">
+                                    <div class="date-picker">
+                                        <el-date-picker
+                                            v-model="filter.monthrange"
+                                            type="monthrange"
+                                            unlink-panels
+                                            range-separator="-"
+                                            start-placeholder="Data początkowa"
+                                            end-placeholder="Data końcowa"
+                                            format="YYYY/MM"
+                                            value-format="YYYY-MM"
+                                            :shortcuts="filter.shortcuts"
+                                            :clearable="false"
+                                            @change="handleAdvertStatsChange"
+                                        >
+                                        </el-date-picker>
+                                        <el-button class="btn-spacing" @click="handleAdvertStatsChange" :disabled="isAdvertStatsFetching">
+                                            <font-awesome-icon icon="search"/>
+                                        </el-button>
+                                    </div>
+                                </el-tab-pane>
+                            </el-tabs>
+                        </div>
+                        <el-skeleton :rows="2" animated v-else />
+                    </el-card>
+                </el-col>
+            </el-row>
+
+            <el-row class="cards__container" v-if="data.advert?.views">
+                <el-col :span="24">
+                    <el-card class="card">
+                        <div class="card__title">Wyświetlenia</div>
+                        <el-tabs v-if="!isAdvertStatsFetching" v-model="filter.graphs.currentViewsTab">
+                            <el-tab-pane label="Wykres liniowy" name="line">
+                                <line-chart download="Wyswietlenia_liniowy" :data="data.advert.views" :discrete="true" empty="Brak danych"></line-chart>
+                            </el-tab-pane>
+                            <el-tab-pane label="Wykres kolumnowy" name="column">
+                                <column-chart download="Wyswietlenia_kolumnowy" :data="data.advert.views" :discrete="true" empty="Brak danych"></column-chart>
+                            </el-tab-pane>
+                            <el-tab-pane label="Wykres słupkowy" name="bar">
+                                <bar-chart download="Wyswietlenia_slupkowy" :data="data.advert.views" :discrete="true" empty="Brak danych"></bar-chart>
+                            </el-tab-pane>
+                            <el-tab-pane label="Dane ogólne" name="details">
+                                <el-descriptions :column="1">
+                                    <el-descriptions-item label="Wszystkie wyświetlenia: " label-class-name="card__data-label" class-name="card__data-line">{{ data.advert.summary.all_views }}</el-descriptions-item>
+                                    <el-descriptions-item label="Najwięcej wyświetleń w: " label-class-name="card__data-label" class-name="card__data-line">{{ data.advert.summary.most_views.date }} ({{ data.advert.summary.most_views.views }})</el-descriptions-item>
+                                    <el-descriptions-item label="Najmniej wyświetleń w: " label-class-name="card__data-label" class-name="card__data-line">{{ data.advert.summary.least_views.date }} ({{ data.advert.summary.least_views.views }})</el-descriptions-item>
+                                </el-descriptions>
+                            </el-tab-pane>
+                        </el-tabs>
+                        <el-skeleton :rows="5" animated v-else />
+                    </el-card>
+                </el-col>
+            </el-row>
+
+            <el-row class="cards__container" v-if="data.advert?.views">
+                <el-col :span="24">
+                    <el-card class="card">
+                        <div class="card__title">Kliknięcia</div>
+                        <el-tabs v-if="!isAdvertStatsFetching" v-model="filter.graphs.currentClicksTab">
+                            <el-tab-pane label="Wykres liniowy" name="line">
+                                <line-chart download="Wyswietlenia_liniowy" :data="data.advert.clicks" :discrete="true" empty="Brak danych"></line-chart>
+                            </el-tab-pane>
+                            <el-tab-pane label="Wykres kolumnowy" name="column">
+                                <column-chart download="Wyswietlenia_kolumnowy" :data="data.advert.clicks" :discrete="true" empty="Brak danych"></column-chart>
+                            </el-tab-pane>
+                            <el-tab-pane label="Wykres słupkowy" name="bar">
+                                <bar-chart download="Wyswietlenia_slupkowy" :data="data.advert.clicks" :discrete="true" empty="Brak danych"></bar-chart>
+                            </el-tab-pane>
+                            <el-tab-pane label="Dane ogólne" name="details">
+                                <el-descriptions :column="1">
+                                    <el-descriptions-item label="Wszystkie wyświetlenia: " label-class-name="card__data-label" class-name="card__data-line">{{ data.advert.summary.all_clicks }}</el-descriptions-item>
+                                    <el-descriptions-item label="Najwięcej wyświetleń w: " label-class-name="card__data-label" class-name="card__data-line">{{ data.advert.summary.most_clicks.date }} ({{ data.advert.summary.most_clicks.clicks }})</el-descriptions-item>
+                                    <el-descriptions-item label="Najmniej wyświetleń w: " label-class-name="card__data-label" class-name="card__data-line">{{ data.advert.summary.least_clicks.date }} ({{ data.advert.summary.least_clicks.clicks }})</el-descriptions-item>
+                                </el-descriptions>
+                            </el-tab-pane>
+                        </el-tabs>
+                        <el-skeleton :rows="5" animated v-else />
+                    </el-card>
+                </el-col>
+            </el-row>
+
+
         </div>
 
         <!-- Modale -->
@@ -181,15 +320,7 @@
 
 	const data = reactive({
 		ads: {},
-		advert: {},
-		views: {},
-		clicks: {},
-		summary: {
-			most_views: {},
-			least_views: {},
-			most_clicks: {},
-			least_clicks: {}
-		}
+		advert: {}
 	});
 
 	const filter = reactive({
@@ -234,14 +365,14 @@
 
     /*  Advert */
     const isAdvertFetching = ref(false);
+    const isAdvertStatsFetching = ref(false);
 
 	const handleAdvertChange = async () => {
         router.push({ name: 'Ads', params: { id: filter.advertId }});
 
-		if (!filter.advertId || filter.advertId === null) {
-			data.advert = {};
-			return;
-		}
+        data.advert = {};
+
+		if (!filter.advertId || filter.advertId === null) return;
 
         isAdvertFetching.value = true;
 
@@ -357,10 +488,26 @@
         const offset = (invoicesPagination.current_page - 1) * invoicesPagination.per_page;
         invoicesPagination.invoices = data.advert.invoices.slice(offset, invoicesPagination.per_page + offset);
     };
+
+    /* Advert Stats */
+    const handleAdvertStatsChange = () => {
+        if (!filter.advertId || filter.advertId === null || filter[filter.type] === null) {
+			return;
+		}
+
+        isAdvertStatsFetching.value = true;
+
+		adStore.getAdvertStats(filter.advertId, { format: filter.type, date: filter[filter.type] })
+			.then((response) => {
+				Object.assign(data.advert, response.data);
+			})
+            .finally(() => {
+                isAdvertStatsFetching.value = false;
+            })
+    };
 </script>
 
 <style lang="scss" scoped>
-
     ::v-deep(.color-warning) {
         color: $--color-error;
     }
@@ -403,11 +550,22 @@
         width: 100%;
     }
 
+    .tab-date-picker {
+        display: flex;
+        justify-content: center;
+    }
+
     .date-picker {
         margin-top: 10px;
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+
+    @media screen and (max-width: $--breakpoint-mobile) {
+        .tab-date-picker {
+            display: block;
+        }
     }
 
     .btn-spacing {

@@ -161,6 +161,31 @@ export const useAdStore = defineStore('adStore', {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+        /* Ad Stats */
+        async getSummary() {
+            try {
+                this.loading = true;
+                const response = await ApiService.get('/stats');
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
+        async getAdvertStats(id, payload) {
+            try {
+                this.loading = true;
+                const response = await ApiService.query(`/ads/${id}/stats`, payload);
+                return Promise.resolve(response);
+            }
+            catch (error) {
+                return Promise.reject(error.data);
+            } finally {
+                this.loading = false;
+            }
+        },
     }
 });

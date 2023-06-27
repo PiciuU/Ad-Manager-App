@@ -154,10 +154,10 @@
             .then((response) => {
                 emit('add', response.data);
                 emit('close');
+                NotificationService.displayMessage('success', 'Pomyślnie utworzono konto użytkownika.');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy tworzeniu użytkownika, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

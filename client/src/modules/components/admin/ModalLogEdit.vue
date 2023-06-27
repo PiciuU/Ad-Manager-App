@@ -56,10 +56,10 @@
             .then((response) => {
                 emit('update', response.data);
                 emit('close');
+                NotificationService.displayMessage('success', 'Pomyślnie edytowano wpis w dzieniku zdarzeń.');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy edycji wpisu, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

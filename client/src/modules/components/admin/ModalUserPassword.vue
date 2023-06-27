@@ -89,12 +89,11 @@
         isLoading.value = true;
         adminStore.changePassword({ id: props.user.id, password: formData.password })
             .then(() => {
-                NotificationService.displaySuccess('Sukces', 'Pomyślnie ustawiono nowe hasło dla użytkownika.');
+                NotificationService.displayMessage('success', 'Pomyślnie ustawiono nowe hasło dla użytkownika.');
                 emit('close');
             })
-            .catch((e) => {
-                console.log(e);
-                NotificationService.displayError('Nieoczekiwany błąd', e.message);
+            .catch(() => {
+                NotificationService.displayMessage('error', 'Wystąpił nieoczekiwany błąd przy ustawianiu nowego hasła dla użytkownika, spróbuj ponownie później.');
             })
             .finally(() => {
                 isLoading.value = false;

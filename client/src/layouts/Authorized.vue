@@ -1,5 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
-<!-- eslint-disable vue/no-parsing-error -->
 <template>
     <el-container class="el-container-outer is-vertical" v-if="authStore.isAuthenticated">
         <TheHeader />
