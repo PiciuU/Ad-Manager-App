@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Models\Ad;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class NotificationFactory extends Factory
     public function definition(): array
     {
         return [
+            'ad_id' => Ad::inRandomOrder()->first()->id,
             'user_id' => User::whereNull('activation_key')->inRandomOrder()->first()->id,
             'date' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'title' => $this->faker->sentence,

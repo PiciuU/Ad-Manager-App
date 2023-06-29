@@ -106,7 +106,6 @@ class AdStatsController extends Controller
         $numOfAllAds = $ads->count();
 
         $numOfActiveAds = $ads->where('status', 'active')
-            ->where('ad_start_date', '>=', date('Y-m-d'))
             ->count();
 
         $numOfInteractions = AdStats::selectRaw('CAST(IFNULL(SUM(views), 0) AS UNSIGNED) AS num_of_today_views, CAST(IFNULL(SUM(clicks), 0) AS UNSIGNED) AS num_of_today_clicks')

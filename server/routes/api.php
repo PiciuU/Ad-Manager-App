@@ -48,6 +48,7 @@ Route::group(['namespace' => 'App\Http\Controllers', 'middleware' => ['auth:sanc
         Route::put('user/ban', [UserController::class, 'toggleBan']);
         Route::put('user/password', [UserController::class, 'changePassword']);
 
+        /* Logs */
         Route::get('logs', [LogController::class, 'index']);
         Route::get('logs/users/{id}', [LogController::class ,'showUser']);
         Route::get('logs/ads/{id}', [LogController::class ,'showAd']);

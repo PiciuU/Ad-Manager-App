@@ -20,8 +20,8 @@ class UserFactory extends Factory
     {
         return [
             'user_role_id' => 1,
-            'name' => $this->faker->name,
-            'login' => $this->faker->unique()->userName,
+            'name' => $this->faker->company,
+            'login' => $this->faker->unique()->regexify('[a-zA-Z0-9_]{2,12}'),
             'password' => Hash::make('password'), // Default password is "password"
             'email' => $this->faker->unique()->safeEmail,
             'activation_key' => null,

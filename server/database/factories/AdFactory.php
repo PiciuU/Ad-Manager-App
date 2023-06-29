@@ -21,9 +21,9 @@ class AdFactory extends Factory
         $startDate = null;
         $endDate = null;
 
-        if ($status === 'active') {
-            $startDate = $this->faker->dateTimeBetween('-1 month', 'now');
-            $endDate = $this->faker->dateTimeBetween('now', $startDate->format('Y-m-d').' +1 month');
+        if ($status === 'active' || $status === 'unpaid') {
+            $startDate = $this->faker->dateTimeBetween('-3 days', 'now');
+            $endDate = $this->faker->dateTimeBetween('+7 days', '+14 days');
         } elseif ($status === 'expired') {
             $endDate = $this->faker->dateTimeBetween('-1 month', 'now');
             $startDate = $this->faker->dateTimeBetween('-2 month', $endDate);
@@ -32,14 +32,18 @@ class AdFactory extends Factory
             $startDate = $this->faker->dateTimeBetween('-2 month', $endDate);
         }
 
+        $extension = $this->faker->randomElement(['png', 'mp4']);
+        $filename = substr(hash('sha256', time()), 0, 16) . '.' . $extension;
+        $filetype = ($extension === 'png') ? 'img' : 'video';
+
         return [
-            'name' => $this->faker->sentence,
+            'name' => $this->faker->word . ' ' . $this->faker->word,
             'user_id' => User::whereNull('activation_key')->inRandomOrder()->first()->id,
             'status' => $status,
             'ad_start_date' => $startDate,
             'ad_end_date' => $endDate,
-            'file_name' => $this->faker->word,
-            'file_type' => $this->faker->randomElement(['img', 'video']),
+            'file_name' => $filename,
+            'file_type' => $filetype,
             'url' => $this->faker->url,
         ];
     }

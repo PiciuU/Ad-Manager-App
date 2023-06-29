@@ -18,7 +18,7 @@ class UserRoleFactory extends Factory
     {
         return [
             'name' => 'User',
-            'description' => 'Zwykły użytkownik',
+            'description' => 'Zwykły użytkownik posiadający ograniczone uprawnienia do systemu.',
         ];
     }
 }

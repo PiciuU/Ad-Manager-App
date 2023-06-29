@@ -22,39 +22,43 @@ class LogSeeder extends Seeder
             // Log 1: Użytkownik aktywuje konto
             Log::factory()->count(1)->create([
                 'user_id' => $user->id,
-                'operation_tags' => 'ACTIVATE',
-                'message' => 'Użytkownik poprawnie aktywował konto',
+                'operation_tags' => 'AUTH/ACTIVATE',
+                'message' => 'Użytkownik aktywował swoje konto.',
             ]);
 
             $ad = $user->ads()->inRandomOrder()->first();
-            // Log 2: Użytkownik aktualizuje reklamę
-            Log::factory()->count(1)->create([
-                'user_id' => $user->id,
-                'ad_id' => $ad->id ?? null,
-                'operation_tags' => 'EDIT_ADVERT',
-                'message' => 'Użytkownik zaktualizował treść reklamy',
-            ]);
 
-            // Log 3: Użytkownik tworzy nową reklamę
-            Log::factory()->count(1)->create([
-                'user_id' => $user->id,
-                'ad_id' => $ad->id ?? null,
-                'operation_tags' => 'CREATE_ADVERT',
-                'message' => 'Użytkownik stworzył nową reklamę',
-            ]);
+            if ($ad) {
+                // Log 2: Użytkownik aktualizuje reklamę
+                Log::factory()->count(1)->create([
+                    'user_id' => $user->id,
+                    'ad_id' => $ad->id,
+                    'operation_tags' => 'AD/UPDATE',
+                    'message' => 'Użytkownik zaktualizował swoją reklamę.',
+                ]);
 
-            // Log 4: Użytkownik opłaca fakturę
-            Log::factory()->count(1)->create([
-                'user_id' => $user->id,
-                'ad_id' => $ad->id ?? null,
-                'operation_tags' => 'PAY_INVOICE',
-                'message' => 'Użytkownik opłacił fakturę',
-            ]);
+                // Log 3: Użytkownik tworzy nową reklamę
+                Log::factory()->count(1)->create([
+                    'user_id' => $user->id,
+                    'ad_id' => $ad->id,
+                    'operation_tags' => 'AD/CREATE',
+                    'message' => 'Użytkownik utworzył nową reklamę.',
+                ]);
 
-            // Log 5: Losowy log dla różnorodności
-            Log::factory()->count(1)->create([
-                'user_id' => $user->id,
-            ]);
+                // Log 4: Użytkownik opłaca fakturę
+                Log::factory()->count(1)->create([
+                    'user_id' => $user->id,
+                    'ad_id' => $ad->id,
+                    'operation_tags' => 'INVOICE/PAYMENT',
+                    'message' => 'Użytkownik opłacił swoją reklamę.',
+                ]);
+            } else {
+                Log::factory()->count(1)->create([
+                    'user_id' => $user->id,
+                    'operation_tags' => 'AUTH/UPDATE',
+                    'message' => 'Użytkownik zaktualizował swoje dane.',
+                ]);
+            }
         }
     }
 }

@@ -21,9 +21,9 @@ class LogFactory extends Factory
         return [
             'user_id' => User::whereNull('activation_key')->inRandomOrder()->first()->id,
             'ad_id' => null,
-            'operation_tags' => $this->faker->words(3, true),
+            'operation_tags' => $this->faker->words(1, true),
             'message' => $this->faker->sentence,
-            'notes' => $this->faker->paragraph,
+            'notes' => null
         ];
     }
 }

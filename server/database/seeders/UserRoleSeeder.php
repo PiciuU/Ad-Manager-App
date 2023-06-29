@@ -17,7 +17,7 @@ class UserRoleSeeder extends Seeder
 
         UserRole::factory()->create([
             'name' => 'Admin',
-            'description' => 'Admin systemu',
+            'description' => 'Administrator systemu posiadający uprawnienia do wszystkich funkcji systemu.',
         ]);
     }
 }

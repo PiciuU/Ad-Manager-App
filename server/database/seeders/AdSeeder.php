@@ -18,9 +18,16 @@ class AdSeeder extends Seeder
         $usersWithoutActivationKey = User::whereNull('activation_key')->pluck('id')->toArray();
 
         foreach ($usersWithoutActivationKey as $userId) {
-            Ad::factory()->count(rand(0, 5))->create([
-                'user_id' => $userId,
-            ]);
+
+            if ($userId == 1) {
+                Ad::factory()->count(6)->create([
+                    'user_id' => $userId,
+                ]);
+            } else {
+                Ad::factory()->count(rand(0, 5))->create([
+                    'user_id' => $userId,
+                ]);
+            }
         }
     }
 }

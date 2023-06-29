@@ -23,6 +23,7 @@ class InvoiceFactory extends Factory
             'price' => $this->faker->numberBetween(50, 100),
             'date' => $this->faker->dateTimeBetween('-6 months', 'now')->format('Y-m-d'),
             'status' => $this->faker->randomElement(['paid', 'unpaid']),
+            'notes' => $this->faker->paragraph,
         ];
     }
 }

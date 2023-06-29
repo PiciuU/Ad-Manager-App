@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('ad_id')->nullable();
-            $table->timestamp('date');
+            $table->datetime('date');
             $table->string('title', 255);
             $table->string('description', 255);
             $table->boolean('is_seen')->default(0);

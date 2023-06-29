@@ -24,6 +24,7 @@ class NotificationSeeder extends Seeder
                 if ($ad->status === 'expired') {
                     Notification::factory()->create([
                         'user_id' => $user->id,
+                        'ad_id' => $ad->id,
                         'title' => 'Zakończenie publikacji reklamy',
                         'date' => $ad->ad_end_date,
                         'description' => 'Twoja reklama "' . $ad->name . '" zakończyła swoją publikację.',
@@ -32,6 +33,7 @@ class NotificationSeeder extends Seeder
                     $invoice = $ad->invoices[0];
                     Notification::factory()->create([
                         'user_id' => $user->id,
+                        'ad_id' => $ad->id,
                         'title' => 'Nieopłacona faktura',
                         'date' => Carbon::now(),
                         'description' => 'Masz nieopłaconą fakturę (' . $invoice->number . ') za reklamę "' . $ad->name . '".',
