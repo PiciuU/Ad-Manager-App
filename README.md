@@ -33,14 +33,15 @@ A live version of the application is available at: [dev.dream-speak.pl/system](h
 ## Installation
 
 1. Clone the repository: `git clone https://github.com/PiciuU/ad-manager-system.git`
-2. Navigate to the project directory: `cd ad-manager`
+2. Navigate to the project directory: `cd ad-manager-system`
 3. Install backend dependencies: `cd server && composer install`
-4. Configure the `.env` file with the appropriate database credentials
+4. Create and configure the `.env` file with the appropriate database credentials
 5. Generate application key: `php artisan key:generate`
-6. Run database migrations: `php artisan migrate`
+6. Run database migrations: `php artisan migrate` (You can run migration with data to test application using `php artisan migrate:refresh --seed`)
 7. Install frontend dependencies: `cd ../client && npm install`
-8. Start the Laravel backend server: `cd ../server && php artisan serve`
-9. In a separate terminal, start the Vue frontend server: `cd ../client && npm run serve`
+8. Create and configure the `.env.development` file with the appropriate data
+9. Start the Laravel backend server: `cd ../server && php artisan serve`
+10. In a separate terminal, start the Vue frontend server: `cd ../client && npm run dev`
 
 Please make sure to have PHP, Composer, and a compatible database installed on your system before proceeding with the installation.
 
