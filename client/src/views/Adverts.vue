@@ -138,7 +138,7 @@
             <el-row class="cards__container">
                 <el-col :span="24">
                     <el-card class="card">
-                        <div class="card__title">Statystyki reklam</div>
+                        <div class="card__title">Statystyki reklamy</div>
                         <div v-if="!isAdvertFetching">
                             <el-tabs class="card__tabs" v-model="filter.type">
                                 <el-tab-pane label="Tydzień" name="week">

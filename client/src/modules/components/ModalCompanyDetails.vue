@@ -1,7 +1,7 @@
 <template>
     <el-dialog
         :model-value="true"
-        :title="`Edycja danych ${mode == 'person' ? 'kontaktowych' : 'reklamodawcy'}`"
+        :title="`Edycja danych ${mode == 'person' ? 'kontaktowych' : 'firmowych'}`"
         :lock-scroll="true"
         :before-close="closeModal"
         :close-on-click-modal="!isLoading"

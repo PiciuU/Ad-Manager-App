@@ -22,7 +22,7 @@
             </el-col>
             <el-col :span="24" :md="16">
                 <el-card class="card">
-                    <div class="card__title">Dane reklamodawcy</div>
+                    <div class="card__title">Dane firmowe</div>
                     <el-descriptions :column="1">
                         <el-descriptions-item label="Nazwa: " label-class-name="card__data-label" class-name="card__data-line">
                             {{ stringToLocale(user.name) }}
@@ -47,7 +47,7 @@
                         </el-descriptions-item>
                     </el-descriptions>
                     <div class="card__buttons--left">
-                        <el-button class="card__button card__buttons--bottom" type="primary" @click="toggleCompanyDetails('company')" plain>Edytuj dane reklamodawcy</el-button>
+                        <el-button class="card__button card__buttons--bottom" type="primary" @click="toggleCompanyDetails('company')" plain>Edytuj dane firmowe</el-button>
                     </div>
                 </el-card>
             </el-col>
