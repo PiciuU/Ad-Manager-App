@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\UserRole;
 use App\Models\PasswordResetToken;
 
+use App\Mail\ResetPasswordRequestMail;
+use App\Mail\ResetPasswordConfirmationMail;
+use App\Mail\ResetEmailConfirmationMail;
+
 use App\Models\User;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserCollection;
@@ -13,6 +17,7 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail;
 
 use Carbon\Carbon;
 
@@ -380,9 +385,9 @@ class UserController extends Controller
             'valid_until' => Carbon::now()->addDay()->format('Y-m-d H:i:s')
         ]);
 
-        // Mail::to($user->email)->send(new ResetPasswordRequestMail($resetPasswordHash));
+        $mailSent = Mail::to($user->email)->send(new ResetPasswordRequestMail($resetPasswordHash));
 
-        // if (Mail::failures()) return $this->errorResponse("An error occurred while sending email, try again later.", 500);
+        if (!$mailSent) return $this->errorResponse("An error occurred while sending email, try again later.", 500);
 
         return $this->successResponse("If an account is associated with the provided email address, we have sent a message to it.");
     }
@@ -430,7 +435,7 @@ class UserController extends Controller
 
         $resetPassword->delete();
 
-        // Mail::to($advertiser['email'])->send(new ResetPasswordConfirmationMail());
+        Mail::to($user->email)->send(new ResetPasswordConfirmationMail());
 
         $this->logController->createLogEntry('AUTH/PASSWORD/RESET', ['user_id' => $user->id]);
 
@@ -468,6 +473,8 @@ class UserController extends Controller
 
         $this->logController->createLogEntry('AUTH/MAIL', ['user_id' => $user->id]);
 
+        Mail::to($user->email)->send(new ResetEmailConfirmationMail());
+
         return $this->successResponse("User has been successfully updated.", new UserResource($user));
     }
 
@@ -493,8 +500,9 @@ class UserController extends Controller
             'password' => Hash::make($request->validated()['password'])
         ])) return $this->errorResponse("An error occurred while updating the password, try again later.", 500);
 
-
         $this->logController->createLogEntry('AUTH/PASSWORD/CHANGE', ['user_id' => $user->id]);
+
+        Mail::to($user->email)->send(new ResetPasswordConfirmationMail());
 
         return $this->successResponse("User has been successfully updated.");
     }
