@@ -6,9 +6,11 @@ AdManager is a comprehensive advertisement management system that allows users t
 
 A live version of the application is available at: [dev.dream-speak.pl/system](https://dev.dream-speak.pl/system)
 
-Credentials for the test account:
-`Login: c5yP7Q `
-`Password: examplesystem2023`
+Credentials for the test accounts:
+- **Login**: 2mznVJL
+**Password**: examplesystem2023
+- **Login**: c5yP7Q
+**Password**: examplesystem2023
 
 ## Features
 
