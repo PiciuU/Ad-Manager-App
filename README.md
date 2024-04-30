@@ -38,7 +38,7 @@ Credentials for the test accounts:
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/PiciuU/ad-manager-system.git`
+1. Clone the repository: `git clone https://github.com/PiciuU/Ad-Manager-App.git`
 2. Navigate to the project directory: `cd ad-manager-system`
 3. Install backend dependencies: `cd server && composer install`
 4. Create and configure the `.env` file with the appropriate database credentials
