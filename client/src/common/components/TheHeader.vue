@@ -113,9 +113,9 @@
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        background-color: $--color-overlay;
+        background-color: $--color-header;
         border-bottom: 1px solid $--color-text-muted-3;
-        color: $--color-text;
+        color: $--color-text-on-header;
 
         &__hamburger {
             order: 1;
@@ -135,7 +135,7 @@
 
             a {
                 display: flex;
-                color: $--color-text;
+                color: $--color-text-on-header;
                 text-decoration: none;
                 font-weight: bold;
                 letter-spacing: 1px;
@@ -259,7 +259,7 @@
         background: $--color-overlay;
         box-shadow: 5px 5px 20px 0 rgba(black, 0.2);
         border-radius: 5px;
-        border: 1px solid $--color-text-muted-3;
+        border: 1px solid $--color-border-1;
         position: absolute;
         left: -182px;
         top: 40px;

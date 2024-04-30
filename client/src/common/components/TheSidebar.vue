@@ -115,7 +115,7 @@
     width: 250px;
     height: 100%;
     background-color: $--color-overlay;
-    border-right: 1px solid $--color-text-muted-3;
+    border-right: 1px solid $--color-text-muted-on-header;
     left: 0;
     display: flex;
     flex-flow: column;
@@ -162,7 +162,7 @@
             position: absolute;
             width: 100%;
             height: 1px;
-            background: $--color-text-muted-3;
+            background: $--color-border-2;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
@@ -189,7 +189,7 @@
             position: absolute;
             width: 100%;
             height: 2px;
-            background: $--color-text-muted-2;
+            background: $--color-border-1;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
@@ -255,12 +255,12 @@
     &__icon--secondary {
         width: 24px;
         font-size: 1.8rem;
-        color: $--color-text;
+        color: $--color-primary;
         cursor: pointer;
         transition: color 0.15s ease-in-out;
 
         &:hover {
-            color: $--color-text-muted-3;
+            color: $--color-secondary;
             transition: color 0.15s ease-in-out;
         }
 

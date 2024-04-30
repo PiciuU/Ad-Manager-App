@@ -155,7 +155,7 @@
     .files__item {
         display: flex;
         align-items: center;
-        border: 1px solid $--color-text-muted-4;
+        border: 1px solid $--color-border-3;
         border-radius: 6px;
         margin-top: 15px;
         padding: 10px;
